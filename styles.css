@@ -482,8 +482,7 @@ ul { list-style: none; }
   background: rgba(245,158,11,0.06);
 }
 
-/* Uniform card height — all cards match */
-.dashboard-grid .card { height: 260px; }
+/* Card height set by responsive breakpoints — see bottom of file */
 
 /* Scrollable content areas inside compact (1-row) cards */
 .alarm-list {
@@ -2600,38 +2599,139 @@ ul { list-style: none; }
   vertical-align: middle;
 }
 
-/* ===== Responsive Breakpoints ===== */
-@media (max-width: 1200px) {
-  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
-  .dashboard-grid .card[data-cols="2"] { grid-column: span 2; }
+/* ===== Responsive Breakpoints (mobile-first, min-width) ===== */
+/*
+ * xs:  0-639px      1 col   phones
+ * sm:  640-767px    1 col   large phones
+ * md:  768-1023px   2 col   tablets portrait
+ * lg:  1024-1279px  2 col   tablets landscape, small laptops
+ * xl:  1280-1919px  4 col   laptops, desktops
+ * 2xl: 1920px+      4 col   large / 4K displays
+ */
+
+/* --- Base: xs (phones, < 640px) --- */
+/* Sidebar: hidden off-screen, full-width overlay when open */
+:root { --sidebar-width: 100vw; }
+body { grid-template-columns: 1fr; }
+.sidebar {
+  position: fixed;
+  left: 0; top: 0;
+  width: 100vw;
+  height: 100vh;
+  transform: translateX(-100%);
+  transition: transform var(--transition);
+  z-index: 200;
+}
+body.sidebar-open .sidebar { transform: translateX(0); }
+/* Sidebar backdrop: pseudo-element so it doesn't disrupt body grid */
+body::after {
+  content: '';
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 199;
+}
+body.sidebar-open::after { display: block; }
+.dashboard-grid { grid-template-columns: 1fr; }
+.dashboard-grid .card { height: auto; min-height: unset; }
+.page-content { padding: 10px; }
+.top-bar { padding: 0 10px; }
+.btn-topbar .btn-label { display: none; }
+.avatar-name { display: none; }
+.search-input { max-width: 120px; }
+html { font-size: 13px; }
+
+/* Internal card splits: stack vertically on phones */
+.wan-split { grid-template-columns: 1fr; }
+.device-split { grid-template-columns: 1fr; }
+.mwan-grid { grid-template-columns: 1fr; }
+
+/* Cap scrollable lists when cards have auto height */
+.events-list, .alarm-list, .topflows-list { max-height: 280px; }
+
+/* Card ordering for 1-col (most important first) */
+#card-qoe        { order: 1; }
+#card-wan        { order: 2; }
+#card-device     { order: 3; }
+#card-events     { order: 4; }
+#card-alarms     { order: 5; }
+#card-multiwan   { order: 6; }
+#card-history    { order: 7; }
+#card-speedtest  { order: 8; }
+#card-wanperf    { order: 9; }
+#card-airtime    { order: 10; }
+#card-topflows   { order: 11; }
+#card-tophosts   { order: 12; }
+#card-placeholder{ order: 13; }
+
+/* Hide edit layout button on mobile */
+.edit-layout-btn { display: none; }
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  .sidebar a { min-height: 44px; display: flex; align-items: center; }
 }
 
-@media (max-width: 700px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .dashboard-grid .card[data-cols="2"] { grid-column: span 1; }
-}
-
-@media (max-width: 768px) {
-  :root { --sidebar-width: 220px; }
-  body { grid-template-columns: 1fr; }
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0;
-    height: 100vh;
-    transform: translateX(-100%);
-    transition: transform var(--transition);
-    z-index: 200;
-  }
-  body.sidebar-open .sidebar { transform: translateX(0); }
-  .dashboard-grid { grid-template-columns: 1fr; }
+/* --- sm: large phones (640px+) --- */
+@media (min-width: 640px) {
+  .search-input { max-width: 200px; }
   .page-content { padding: 12px; }
-  .top-bar { padding: 0 12px; }
-  .btn-topbar .btn-label { display: none; }
-  .avatar-name { display: none; }
 }
 
+/* --- md: tablets portrait (768px+) --- */
+@media (min-width: 768px) {
+  html { font-size: 14px; }
+  :root { --sidebar-width: 220px; }
+  .sidebar { width: var(--sidebar-width); }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-grid .card { min-height: 200px; }
+  .page-content { padding: 12px 16px; }
+  .top-bar { padding: 0 16px; }
+  .search-input { max-width: 240px; }
+
+  /* Restore 2-col internal splits */
+  .wan-split { grid-template-columns: 1fr 1fr; }
+  .device-split { grid-template-columns: 1fr 1fr; }
+  .mwan-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Edit layout available at 2-col+ */
+  .edit-layout-btn { display: inline-flex; }
+}
+
+/* --- lg: tablets landscape, small laptops (1024px+) --- */
+@media (min-width: 1024px) {
+  /* Sidebar returns to normal flow */
+  :root { --sidebar-width: 200px; }
+  body { grid-template-columns: var(--sidebar-width) 1fr; }
+  .sidebar {
+    position: static;
+    width: var(--sidebar-width);
+    height: auto;
+    transform: none;
+    transition: none;
+  }
+  .sidebar-backdrop { display: none !important; }
+  .btn-topbar .btn-label { display: inline; }
+  .avatar-name { display: inline; }
+  .search-input { max-width: 300px; }
+}
+
+/* --- xl: desktops (1280px+) --- */
+@media (min-width: 1280px) {
+  :root { --sidebar-width: 220px; }
+  body { grid-template-columns: var(--sidebar-width) 1fr; }
+  .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
+  .dashboard-grid .card { height: 260px; min-height: 260px; }
+  /* Remove mobile list caps — cards have fixed height with overflow scroll */
+  .events-list, .alarm-list, .topflows-list { max-height: none; }
+}
+
+/* --- 2xl: large / 4K displays (1920px+) --- */
 @media (min-width: 1920px) {
   :root { --gap: 20px; }
+  html { font-size: 15px; }
   .page-content { padding: 24px 28px; }
   .perf-val { font-size: 34px; }
   .qoe-score-num { font-size: 58px; }
