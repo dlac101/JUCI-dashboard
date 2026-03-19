@@ -18,6 +18,7 @@ This dashboard provides real-time visibility into router health, WAN connectivit
 - **WiFi Airtime** -- Per-radio (2.4/5/6 GHz) stacked utilization bars (Tx, Rx, WiFi interference, non-WiFi interference, available)
 - **Recent Events** -- Scrollable event list with severity icons and acknowledgment checkmarks
 - **Active Alarms** -- Severity-grouped alarm list (critical/error/warn) with dismiss buttons
+- **WWAN Failover** -- Dual-panel WAN/WWAN status with latency sparklines, carrier name via rDNS lookup, failover event log (4-event cycle: Primary WAN down, Backup WAN up, Primary WAN restored, Backup WAN standing by), and 30-day WAN/LTE usage bar
 
 ### FlowSight Integration Widgets
 - **Top Active Flows** -- Per-flow ranked list with destination hostnames, protocol badges (TCP/UDP), app classification (YouTube, Netflix, Steam, etc.), inline SVG sparklines, and live rate animation. Maps to `flowstatd.flows` ubus API.
@@ -114,6 +115,8 @@ mockup-bufferbloat.html Bufferbloat layout comparison mockup
 flowstatd.md            Flow statistics daemon API reference
 flowstatd-modules.md    Detailed flowstatd module documentation
 classifi.md             DPI classification daemon documentation
+SOS_Dashboard2.0_Integration_Guide.md
+                        Full JUCI integration guide for all 12 widgets
 ```
 
 ## Design Principles
