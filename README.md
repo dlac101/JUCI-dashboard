@@ -9,13 +9,14 @@ This dashboard provides real-time visibility into router health, WAN connectivit
 ## Features
 
 ### Core Widgets
-- **System Performance Score** -- Composite QoE score (0-100) with per-subsystem pill badges (WAN, System, WiFi, LAN, Mesh) and per-device issue list
+- **System Performance Score** -- Composite QoE score (0-100) with per-subsystem pill badges (WAN, System, WiFi, LAN, Mesh) and per-device issue list. Simple view adds inline "Last Speed Test" section with horizontal bar graphs showing download/upload as a percentage of ISP service rate
 - **WAN Status + Bufferbloat Score** -- Dual-panel card with WAN metadata (IP, gateway, DNS, MTU, link speed, uptime) and live bufferbloat grade with latency metrics
+- **Bufferbloat Score** -- Standalone Simple-view card (`card-bbscore`) showing download and upload bufferbloat grade pills (A/B/C/D/F) with color coding
 - **Device Info + System Health** -- Split card: device identity (model, MAC, serial, firmware, CDT) alongside a 2x2 Boeing-inspired needle gauge cluster (CPU, Temp, Flash, RAM) with animated excursions
 - **Connection History** -- Interactive timeline bar (7d/30d/1yr) with grab-to-scroll, alternating month shading, uptime stats, and monthly uptime pill badges
 - **WAN Throughput** -- Real-time canvas graph with smooth Y-axis lerp scaling and bursty mock traffic patterns
-- **Speed Test History** -- Bar chart with DL/UL grouped bars, % utilization toggle, grab-to-scroll, and mouseover detail tooltips
-- **WiFi Airtime** -- Per-radio (2.4/5/6 GHz) stacked utilization bars (Tx, Rx, WiFi interference, non-WiFi interference, available)
+- **Speed Test History** -- Bar chart with DL/UL grouped bars, % utilization toggle, grab-to-scroll, mouseover detail tooltips, and dotted service-rate reference lines (cyan for DL, green for UL)
+- **WiFi Airtime** -- Per-radio (2.4/5/6 GHz) stacked utilization bars (Tx, Rx, WiFi interference, non-WiFi interference, available) with dynamic per-band client counts that drift in mock data
 - **Recent Events** -- Scrollable event list with severity icons and acknowledgment checkmarks
 - **Active Alarms** -- Severity-grouped alarm list (critical/error/warn) with dismiss buttons
 - **WWAN Failover** -- Dual-panel WAN/WWAN status with latency sparklines, carrier name via rDNS lookup, failover event log (4-event cycle: Primary WAN down, Backup WAN up, Primary WAN restored, Backup WAN standing by), and 30-day WAN/LTE usage bar
@@ -25,11 +26,15 @@ This dashboard provides real-time visibility into router health, WAN connectivit
 - **Top Bandwidth Hosts** -- Per-device aggregated bandwidth with green-themed sparklines and flow counts. Maps to `flowstatd.hosts` ubus API.
 
 ### Dashboard Features
+- **Simple/Advanced view toggle** -- Pill toggle in the top bar switches between a consumer-friendly 6-card Simple view and the full 13-card Advanced technician dashboard. Inspired by Eero/Google Nest simplicity with a UniFi-style advanced toggle. View preference persisted to localStorage
+- **Simple view** -- Fixed 3-column centered grid (max-width 1100px) with responsive breakpoints: 3-col at 1280px+, 2-col at 768-1279px, 1-col below 768px. Cards use auto height. Per-card simplifications hide technical details (WAN hides gateway/DNS/MTU; Device Info hides serial/MAC/CDT/gauges; WiFi Airtime hides Tx/Rx legend; Connection History locks to 1yr and hides monthly stats). No edit mode or drag-drop
+- **Advanced view** -- Full technician dashboard with drag-and-drop customization, tile picker, and "Restore Default Layout" button in edit mode
 - **Free-placement grid** -- 4-column CSS Grid with explicit `grid-column`/`grid-row` positioning, persistent via localStorage
 - **iOS-style edit mode** -- Long-press enters wiggle mode; drag to reorder; Escape or click outside to exit
+- **Restore Default Layout** -- Fixed-position button visible in edit mode; resets to factory default `LAYOUT_4COL`, clears hidden tiles, reloads page
 - **FLIP animations** -- Smooth position transitions when tiles swap during drag
 - **Tile picker** -- Add custom widgets (SFP, Multi-WAN, VoIP, VPN, PoE, Connected Clients)
-- **Responsive** -- Media queries for 1920px+, 1200px, 768px, and 700px breakpoints
+- **Responsive** -- Media queries for 1920px+, 1200px, 768px, and 700px breakpoints; Simple view has its own responsive grid (3-col/2-col/1-col)
 
 ## Tech Stack
 
@@ -124,7 +129,7 @@ SOS_Dashboard2.0_Integration_Guide.md
 - **Needle gauges over arc fills** -- Inspired by Boeing engine instruments. Humans have extreme hyperacuity for angular orientation of line segments, making needle position changes detectable in milliseconds. Arc fill gauges lack this perceptual advantage.
 - **Information density without clutter** -- Every pixel earns its place. No decorative elements that don't convey data.
 - **Dark theme first** -- Optimized for NOC/monitoring environments and reduced eye strain.
-- **Progressive disclosure** -- Summary view on dashboard, "View All" links to detail pages.
+- **Progressive disclosure** -- Simple view for consumers, Advanced view for technicians. "View All" links to detail pages. Per-card content simplification hides technical rows in Simple mode via CSS-driven `body[data-view="basic"]` and `.tech-only` / `.basic-only` classes.
 
 ## License
 
