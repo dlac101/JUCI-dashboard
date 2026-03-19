@@ -310,9 +310,9 @@ const MOCK = {
   // Fabricated — matches juci.wireless.airtime() format; tx+rx+wifi_int+non_wifi_int+available=100
   airtime: {
     airtime_utilization: [
-      { radio_name: 'wlan0', band: '2.4 GHz', channel: 6,   tx: 16, rx: 9,  wifi_int: 11, non_wifi_int: 8,  available: 56 },
-      { radio_name: 'wlan1', band: '5 GHz',   channel: 100, tx: 13, rx: 7,  wifi_int: 6,  non_wifi_int: 2,  available: 72 },
-      { radio_name: 'wlan2', band: '6 GHz',   channel: 37,  tx: 6,  rx: 4,  wifi_int: 3,  non_wifi_int: 2,  available: 85 }
+      { radio_name: 'wlan0', band: '2.4 GHz', channel: 6,   tx: 16, rx: 9,  wifi_int: 11, non_wifi_int: 8,  available: 56, clients: 3 },
+      { radio_name: 'wlan1', band: '5 GHz',   channel: 100, tx: 13, rx: 7,  wifi_int: 6,  non_wifi_int: 2,  available: 72, clients: 5 },
+      { radio_name: 'wlan2', band: '6 GHz',   channel: 37,  tx: 6,  rx: 4,  wifi_int: 3,  non_wifi_int: 2,  available: 85, clients: 2 }
     ]
   },
 
@@ -1246,8 +1246,11 @@ function renderWANBufferbloat(st) {
   el('bb-summary').innerHTML = bbSummary(dlG, ulG);
 
   // Timestamp (inline with label)
+  const tsText = '- Tested ' + formatEpochShort(st.epoch);
   const tsEl = el('wan-perf-ts-header');
-  if (tsEl) tsEl.textContent = '- Tested ' + formatEpochShort(st.epoch);
+  if (tsEl) tsEl.textContent = tsText;
+  const tsMob = el('wan-perf-ts-mobile');
+  if (tsMob) tsMob.textContent = tsText;
 }
 
 function formatUptime(secs) {
@@ -1472,7 +1475,17 @@ function animatePct(pctEl, from, to, delay) {
       const progress = Math.min((ts - start) / duration, 1);
       // same easing as the CSS bars: cubic-bezier(0.4, 0, 0.2, 1) approximated
       const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-      pctEl.textContent = Math.round(from + (to - from) * ease) + '% in use';
+      const pctText = Math.round(from + (to - from) * ease) + '% in use';
+      // Preserve client count span if present
+      const clientSpan = pctEl.querySelector('.airtime-client-count');
+      if (clientSpan) {
+        // Keep the span, update only the text node after it
+        const textNode = clientSpan.nextSibling;
+        if (textNode) textNode.textContent = ' \u00B7 ' + pctText;
+        else pctEl.appendChild(document.createTextNode(' \u00B7 ' + pctText));
+      } else {
+        pctEl.textContent = pctText;
+      }
       if (progress < 1) requestAnimationFrame(tick);
     });
   }, delay);
@@ -1482,10 +1495,13 @@ function renderAirtimeBars(animate) {
   el('airtime-bars').innerHTML = MOCK.airtime.airtime_utilization.map((r, idx) => {
     const bc = bandClass[r.band] || 'band-5';
     const inUse = r.tx + r.rx;
+    const cl = r.clients || 0;
+    const clLabel = cl === 1 ? '1 client' : cl + ' clients';
+
     return `<div class="airtime-bar-row">
       <div class="airtime-bar-header">
         <span class="airtime-band-label ${bc}">${r.band} &middot; ch ${r.channel}</span>
-        <span class="airtime-band-pct">${animate ? '0% in use' : inUse + '% in use'}</span>
+        <span class="airtime-band-pct"><span class="airtime-client-count">${clLabel}</span> &middot; ${animate ? '0% in use' : inUse + '% in use'}</span>
       </div>
       <div class="airtime-track"
            onmouseenter="showAirtimeTooltip(event, ${idx})"
@@ -1532,7 +1548,10 @@ function updateAirtimeMock() {
     rx  = Math.round(rx  * scale);
     wi  = Math.round(wi  * scale);
     nwi = Math.round(nwi * scale);
-    return { ...r, tx, rx, wifi_int: wi, non_wifi_int: nwi, available: 100 - tx - rx - wi - nwi };
+    // Occasionally drift client count by +/-1
+    let clients = r.clients || 0;
+    if (Math.random() < 0.15) clients = Math.max(0, clients + (Math.random() < 0.5 ? 1 : -1));
+    return { ...r, tx, rx, wifi_int: wi, non_wifi_int: nwi, available: 100 - tx - rx - wi - nwi, clients };
   });
 }
 
@@ -1558,6 +1577,8 @@ function renderDevices() {
       segs.forEach((seg, j) => { seg.style.width = vals[j] + '%'; });
       const pct = rows[i].querySelector('.airtime-band-pct');
       if (pct) animatePct(pct, prevTotals[i], r.tx + r.rx, 0);
+      const clSpan = rows[i].querySelector('.airtime-client-count');
+      if (clSpan) clSpan.textContent = (r.clients === 1 ? '1 client' : (r.clients || 0) + ' clients');
     });
   }, 5000);
 }
@@ -2114,8 +2135,9 @@ function renderSpeedtestHistory() {
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  // Layout padding — extra left/bottom for larger axis labels
-  const pad = { top: 10, right: 8, bottom: 50, left: 50 };
+  // Layout padding — reduce left pad on narrow screens where fixed Y-axis overlay handles labels
+  const useOverlay = window.innerWidth < 1280;
+  const pad = { top: 10, right: 8, bottom: useOverlay ? 36 : 50, left: useOverlay ? 10 : 50 };
   const cW = W - pad.left - pad.right;
   const cH = H - pad.top - pad.bottom;
 
@@ -2155,6 +2177,25 @@ function renderSpeedtestHistory() {
     }
     ctx.fillStyle = 'rgba(255,255,255,0.38)';
     ctx.fillText(lbl, pad.left - 5, y);
+  }
+
+  // Populate fixed Y-axis overlay (for mobile scroll)
+  const yaxisEl = el('sth-yaxis');
+  if (yaxisEl) {
+    yaxisEl.innerHTML = '';
+    for (let i = gridSteps; i >= 0; i--) {
+      const val = yMax * i / gridSteps;
+      let lbl;
+      if (usePct) {
+        lbl = i === 0 ? '0' : Math.round(val) + '%';
+      } else {
+        lbl = val === 0 ? '0' : val >= 1000 ? (val / 1000).toFixed(0) + 'G' : Math.round(val) + '';
+      }
+      const tick = document.createElement('div');
+      tick.className = 'sth-yaxis-tick';
+      tick.textContent = lbl;
+      yaxisEl.appendChild(tick);
+    }
   }
 
   // Bars
@@ -2376,6 +2417,12 @@ function drawThroughput(timestamp) {
 
   ctx.clearRect(0, 0, W, H);
 
+  // Y-axis layout
+  const padL = 40;  // left padding for Y-axis labels
+  const padB = 12;  // bottom padding so "0" label isn't clipped
+  const chartW = W - padL;
+  const chartH = H - padB;
+
   // Clip to canvas
   ctx.save();
   ctx.beginPath();
@@ -2389,24 +2436,49 @@ function drawThroughput(timestamp) {
   currentMaxY += (targetMaxY - currentMaxY) * 0.06;
   const maxY = currentMaxY;
   const N    = THROUGHPUT_POINTS;
-  const step = W / (N - 2);
+  const step = chartW / (N - 2);
   const offsetPx = throughputScrollOffset * step;
+
+  // Draw Y-axis grid lines and labels
+  const ySteps = 4;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right';
+  ctx.font = '10px monospace';
+  for (let i = 0; i <= ySteps; i++) {
+    const val = maxY * i / ySteps;
+    const y = chartH - (val / maxY) * chartH * 0.92;
+    // Grid line
+    ctx.strokeStyle = i === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W, y); ctx.stroke();
+    // Label
+    if (maxY > 0) {
+      let lbl;
+      if (val === 0) lbl = '0';
+      else if (val >= 1000) lbl = (val / 1000).toFixed(1) + 'G';
+      else if (val >= 1) lbl = Math.round(val) + '';
+      else lbl = val.toFixed(1);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '11px monospace';
+      ctx.fillText(lbl, padL - 8, Math.round(y));
+    }
+  }
 
   function drawTrace(data, strokeColor, r, g, b, yMult) {
     const pts = [];
     for (let i = 0; i < N; i++) {
       pts.push([
-        i * step - offsetPx,
-        H - Math.min(1, data[i] / maxY * yMult) * H * 0.92
+        padL + i * step - offsetPx,
+        chartH - Math.min(1, data[i] / maxY * yMult) * chartH * 0.92
       ]);
     }
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    const grad = ctx.createLinearGradient(0, 0, 0, chartH);
     grad.addColorStop(0, `rgba(${r},${g},${b},0.55)`);
     grad.addColorStop(1, `rgba(${r},${g},${b},0.03)`);
     ctx.beginPath();
-    ctx.moveTo(pts[0][0], H);
+    ctx.moveTo(pts[0][0], chartH);
     pts.forEach(([x, y]) => ctx.lineTo(x, y));
-    ctx.lineTo(pts[N - 1][0], H);
+    ctx.lineTo(pts[N - 1][0], chartH);
     ctx.closePath();
     ctx.fillStyle = grad;
     ctx.fill();
