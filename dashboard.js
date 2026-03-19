@@ -414,7 +414,17 @@ const dismissedAlarms = new Set();
 const ackedEvents     = new Set();
 
 /* ===== Free-Placement Grid Layout ===== */
-const DEFAULT_LAYOUT = {
+
+/* Breakpoint detection */
+function getGridMode() {
+  const w = window.innerWidth;
+  if (w >= 1280) return 4;
+  if (w >= 768)  return 2;
+  return 1;
+}
+
+/* 4-column layout (xl: 1280px+) */
+const LAYOUT_4COL = {
   'card-qoe':        { col: 1, row: 1, span: 2 },
   'card-wan':        { col: 3, row: 1, span: 1 },
   'card-device':     { col: 4, row: 1, span: 1 },
@@ -429,6 +439,26 @@ const DEFAULT_LAYOUT = {
   'card-multiwan':   { col: 4, row: 5, span: 1 },
   'card-placeholder':{ col: 1, row: 5, span: 2 },
 };
+
+/* 2-column layout (md/lg: 768-1279px) */
+const LAYOUT_2COL = {
+  'card-qoe':        { col: 1, row: 1, span: 2 },
+  'card-wan':        { col: 1, row: 2, span: 1 },
+  'card-device':     { col: 2, row: 2, span: 1 },
+  'card-history':    { col: 1, row: 3, span: 2 },
+  'card-speedtest':  { col: 1, row: 4, span: 2 },
+  'card-airtime':    { col: 1, row: 5, span: 2 },
+  'card-wanperf':    { col: 1, row: 6, span: 2 },
+  'card-events':     { col: 1, row: 7, span: 1 },
+  'card-alarms':     { col: 2, row: 7, span: 1 },
+  'card-topflows':   { col: 1, row: 8, span: 1 },
+  'card-tophosts':   { col: 2, row: 8, span: 1 },
+  'card-multiwan':   { col: 1, row: 9, span: 1 },
+  'card-placeholder':{ col: 2, row: 9, span: 1 },
+};
+
+/* DEFAULT_LAYOUT is the 4-col version (used for save/load) */
+const DEFAULT_LAYOUT = LAYOUT_4COL;
 
 let cardLayout = {};
 
@@ -451,28 +481,58 @@ function saveLayout() {
   localStorage.setItem('dashboard_layout', JSON.stringify(cardLayout));
 }
 
+let _lastGridMode = 0;
+
 function applyLayout() {
   const grid = document.getElementById('dashboard-grid');
   if (!grid) return;
+  const mode = getGridMode();
+  _lastGridMode = mode;
+
   grid.querySelectorAll(':scope > .card').forEach(card => {
-    const pos = cardLayout[card.id];
-    if (pos) {
-      card.style.gridColumn = pos.col + ' / span ' + pos.span;
-      card.style.gridRow = String(pos.row);
+    if (mode === 1) {
+      /* 1-col: clear JS positions, let CSS order + auto-flow handle it */
+      card.style.gridColumn = '';
+      card.style.gridRow = '';
+    } else if (mode === 2) {
+      /* 2-col: use LAYOUT_2COL positions */
+      const pos = LAYOUT_2COL[card.id];
+      if (pos) {
+        card.style.gridColumn = pos.col + ' / span ' + pos.span;
+        card.style.gridRow = String(pos.row);
+      }
+    } else {
+      /* 4-col: use user-customized layout */
+      const pos = cardLayout[card.id];
+      if (pos) {
+        card.style.gridColumn = pos.col + ' / span ' + pos.span;
+        card.style.gridRow = String(pos.row);
+      }
     }
   });
 }
+
+/* Re-apply layout on resize (debounced) */
+let _resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(function() {
+    if (getGridMode() !== _lastGridMode) applyLayout();
+  }, 150);
+});
 
 function getCellFromPoint(x, y) {
   const grid = document.getElementById('dashboard-grid');
   const rect = grid.getBoundingClientRect();
   const cs = getComputedStyle(grid);
   const gap = parseFloat(cs.gap) || 12;
-  const colW = (rect.width - gap * 3) / 4;
-  const rowH = 260 + gap;
+  const mode = getGridMode();
+  const cols = mode >= 4 ? 4 : mode >= 2 ? 2 : 1;
+  const colW = (rect.width - gap * (cols - 1)) / cols;
+  const rowH = (mode === 1 ? 200 : 260) + gap;
   const col = Math.floor((x - rect.left + gap / 2) / (colW + gap)) + 1;
   const row = Math.floor((y - rect.top + gap / 2) / rowH) + 1;
-  return { col: Math.max(1, Math.min(4, col)), row: Math.max(1, row) };
+  return { col: Math.max(1, Math.min(cols, col)), row: Math.max(1, row) };
 }
 
 function findCardAt(col, row, excludeId) {
@@ -596,7 +656,22 @@ function navigateTo(page) {
 
 /* ===== Sidebar Toggle ===== */
 el('sidebarToggle').addEventListener('click', function() {
-  document.body.classList.toggle('sidebar-collapsed');
+  if (getGridMode() < 4) {
+    /* Mobile/tablet: toggle overlay sidebar */
+    document.body.classList.toggle('sidebar-open');
+  } else {
+    /* Desktop: toggle collapsed sidebar */
+    document.body.classList.toggle('sidebar-collapsed');
+  }
+});
+
+/* Close sidebar when tapping outside it (mobile) */
+document.addEventListener('click', function(e) {
+  if (document.body.classList.contains('sidebar-open') &&
+      !e.target.closest('.sidebar') &&
+      !e.target.closest('#sidebarToggle')) {
+    document.body.classList.remove('sidebar-open');
+  }
 });
 
 /* ===== Theme Toggle ===== */
