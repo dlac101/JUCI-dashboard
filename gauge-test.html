@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Needle Gauge Test</title>
+<style>
+  body { background: #0f172a; margin: 40px; font-family: 'JetBrains Mono', monospace; color: #fff; }
+  .row { display: flex; gap: 40px; margin-bottom: 40px; }
+  .gauge-box { text-align: center; }
+  canvas { display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); }
+  .label { margin-top: 6px; font-size: 14px; color: #94a3b8; }
+  h2 { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<h2>V6 TRUE FROWN &mdash; Large (300x280)</h2>
+<div class="row">
+  <div class="gauge-box">
+    <canvas id="g1" width="300" height="280"></canvas>
+    <div class="label">CPU &mdash; 23%</div>
+  </div>
+  <div class="gauge-box">
+    <canvas id="g2" width="300" height="280"></canvas>
+    <div class="label">MEM &mdash; 61%</div>
+  </div>
+  <div class="gauge-box">
+    <canvas id="g3" width="300" height="280"></canvas>
+    <div class="label">HIGH &mdash; 92%</div>
+  </div>
+</div>
+
+<h2>Medium (200x180)</h2>
+<div class="row">
+  <div class="gauge-box">
+    <canvas id="g4" width="200" height="180"></canvas>
+    <div class="label">CPU &mdash; 23%</div>
+  </div>
+  <div class="gauge-box">
+    <canvas id="g5" width="200" height="180"></canvas>
+    <div class="label">MEM &mdash; 61%</div>
+  </div>
+</div>
+
+<h2>Small (140x120)</h2>
+<div class="row">
+  <div class="gauge-box">
+    <canvas id="g6" width="140" height="120"></canvas>
+    <div class="label">CPU &mdash; 23%</div>
+  </div>
+  <div class="gauge-box">
+    <canvas id="g7" width="140" height="120"></canvas>
+    <div class="label">MEM &mdash; 61%</div>
+  </div>
+</div>
+
+<script>
+function drawGauge(canvasId, value, warnThreshold) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Clear
+  ctx.clearRect(0, 0, W, H);
+
+  // FROWN gauge (∩ shape): arc passes through TOP (270deg)
+  // 0% at 150deg (lower-left), 100% at 30deg (lower-right)
+  // Arc sweeps clockwise: 150 → 180 → 270(top) → 360/0 → 30
+  const DEG = Math.PI / 180;
+  const startDeg = 150;  // 0% position (lower-left)
+  const endDeg   = 30;   // 100% position (lower-right)
+  const sweepDeg = 240;
+  const sweepRad = sweepDeg * DEG;
+  const startAngle = startDeg * DEG;
+  const endAngle   = endDeg * DEG;
+
+  // Pivot in lower portion; arc rises above
+  const cx = W / 2;
+  const cy = H * 0.62;
+  // At 270deg (top of arc): y = cy - r → must be >= 14
+  // At endpoints (150 & 30): y = cy + r*sin(30deg) = cy + 0.5*r → must be <= H - 22
+  // Sides: at 180deg x = cx - r, at 0deg x = cx + r
+  const maxR_top    = cy - 14;               // arc top must stay in canvas
+  const maxR_bottom = (H - cy - 22) / 0.5;   // endpoints must stay in canvas
+  const maxR_horiz  = cx - 14;               // sides must fit
+  const r = Math.min(maxR_top, maxR_bottom, maxR_horiz);
+
+  const pct = Math.max(0, Math.min(100, value));
+  // Needle: 0% = startAngle (lower-left), sweeps clockwise to 100% (lower-right)
+  const needleAngle = startAngle + (pct / 100) * sweepRad;
+  const warnAngle   = startAngle + (warnThreshold / 100) * sweepRad;
+
+  // === Arc track (240deg clockwise through top = frown ∩) ===
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, endAngle, false);  // clockwise: 150→270(top)→30
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.lineWidth = Math.max(2, r * 0.04);
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+
+  // === Graduation ticks ===
+  for (let i = 0; i <= 10; i++) {
+    const a = startAngle - (i / 10) * sweepRad;
+    const isMajor = (i % 2 === 0);
+    const isEnd = (i === 0 || i === 10);
+    const tickInward = isMajor ? r * 0.18 : r * 0.10;
+    const tickOutward = 1;
+    const inner = r - tickInward;
+    const outer = r + tickOutward;
+    ctx.beginPath();
+    ctx.moveTo(cx + inner * Math.cos(a), cy + inner * Math.sin(a));
+    ctx.lineTo(cx + outer * Math.cos(a), cy + outer * Math.sin(a));
+    ctx.strokeStyle = isEnd ? 'rgba(255,255,255,0.9)' : (isMajor ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.25)');
+    ctx.lineWidth = isEnd ? 2.5 : (isMajor ? 1.8 : 0.8);
+    ctx.stroke();
+  }
+
+  // === Warning bug marker (T-shape) ===
+  const bugR = r + 5;
+  const bugLen = Math.max(6, r * 0.1);
+  const bx1 = cx + bugR * Math.cos(warnAngle);
+  const by1 = cy + bugR * Math.sin(warnAngle);
+  const bx2 = cx + (bugR + bugLen) * Math.cos(warnAngle);
+  const by2 = cy + (bugR + bugLen) * Math.sin(warnAngle);
+  ctx.beginPath();
+  ctx.moveTo(bx1, by1);
+  ctx.lineTo(bx2, by2);
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  // Perpendicular tick at end
+  const perpA = warnAngle + Math.PI / 2;
+  const tickH = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(bx2 + tickH * Math.cos(perpA), by2 + tickH * Math.sin(perpA));
+  ctx.lineTo(bx2 - tickH * Math.cos(perpA), by2 - tickH * Math.sin(perpA));
+  ctx.stroke();
+
+  // === Tapered needle ===
+  const needleLen = r - 3;
+  const tipX = cx + needleLen * Math.cos(needleAngle);
+  const tipY = cy + needleLen * Math.sin(needleAngle);
+  const baseHalf = Math.max(3, r * 0.06);
+  const perpN = needleAngle + Math.PI / 2;
+
+  // Glow
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,255,255,0.5)';
+  ctx.shadowBlur = 6;
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(cx + baseHalf * Math.cos(perpN), cy + baseHalf * Math.sin(perpN));
+  ctx.lineTo(cx - baseHalf * Math.cos(perpN), cy - baseHalf * Math.sin(perpN));
+  ctx.closePath();
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.restore();
+
+  // Pivot dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(3, r * 0.06), 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  // === Digital readout (below pivot, inside the frown) ===
+  const fontSize = Math.round(r * 0.28);
+  ctx.font = '700 ' + fontSize + 'px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = pct >= warnThreshold ? '#f59e0b' : '#ffffff';
+  ctx.fillText(Math.round(pct) + '%', cx, cy + 8);
+
+  // === Debug: draw canvas boundary ===
+  // (already visible via CSS border)
+}
+
+drawGauge('g1', 23, 80);
+drawGauge('g2', 61, 80);
+drawGauge('g3', 92, 80);
+drawGauge('g4', 23, 80);
+drawGauge('g5', 61, 80);
+drawGauge('g6', 23, 80);
+drawGauge('g7', 61, 80);
+</script>
+</body>
+</html>

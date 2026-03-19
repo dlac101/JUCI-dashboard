@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartOS Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260318" />
+</head>
+<body>
+
+  <!-- ===== Sidebar ===== -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 586 149.02" aria-label="Adtran">
+        <path d="M158.80,120.00 C165.19,127.09 173.58,130.63 183.95,130.63 C194.33,130.63 202.71,127.09 209.11,120.00 C215.49,112.92 218.69,104.18 218.69,93.81 C218.69,83.68 215.49,75.08 209.11,67.99 C202.71,60.90 194.33,57.36 183.95,57.36 C173.58,57.36 165.19,60.90 158.80,67.99 C152.41,75.08 149.22,83.68 149.22,93.81 C149.22,104.18 152.41,112.92 158.80,120.00 L229.20,1.76 C234.28,1.76 238.40,5.88 238.40,10.97 L238.32,137.08 C238.32,142.27 234.11,146.48 228.92,146.48 C223.73,146.48 219.52,142.27 219.52,137.08 L219.52,133.21 C208.14,143.71 198.10,149.02 183.09,149.02 C167.82,149.02 155.19,143.70 145.20,133.06 C135.21,122.42 130.22,109.34 130.22,93.80 C130.22,78.53 135.21,65.57 145.20,54.93 C155.19,44.29 167.69,38.97 182.70,38.97 C197.71,38.97 207.98,44.03 219.52,54.65 L219.60,10.97 C219.60,5.88 223.72,1.76 228.80,1.76 Z" fill="#FFFFFF"/>
+        <path d="M308.82,133.41 L308.82,133.41 C310.84,137.57 309.15,142.63 304.99,144.63 C298.91,147.56 291.96,149.02 284.13,149.02 C273.03,149.02 264.67,145.60 259.06,138.74 C253.44,131.89 250.64,122.19 250.64,109.66 L250.64,57.57 L250.84,41.52 L250.85,11.17 C250.85,6.09 254.97,1.97 260.05,1.97 C265.14,1.97 269.26,6.09 269.26,11.17 L269.24,41.52 L295.57,41.52 C300.01,41.52 303.60,45.11 303.60,49.54 C303.60,53.98 300.01,57.57 295.57,57.57 L269.24,57.57 L269.24,111.03 C269.24,124.87 274.92,131.79 286.28,131.79 C290.13,131.79 294.08,130.96 298.15,129.30 C302.22,127.63 306.90,129.45 308.82,133.41 Z" fill="#FFFFFF"/>
+        <path d="M318.67,137.08 L318.67,50.42 C318.67,45.50 322.66,41.52 327.58,41.52 C332.50,41.52 336.49,45.50 336.49,50.42 L336.49,54.85 C342.33,45.44 353.30,38.77 366.64,38.77 C367.69,38.77 368.72,38.81 369.76,38.87 C374.85,39.19 378.66,43.68 378.17,48.75 C377.69,53.62 373.43,57.22 368.55,56.87 C367.78,56.82 367.01,56.79 366.25,56.79 C357.90,56.79 351.72,59.66 346.30,65.41 C340.89,71.15 337.46,80.35 337.46,91.58 L337.46,137.08 C337.46,142.27 333.26,146.48 328.07,146.48 C322.87,146.48 318.67,142.27 318.67,137.08 Z" fill="#FFFFFF"/>
+        <path d="M402.05,120.02 C408.38,127.11 416.74,130.66 427.12,130.66 C437.51,130.66 445.93,127.11 452.39,120.02 C458.85,112.93 462.08,104.19 462.08,93.81 C462.08,83.68 458.85,75.07 452.39,67.97 C445.93,60.88 437.51,57.33 427.12,57.33 C416.74,57.33 408.38,60.88 402.05,67.97 C395.72,75.07 392.55,83.74 392.55,94.00 C392.55,104.25 395.72,112.93 402.05,120.02 L472.06,41.52 C477.03,41.52 481.06,45.55 481.06,50.52 L481.06,137.47 C481.06,142.44 477.03,146.48 472.06,146.48 C467.08,146.48 463.05,142.44 463.05,137.47 L463.05,133.02 C453.45,143.08 441.31,149.02 426.04,149.02 C411.02,149.02 398.52,143.67 388.54,132.97 C378.55,122.26 373.56,109.01 373.56,93.21 C373.56,77.55 378.52,64.59 388.44,54.34 C398.36,44.09 410.89,38.97 426.04,38.97 C440.92,38.97 452.04,44.34 463.05,54.65 L463.05,50.52 C463.05,45.55 467.08,41.52 472.06,41.52 Z" fill="#FFFFFF"/>
+        <path d="M492.79,137.47 L492.79,50.52 C492.79,45.55 496.83,41.52 501.80,41.52 L502.19,41.52 C507.17,41.52 511.20,45.55 511.20,50.52 L511.20,54.26 C519.13,44.19 528.95,38.77 544.49,38.77 C556.24,38.77 566.09,42.56 574.06,50.13 C582.02,57.70 586.00,68.61 586.00,82.83 L586.00,137.47 C586.00,142.44 581.97,146.48 577.00,146.48 L576.41,146.48 C571.43,146.48 567.40,142.44 567.40,137.47 L567.40,88.12 C567.40,77.94 564.92,70.08 559.96,64.52 C555.00,58.98 549.25,56.20 541.29,56.20 C532.80,56.20 525.85,59.21 520.43,65.21 C515.01,71.22 511.59,79.63 511.59,89.03 L511.59,137.47 C511.59,142.44 507.56,146.48 502.58,146.48 L501.80,146.48 C496.83,146.48 492.79,142.44 492.79,137.47 Z" fill="#FFFFFF"/>
+        <path d="M22.51,110.12 C16.44,110.12 10.84,114.49 8.56,120.12 L2.88,132.93 C0.00,139.41 4.52,146.48 12.19,146.48 C16.64,146.48 20.64,143.99 22.26,140.21 L35.87,110.12 L22.51,110.12 Z" fill="#FFFFFF"/>
+        <path d="M130.38,132.96 L75.64,7.84 C72.21,0.00 61.09,0.02 57.69,7.87 L29.86,72.16 C25.90,81.95 32.21,89.83 42.77,89.83 L43.98,89.83 L66.70,35.84 L110.93,140.21 C112.55,143.99 116.55,146.48 121.00,146.48 L121.06,146.48 C128.71,146.48 133.23,139.43 130.38,132.96 Z" fill="#FFFFFF"/>
+        <path d="M80.16,99.97 C80.16,107.45 74.10,113.52 66.62,113.52 C59.14,113.52 53.08,107.45 53.08,99.97 C53.08,92.50 59.14,86.43 66.62,86.43 C74.10,86.43 80.16,92.50 80.16,99.97 Z" fill="#FFFFFF"/>
+      </svg>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li>
+        <a class="nav-link active" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-sitemap"></i></span>
+          <span class="nav-label">Intellifi</span>
+        </a>
+      </li>
+
+      <div class="nav-section-label">Network</div>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-network-wired"></i></span>
+          <span class="nav-label">Network</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-wifi"></i></span>
+          <span class="nav-label">WiFi</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-laptop"></i></span>
+          <span class="nav-label">Devices</span>
+        </a>
+      </li>
+
+      <div class="nav-section-label">Traffic</div>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+          <span class="nav-label">Flows</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#" id="nav-speedtest">
+          <span class="nav-icon"><i class="fa-solid fa-bolt"></i></span>
+          <span class="nav-label">Speed Test</span>
+        </a>
+      </li>
+
+      <div class="nav-section-label">System</div>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-sliders"></i></span>
+          <span class="nav-label">Services</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#">
+          <span class="nav-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+          <span class="nav-label">Admin</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#" id="nav-events">
+          <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+          <span class="nav-label">Events</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#" id="nav-alarms">
+          <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+          <span class="nav-label">Alarms</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ===== Main Wrapper ===== -->
+  <div class="main-wrapper">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="search-bar">
+        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" class="search-input" placeholder="Search..." />
+      </div>
+
+      <div class="top-bar-right">
+        <button class="btn-topbar" id="btnCharts" title="Open Netdata charts">
+          <i class="fa-solid fa-chart-area"></i>
+          <span class="btn-label">Charts</span>
+        </button>
+        <button class="btn-topbar" id="btnTopology" title="Intellifi topology view">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span class="btn-label">Topology</span>
+        </button>
+
+        <div class="topbar-divider"></div>
+
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <div class="topbar-divider"></div>
+
+        <div class="user-avatar">
+          <div class="avatar-circle">A</div>
+          <span class="avatar-name">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+
+      <!-- Unified Dashboard Grid — all tiles, any position -->
+      <div class="dashboard-grid" id="dashboard-grid">
+
+        <!-- WAN Card -->
+        <div class="card" id="card-wan">
+          <div class="card-label wan-dual-header">
+            <span class="wan-header-left">
+              <div class="state-dot up" id="wan-dot"></div>
+              WAN Status
+              <span class="state-badge up" id="wan-state-text">UP</span>
+              <span class="wan-interface-badge" id="wan-iface">XGSPON</span>
+            </span>
+            <span class="wan-header-right">
+              Bufferbloat Score <span class="wan-perf-ts" id="wan-perf-ts-header"></span>
+            </span>
+          </div>
+          <div id="wan-content" class="wan-split">
+            <!-- Left: IP + meta -->
+            <div class="wan-left">
+              <div class="wan-ip" id="wan-ip">—</div>
+              <div class="wan-meta">
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">WAN Type</span>
+                  <span class="wan-meta-val" id="wan-type"><span class="wan-type-badge">—</span></span>
+                </div>
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">Gateway</span>
+                  <span class="wan-meta-val" id="wan-gw">—</span>
+                </div>
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">DNS</span>
+                  <span class="wan-meta-val" id="wan-dns">—</span>
+                </div>
+                <div class="wan-meta-row" id="wan-lease-row">
+                  <span class="wan-meta-key">Lease</span>
+                  <span class="wan-meta-val" id="wan-lease">—</span>
+                </div>
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">MTU</span>
+                  <span class="wan-meta-val" id="wan-mtu">—</span>
+                </div>
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">Link</span>
+                  <span class="wan-meta-val" id="wan-link-speed">—</span>
+                </div>
+                <div class="wan-meta-row">
+                  <span class="wan-meta-key">Uptime</span>
+                  <span class="wan-meta-val" id="wan-uptime">—</span>
+                </div>
+              </div>
+            </div>
+            <!-- Right: bufferbloat score (Stacked Stat Cards) -->
+            <div class="wan-right">
+              <div class="bb-stacked">
+                <div class="bb-row" id="bb-row-dl">
+                  <div class="bb-row-header"><span class="bb-row-dir">Download</span></div>
+                  <div class="bb-row-data">
+                    <span class="bb-row-grade" id="bb-dl-grade">—</span>
+                    <span class="bb-row-speed"><span id="bb-dl-speed">—</span> <span class="bb-row-unit">Mbps</span></span>
+                  </div>
+                  <div class="bb-row-lat" id="bb-dl-lat">—</div>
+                </div>
+                <div class="bb-row" id="bb-row-ul">
+                  <div class="bb-row-header"><span class="bb-row-dir">Upload</span></div>
+                  <div class="bb-row-data">
+                    <span class="bb-row-grade" id="bb-ul-grade">—</span>
+                    <span class="bb-row-speed"><span id="bb-ul-speed">—</span> <span class="bb-row-unit">Mbps</span></span>
+                  </div>
+                  <div class="bb-row-lat" id="bb-ul-lat">—</div>
+                </div>
+              </div>
+              <div class="bb-summary" id="bb-summary"></div>
+              <div class="wan-bb-footer">
+                <button class="btn-run-test" onclick="runSpeedtest()">
+                  <i class="fa-solid fa-bolt" style="margin-right: 4px;"></i> Run Test
+                </button>
+                <span class="wan-bb-history" onclick="navigateTo('speedtest')">History &rarr;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Device Card -->
+        <div class="card" id="card-device">
+          <div class="card-label">
+            Device Info
+          </div>
+          <div class="device-split">
+            <!-- Left: model + meta (Device Info) -->
+            <div class="device-info-col">
+              <div class="device-model" id="device-model">—</div>
+              <div class="device-meta-grid" id="device-meta"></div>
+            </div>
+            <!-- Right: 2x2 gauge cluster (System Health) -->
+            <div class="device-gauges-col">
+              <div class="gauge-col-title">System Health</div>
+              <div class="gauge-grid">
+                <div class="device-gauge-wrap">
+                  <canvas id="gauge-cpu"></canvas>
+                  <div class="gauge-label">CPU</div>
+                </div>
+                <div class="device-gauge-wrap">
+                  <canvas id="gauge-cputemp"></canvas>
+                  <div class="gauge-label">Temp</div>
+                </div>
+                <div class="device-gauge-wrap">
+                  <canvas id="gauge-flash"></canvas>
+                  <div class="gauge-label">Flash</div>
+                </div>
+                <div class="device-gauge-wrap">
+                  <canvas id="gauge-mem"></canvas>
+                  <div class="gauge-label">RAM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Alarms Card -->
+        <div class="card" id="card-alarms">
+          <div class="card-label">
+
+            Active Alarms
+            <span style="margin-left: auto; font-size: 9px; cursor: pointer; color: var(--accent-cyan);" onclick="navigateTo('alarms')">View All &rarr;</span>
+          </div>
+          <div class="alarm-sev-row" id="alarm-sev-row"></div>
+          <div class="alarm-list" id="alarm-list"></div>
+        </div>
+
+        <!-- Recent Events Card -->
+        <div class="card" id="card-events">
+          <div class="card-label">
+
+            Recent Events
+            <span style="margin-left: auto; font-size: 9px; cursor: pointer; color: var(--accent-cyan);" onclick="navigateTo('events')">View All &rarr;</span>
+          </div>
+          <div class="events-counts" id="events-counts"></div>
+          <div class="events-list" id="events-list"></div>
+        </div>
+
+
+
+        <!-- Connection History -->
+        <div class="card" id="card-history">
+          <div class="history-header">
+            <div class="history-header-left">
+              <div class="card-label">
+    
+                Connection History
+              </div>
+              <div class="history-summary" id="history-summary">Loading...</div>
+            </div>
+            <div class="history-toggle">
+              <button class="toggle-btn" data-span="7" onclick="setHistorySpan(7)">7d</button>
+              <button class="toggle-btn" data-span="30" onclick="setHistorySpan(30)">30d</button>
+              <button class="toggle-btn active" data-span="365" onclick="setHistorySpan(365)">1yr</button>
+            </div>
+          </div>
+          <div class="timeline-container" id="timeline-container">
+            <div class="timeline-scroll" id="timeline-scroll">
+              <div class="timeline-inner" id="timeline-inner">
+                <div class="timeline-axis" id="timeline-axis"></div>
+                <div class="timeline-bar" id="timeline-bar"></div>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-legend">
+            <div class="legend-item"><div class="legend-swatch up"></div> Online</div>
+            <div class="legend-item"><div class="legend-swatch internet"></div> Internet Lost</div>
+            <div class="legend-item"><div class="legend-swatch power"></div> Power Loss</div>
+            <div class="legend-item"><div class="legend-swatch upgrade"></div> Upgrade / Reboot</div>
+            <div class="legend-item"><div class="legend-swatch grey"></div> Uncertain</div>
+            <div class="legend-item"><div class="legend-swatch nodata"></div> No Data</div>
+          </div>
+          <div class="history-stats" id="history-stats"></div>
+          <div class="history-monthly" id="history-monthly"></div>
+        </div>
+
+        <!-- WiFi Airtime -->
+        <div class="card" id="card-airtime">
+          <div class="card-label">
+
+            WiFi Airtime
+          </div>
+          <div class="airtime-bars" id="airtime-bars"></div>
+          <div class="airtime-legend" id="airtime-legend"></div>
+        </div>
+
+        <!-- WAN Throughput Card -->
+        <div class="card" id="card-wanperf">
+          <div class="card-label">
+
+            WAN Throughput
+          </div>
+          <div class="wanperf-body">
+            <div class="wanperf-canvas-col">
+              <canvas id="throughput-canvas"></canvas>
+            </div>
+            <div class="wanperf-live-vals">
+              <div class="tp-item dl">
+                <span class="tp-arrow dl">↓</span>
+                <span class="tp-val" id="throughput-dl-val">—</span>
+                <span class="tp-unit" id="throughput-dl-unit">Mbps</span>
+              </div>
+              <div class="tp-item ul">
+                <span class="tp-arrow ul">↑</span>
+                <span class="tp-val" id="throughput-ul-val">—</span>
+                <span class="tp-unit" id="throughput-ul-unit">Mbps</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Performance (QoE) Card -->
+        <div class="card" id="card-qoe" style="cursor: pointer;" onclick="navigateTo('diagnostics')">
+          <div class="card-label">
+
+            System Performance Score
+          </div>
+          <div class="qoe-top">
+            <div class="qoe-score-block">
+              <div class="qoe-score-num good" id="qoe-score">—</div>
+              <div class="qoe-score-label">/ 100</div>
+              <div class="qoe-score-ts" id="qoe-ts">—</div>
+            </div>
+            <div class="qoe-pills-block">
+              <div class="qoe-pills" id="qoe-pills"></div>
+            </div>
+          </div>
+          <div class="qoe-issues" id="qoe-issues"></div>
+        </div>
+
+
+        <!-- Speedtest History -->
+        <div class="card" id="card-speedtest">
+          <div class="card-label">
+
+            Speed Test History
+            <div class="sth-toggle-wrap" id="sth-toggle-wrap">
+              <button class="sth-toggle" id="sth-btn-pct" onclick="setSpeedtestMode('pct')">% Util</button>
+              <button class="sth-toggle active" id="sth-btn-raw" onclick="setSpeedtestMode('raw')">Mbps</button>
+            </div>
+          </div>
+          <div class="sth-chart-wrap">
+            <div class="sth-scroll" id="sth-scroll">
+              <canvas id="speedtest-canvas"></canvas>
+            </div>
+            <div id="speedtest-tooltip" class="sth-tooltip" style="display:none;"></div>
+          </div>
+          <div class="speedtest-footer">
+            <div class="sth-legend">
+              <span class="sth-legend-dot" style="background:var(--accent-cyan)"></span>
+              <span class="sth-legend-label">DL</span>
+              <span class="sth-legend-dot" style="background:var(--accent-green);margin-left:8px"></span>
+              <span class="sth-legend-label">UL</span>
+            </div>
+            <a class="link-view-all" href="#" onclick="navigateTo('speedtest')">View Full History &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Top Active Flows Card -->
+        <div class="card" id="card-topflows">
+          <div class="card-label">
+            Top Active Flows
+            <span class="flow-count-badge" id="topflows-count">0</span>
+            <span style="margin-left:auto;font-size:9px;cursor:pointer;color:var(--accent-cyan);" onclick="navigateTo('flows')">View All &rarr;</span>
+          </div>
+          <div class="topflows-list" id="topflows-list"></div>
+        </div>
+
+        <!-- Top Bandwidth Hosts Card -->
+        <div class="card" id="card-tophosts">
+          <div class="card-label">
+            Top Bandwidth Hosts
+            <span class="flow-count-badge" id="tophosts-count">0</span>
+            <span style="margin-left:auto;font-size:9px;cursor:pointer;color:var(--accent-cyan);" onclick="navigateTo('devices')">View All &rarr;</span>
+          </div>
+          <div class="topflows-list" id="tophosts-list"></div>
+        </div>
+
+        <!-- Placeholder Tile -->
+        <div class="card" id="card-placeholder">
+          <div class="card-label">
+
+            Custom Tile
+          </div>
+          <div class="placeholder-content">
+            <div class="placeholder-add-icon"><i class="fa-solid fa-plus-circle"></i></div>
+            <div class="placeholder-add-text">Add Tile</div>
+          </div>
+        </div>
+
+      </div><!-- /dashboard-grid -->
+
+    </main>
+  </div><!-- /main-wrapper -->
+
+  <!-- Global Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- Add Tile Modal -->
+  <div id="tile-picker-overlay" class="tile-picker-overlay hidden">
+    <div class="tile-picker-modal">
+      <div class="tile-picker-header">
+        <span class="tile-picker-title">Add Tile</span>
+        <button id="tilePickerClose" class="tile-picker-close">&#x2715;</button>
+      </div>
+      <div class="tile-picker-grid" id="tilePickerGrid"></div>
+      <div class="tile-picker-restore hidden" id="tilePickerRestore">
+        <div class="tile-picker-section-label">Restore Hidden Tiles</div>
+        <div class="tile-picker-grid" id="tilePickerRestoreGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
