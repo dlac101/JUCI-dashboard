@@ -673,7 +673,7 @@ ul { list-style: none; }
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text-muted);
-  min-width: 52px;
+  min-width: 69px;
 }
 
 .wan-meta-val {
@@ -685,23 +685,23 @@ ul { list-style: none; }
 /* Device Card */
 .device-model {
   font-family: var(--font-mono);
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--text-heading);
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   letter-spacing: -0.3px;
 }
 
 .device-meta-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
 }
 
 .device-meta-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
 }
 
@@ -711,7 +711,7 @@ ul { list-style: none; }
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text-muted);
-  min-width: 68px;
+  min-width: 69px;
   flex-shrink: 0;
 }
 
@@ -2895,6 +2895,14 @@ body[data-view="basic"] #card-wan,
 body[data-view="basic"] #card-bbscore,
 body[data-view="basic"] #card-device {
   align-self: stretch;
+}
+/* Align Device + BB card labels with WAN dual-header */
+body[data-view="basic"] #card-device .card-label,
+body[data-view="basic"] #card-bbscore .card-label {
+  min-height: 17px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
 }
 
 
