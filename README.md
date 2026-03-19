@@ -54,7 +54,40 @@ All data is currently mock/simulated for prototyping. In production, widgets con
 | WiFi Airtime | `iwinfo` / `hostapd` | hostapd |
 | System Health | `/proc/stat`, `/proc/meminfo` | procd |
 
+| WWAN Failover | `mwan3.status` (rpcd) | mwan3 / mwan3track |
+| WWAN Failover events | `/FLASH/persist/mwan/mwanlte.log` | mwan3track |
+| WWAN Failover usage | `ltewan-accounting.py` | mwan3 |
+
 See `flowstatd.md`, `flowstatd-modules.md`, and `classifi.md` for detailed API contracts.
+
+---
+
+## Open Engineering Questions
+
+### WWAN Failover Widget: Carrier / ISP Name Display
+
+The WWAN Failover widget shows a carrier/ISP label beneath each interface panel (bottom-left). The mock data currently uses **reverse DNS (PTR) lookup** on the interface IP as a proxy for carrier name:
+
+- WAN example: `c-198-51-100-43.hsd1.ca.comcast.net` → resolves Comcast
+- WWAN example: `mip-100-74-23-156.vzwentp.net` → resolves Verizon
+
+**The problem:** rDNS is unreliable as a carrier name source:
+- Many ISPs do not set PTR records for customer IPs
+- CGNAT addresses (100.64.0.0/10), common on LTE, frequently have no PTR record
+- The hostname format varies wildly between ISPs and is not human-friendly
+- A PTR lookup adds latency and must be cached to avoid re-querying on every render
+
+**Alternatives to evaluate:**
+
+1. **CDT (Customer Defined Tags / Configuration Template):** The CDT value provisioned onto the device often encodes the carrier or ISP name. This is likely the most reliable source for managed CPE deployments where the CDT is set at provisioning time. Check whether the CDT data model exposes a human-readable carrier name field.
+
+2. **rDNS with parsing:** Run `resolveip -4 <ip>` (available on OpenWrt), cache the result, and parse a recognizable segment from the hostname (e.g. extract the registrable domain). Works without provisioning but fails silently on CGNAT/no-PTR cases.
+
+3. **Modem manager for WWAN:** The Inseego and Alcatel manager scripts (`inseego-manager.sh`, `alcatel-manager.sh`) query the modem directly and may expose the SIM carrier name via AT commands or JSON RPC. This would be authoritative for the WWAN panel specifically.
+
+4. **Static provisioning field:** Add an explicit `isp_name` field to the WAN/WWAN interface config in UCI. Reliable but requires provisioning-time data entry.
+
+**Recommendation:** Use CDT for WAN (if available), modem manager for WWAN, and fall back to rDNS with domain extraction. Never display a raw rDNS hostname without parsing — it will confuse end users.
 
 ## Quick Start
 

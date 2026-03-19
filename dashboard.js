@@ -337,6 +337,77 @@ MOCK.flows.forEach(f => {
   f.rateHistory = Array.from({ length: 12 }, () => Math.max(0, f.rx_bps + (Math.random() - 0.5) * f.rx_bps * 0.3));
 });
 
+/* ===== Multi-WAN mock data ===== */
+MOCK.mwan = {
+  enabled: true,
+  active_policy: 'wan_wwan',  // wan_wwan | wan_only | wwan_only
+  interfaces: {
+    wan: {
+      name: 'WAN',
+      enabled: true,
+      state: 'online',
+      uptime_secs: 345678,
+      offline_secs: null,
+      latency_ms: 4.2,
+      loss_pct: 0,
+      track_ips: ['8.8.4.4', '208.67.222.222'],
+      device: MOCK.wan.media_type,      // production: juci.wan.status() → media_type
+      access_tech: MOCK.wan.media_type, // production: juci.wan.status() → media_type
+      ip_addr: MOCK.wan.ip_addr,        // production: juci.wan.status() → ip_addr
+      rdns_hostname: 'c-198-51-100-43.consolidated.net', // production: PTR lookup on ip_addr (see README)
+      model: null,
+      sparklineColor: 'var(--accent-amber)',
+      latencyHistory: Array.from({ length: 12 }, () => 3.5 + Math.random() * 2.5)
+    },
+    wwan: {
+      name: 'WWAN',
+      enabled: true,
+      state: 'online',
+      uptime_secs: 12943,
+      offline_secs: null,
+      latency_ms: 52.1,
+      loss_pct: 0,
+      track_ips: ['8.8.8.8', '208.67.220.220'],
+      device: 'usb0',
+      model: 'Inseego USB800',
+      access_tech: '4G LTE',    // production: modem manager (inseego-manager.sh / alcatel-manager.sh) → access_technology
+      ip_addr: '100.74.23.156',          // production: juci.network.interface() → ipaddr (CGNAT typical for LTE)
+      rdns_hostname: 'mip-100-74-23-156.vzwentp.net', // production: PTR lookup on ip_addr (see README)
+      sparklineColor: 'var(--accent-cyan)',
+      latencyHistory: Array.from({ length: 12 }, () => 44 + Math.random() * 18)
+    }
+  },
+  // Events newest-first. 4-event cycle per outage:
+  //   failover → backup_up → recovery → backup_standby
+  failover_events: [
+    // Cycle 1 — Mar 15: ISP outage, 4h 12m on LTE
+    { epoch: 1741996440, event_type: 'failover',       probe_label: 'Primary WAN down',       duration_secs: 15120, dialup_secs: null },
+    { epoch: 1741996458, event_type: 'backup_up',      probe_label: 'Backup WAN up',          duration_secs: null,  dialup_secs: 18   },
+    { epoch: 1742011560, event_type: 'recovery',       probe_label: 'Primary WAN restored',   duration_secs: null,  dialup_secs: null },
+    { epoch: 1742011585, event_type: 'backup_standby', probe_label: 'Backup WAN standing by', duration_secs: null,  dialup_secs: null },
+    // Cycle 2 — Mar 9: quick 6-min flap (ONT reboot / power blip)
+    { epoch: 1741530120, event_type: 'failover',       probe_label: 'Primary WAN down',       duration_secs: 360,   dialup_secs: null },
+    { epoch: 1741530142, event_type: 'backup_up',      probe_label: 'Backup WAN up',          duration_secs: null,  dialup_secs: 22   },
+    { epoch: 1741530480, event_type: 'recovery',       probe_label: 'Primary WAN restored',   duration_secs: null,  dialup_secs: null },
+    { epoch: 1741530500, event_type: 'backup_standby', probe_label: 'Backup WAN standing by', duration_secs: null,  dialup_secs: null },
+    // Cycle 3 — Feb 28: degraded link, 1h 2m before WAN stabilised
+    { epoch: 1740785220, event_type: 'failover',       probe_label: 'Primary WAN down',       duration_secs: 3720,  dialup_secs: null },
+    { epoch: 1740785235, event_type: 'backup_up',      probe_label: 'Backup WAN up',          duration_secs: null,  dialup_secs: 15   },
+    { epoch: 1740788940, event_type: 'recovery',       probe_label: 'Primary WAN restored',   duration_secs: null,  dialup_secs: null },
+    { epoch: 1740788970, event_type: 'backup_standby', probe_label: 'Backup WAN standing by', duration_secs: null,  dialup_secs: null },
+    // Cycle 4 — Feb 20: 8-min CPE firmware upgrade reboot
+    { epoch: 1740021120, event_type: 'failover',       probe_label: 'Primary WAN down',       duration_secs: 480,   dialup_secs: null },
+    { epoch: 1740021148, event_type: 'backup_up',      probe_label: 'Backup WAN up',          duration_secs: null,  dialup_secs: 28   },
+    { epoch: 1740021600, event_type: 'recovery',       probe_label: 'Primary WAN restored',   duration_secs: null,  dialup_secs: null },
+    { epoch: 1740021622, event_type: 'backup_standby', probe_label: 'Backup WAN standing by', duration_secs: null,  dialup_secs: null },
+  ],
+  usage_30d: {
+    wan_secs:    2572320,   // ~29.8 days
+    wwan_secs:     19680,   // ~5.5 hours total across 4 events
+    offline_secs:      0
+  }
+};
+
 /* ===== State ===== */
 let currentHistorySpan = 365; // days
 const dismissedAlarms = new Set();
@@ -355,6 +426,7 @@ const DEFAULT_LAYOUT = {
   'card-wanperf':    { col: 1, row: 4, span: 2 },
   'card-topflows':   { col: 3, row: 4, span: 1 },
   'card-tophosts':   { col: 4, row: 4, span: 1 },
+  'card-multiwan':   { col: 4, row: 5, span: 1 },
   'card-placeholder':{ col: 1, row: 5, span: 2 },
 };
 
@@ -1662,8 +1734,240 @@ function renderTopHosts() {
     });
     renderTopFlows();
     renderTopHosts();
+    // Drift mwan latencies + increment uptimes
+    const mw = MOCK.mwan;
+    const iwan  = mw.interfaces.wan;
+    const iwwan = mw.interfaces.wwan;
+    iwan.latency_ms  = Math.max(1, iwan.latency_ms  + (Math.random() - 0.5) * 1.0);
+    iwwan.latency_ms = Math.max(10, iwwan.latency_ms + (Math.random() - 0.5) * 6.0);
+    iwan.latencyHistory.shift();  iwan.latencyHistory.push(iwan.latency_ms);
+    iwwan.latencyHistory.shift(); iwwan.latencyHistory.push(iwwan.latency_ms);
+    if (iwan.state  === 'online') iwan.uptime_secs  += 5;
+    if (iwwan.state === 'online') iwwan.uptime_secs += 5;
+    renderMWAN();
   }, 5000);
 })();
+
+/* ===== Multi-WAN Card ===== */
+
+// Map rDNS registrable domain → human carrier name.
+// Production: PTR lookup on interface IP via resolveip / nslookup, then run through here.
+// See README for open engineering question on carrier name sourcing (CDT vs rDNS vs modem AT).
+function rdnsToCarrier(hostname) {
+  if (!hostname) return '';
+  const parts  = hostname.split('.');
+  if (parts.length < 2) return '';
+  const domain = parts.slice(-2).join('.').toLowerCase();
+  const ISP_MAP = {
+    // Fiber / DSL / Cable
+    'consolidated.net':  'Consolidated Communications',
+    'comcast.net':       'Comcast',
+    'xfinity.com':       'Xfinity',
+    'att.net':           'AT&T',
+    'sbcglobal.net':     'AT&T',
+    'bellsouth.net':     'AT&T',
+    'att.com':           'AT&T',
+    'spectrum.com':      'Spectrum',
+    'charter.com':       'Spectrum',
+    'rr.com':            'Spectrum',
+    'twc.com':           'Spectrum',
+    'twcable.com':       'Spectrum',
+    'cox.net':           'Cox',
+    'cox.com':           'Cox',
+    'centurylink.net':   'CenturyLink',
+    'centurylink.com':   'CenturyLink',
+    'lumen.com':         'Lumen',
+    'qwest.net':         'Lumen',
+    'frontier.com':      'Frontier',
+    'frontiernet.net':   'Frontier',
+    'windstream.net':    'Windstream',
+    'windstream.com':    'Windstream',
+    'optimum.net':       'Optimum',
+    'optonline.net':     'Optimum',
+    'cablevision.com':   'Optimum',
+    'suddenlink.net':    'Optimum',
+    'mediacom.com':      'Mediacom',
+    'mchsi.com':         'Mediacom',
+    'tds.net':           'TDS Telecom',
+    'rcn.net':           'RCN',
+    'earthlink.net':     'EarthLink',
+    'midco.net':         'Midco',
+    'wowway.net':        'WOW!',
+    'wow-net.net':       'WOW!',
+    'cincinnati.com':    'Cincinnati Bell',
+    'hawaiiantel.net':   'Hawaiian Telcom',
+    // Cellular / LTE
+    'vzwentp.net':       'Verizon',
+    'verizon.net':       'Verizon',
+    'vzw.net':           'Verizon',
+    'mycingular.net':    'AT&T Mobility',
+    'tmobile.com':       'T-Mobile',
+    'tmo.net':           'T-Mobile',
+    't-mobile.com':      'T-Mobile',
+    'sprint.com':        'T-Mobile',
+    'uscellular.net':    'UScellular',
+    'uscc.net':          'UScellular',
+  };
+  return ISP_MAP[domain] || ''; // blank fallback — show nothing rather than a confusing fragment
+}
+
+function formatMWANUptime(secs) {
+  if (!secs || secs < 0) return '0s';
+  const d = Math.floor(secs / 86400);
+  const h = Math.floor((secs % 86400) / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function formatMWANEventDate(epoch) {
+  const d = new Date(epoch * 1000);
+  const mon = d.toLocaleString('en-US', { month: 'short' });
+  const day = d.getDate();
+  const hh  = String(d.getHours()).padStart(2, '0');
+  const mm  = String(d.getMinutes()).padStart(2, '0');
+  return `${mon} ${day}, ${hh}:${mm}`;
+}
+
+function formatMWANDuration(secs) {
+  if (!secs) return null;
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function mwanPolicyLabel(policy) {
+  if (policy === 'wwan_only') return 'LTE ACTIVE';
+  return 'STANDBY';
+}
+
+function renderMWANIfacePanel(panelEl, iface, isActiveRouter) {
+  const stateClass    = iface.state || 'disabled';
+  // 'connecting' maps to the dialing CSS class (amber pulse) but displays as "DIALING"
+  const stateCssClass = stateClass === 'connecting' ? 'connecting' : stateClass;
+  const stateLabel    = stateClass === 'connecting' ? 'DIALING' : stateClass.toUpperCase();
+  const lossWarnClass = iface.loss_pct > 5 ? 'loss-crit' : iface.loss_pct > 1 ? 'loss-warn' : '';
+  // Sparkline muted when interface is online but not the active router (backup mode)
+  const isDimmed      = !isActiveRouter && iface.state === 'online';
+  const latColor      = iface.latency_ms > 150 ? 'var(--accent-red)'
+                      : isDimmed               ? 'var(--text-muted)'
+                      : iface.latency_ms > 50  ? 'var(--accent-amber)'
+                      : iface.sparklineColor || 'var(--accent-amber)';
+  const uptimeLabel   = (iface.state === 'online')
+    ? `Up ${formatMWANUptime(iface.uptime_secs)}`
+    : iface.offline_secs
+      ? `Offline ${formatMWANUptime(iface.offline_secs)} ago`
+      : 'Offline';
+  const techLabel = iface.access_tech || iface.device;
+  const techClass = 'media-' + techLabel.toLowerCase().replace(/\./g, '').replace(/\s/g, '');
+  // WWAN only: modem model shown above the bottom row
+  const modelLine = iface.model
+    ? `<div class="mwan-iface-device">${iface.model}</div>`
+    : '';
+  const carrierLabel = rdnsToCarrier(iface.rdns_hostname);
+
+  panelEl.innerHTML = `
+    <div class="mwan-iface-header">
+      <div class="mwan-state-dot ${stateCssClass}"></div>
+      <span class="mwan-iface-name">${iface.name}</span>
+      <div class="mwan-lat-group">
+        <span class="mwan-lat-val" style="color:${latColor}">${iface.latency_ms.toFixed(1)}ms</span>
+        ${renderFlowSparkline(iface.latencyHistory, latColor)}
+      </div>
+    </div>
+    <div class="mwan-iface-row2">
+      <span class="wan-interface-badge ${techClass}">${techLabel}</span>
+      <span class="mwan-state-badge ${stateCssClass}">${stateLabel}</span>
+      <div class="mwan-metric-chip ${lossWarnClass}">
+        <span class="chip-label">loss</span>
+        <span class="chip-val">${iface.loss_pct}%</span>
+      </div>
+      <span class="mwan-uptime">${uptimeLabel}</span>
+    </div>
+    <div class="mwan-iface-bottom">
+      <span class="mwan-iface-device" title="${iface.rdns_hostname || ''}">${carrierLabel}</span>
+      ${iface.ip_addr ? `<span class="mwan-iface-ip">${iface.ip_addr}</span>` : ''}
+    </div>
+  `;
+}
+
+function renderMWAN() {
+  const mw = MOCK.mwan;
+
+  // Policy badge
+  const badge = el('mwan-policy-badge');
+  if (badge) badge.textContent = mwanPolicyLabel(mw.active_policy);
+
+  // Display states map directly from mwan3track: online / offline / connecting (→ DIALING) / disabled
+  // Sparkline muting is separate: WWAN is dimmed whenever it's not the active router.
+  const wwanIsActiveRouter = mw.active_policy === 'wwan_only';
+
+  // Interface panels
+  const panelWan  = el('mwan-panel-wan');
+  const panelWwan = el('mwan-panel-wwan');
+  if (panelWan)  renderMWANIfacePanel(panelWan,  mw.interfaces.wan,  true);
+  if (panelWwan) renderMWANIfacePanel(panelWwan, mw.interfaces.wwan, wwanIsActiveRouter);
+
+  // Failover events
+  const evList = el('mwan-events-list');
+  if (evList) {
+    const iconMap = {
+      failover:       { cls: 'failover',       tag: '<i class="fa-solid fa-arrow-down"></i>' },
+      backup_up:      { cls: 'backup-up',      tag: '<i class="fa-solid fa-arrow-up"></i>'   },
+      recovery:       { cls: 'recovery',       tag: '<i class="fa-solid fa-arrow-up"></i>'   },
+      backup_standby: { cls: 'backup-standby', tag: '<i class="fa-solid fa-minus"></i>'      },
+    };
+    evList.innerHTML = mw.failover_events.map(ev => {
+      const icon = iconMap[ev.event_type] || iconMap.recovery;
+      const dur  = formatMWANDuration(ev.duration_secs);
+      const durHtml    = dur ? `<span class="mwan-event-dur">${dur}</span>` : '';
+      const dialupHtml = ev.dialup_secs ? `<span class="mwan-event-dur">+${ev.dialup_secs}s</span>` : '';
+      return `
+        <div class="mwan-event-row">
+          <span class="mwan-event-icon ${icon.cls}">${icon.tag}</span>
+          <span class="mwan-event-path">
+            <span class="ev-probe">${ev.probe_label}</span>
+          </span>
+          <span class="mwan-event-ts">${formatMWANEventDate(ev.epoch)}</span>
+          ${durHtml}${dialupHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 30-day usage bar
+  const total = mw.usage_30d.wan_secs + mw.usage_30d.wwan_secs + mw.usage_30d.offline_secs;
+  const wanPct  = total > 0 ? (mw.usage_30d.wan_secs  / total * 100).toFixed(1) : 0;
+  const wwanPct = total > 0 ? (mw.usage_30d.wwan_secs / total * 100).toFixed(1) : 0;
+  const wanDays  = (mw.usage_30d.wan_secs  / 86400).toFixed(1);
+  const wwanDays = (mw.usage_30d.wwan_secs / 86400).toFixed(1);
+
+  const barWan  = el('mwan-bar-wan');
+  const barWwan = el('mwan-bar-wwan');
+  if (barWan)  barWan.style.width  = wanPct  + '%';
+  if (barWwan) barWwan.style.width = wwanPct + '%';
+
+  const legend = el('mwan-usage-legend');
+  if (legend) {
+    legend.innerHTML = `
+      <div class="mwan-legend-item">
+        <div class="mwan-legend-dot wan"></div>
+        WAN <span class="mwan-legend-days">${wanDays}d</span>
+      </div>
+      <div class="mwan-legend-item">
+        <div class="mwan-legend-dot wwan"></div>
+        LTE <span class="mwan-legend-days">${wwanDays}d</span>
+      </div>
+      ${mw.usage_30d.offline_secs > 0 ? `
+      <div class="mwan-legend-item">
+        <div class="mwan-legend-dot offline"></div>
+        Offline <span class="mwan-legend-days">${(mw.usage_30d.offline_secs/86400).toFixed(1)}d</span>
+      </div>` : ''}
+    `;
+  }
+}
 
 /* ===== Speedtest History Card ===== */
 let speedtestMode = 'raw'; // 'pct' or 'raw'
@@ -2102,6 +2406,7 @@ function init() {
   renderSpeedtestHistory();
   renderTopFlows();
   renderTopHosts();
+  renderMWAN();
   // Canvas needs layout to be done first
   requestAnimationFrame(() => initThroughputCanvas());
 }
@@ -2113,7 +2418,6 @@ const addedTiles   = new Set(JSON.parse(localStorage.getItem('dashboard_added_ti
 /* ===== Add Tile Picker ===== */
 const AVAILABLE_TILES = [
   { id: 'tile-sfp',       title: 'SFP / Optical Power',       icon: 'fa-solid fa-fire-flame-curved', desc: 'Tx/Rx power (dBm), temperature, bias current, voltage', strip: '.strip-3', accentColor: 'var(--accent-cyan)' },
-  { id: 'tile-multiwan',  title: 'Multi-WAN / LTE Failover',   icon: 'fa-solid fa-shuffle',           desc: 'Active WAN, failover event log, LTE 30-day data usage', strip: '.strip-3', accentColor: 'var(--accent-amber)' },
   { id: 'tile-voip',      title: 'VoIP Line Status',           icon: 'fa-solid fa-phone',             desc: 'SIP registration + hook state per FXS port',            strip: '.strip-3', accentColor: 'var(--accent-green)' },
   { id: 'tile-clients',   title: 'Connected Clients by Band',  icon: 'fa-solid fa-laptop',            desc: 'Client count and RSSI per radio band',                  strip: '.strip-3', accentColor: 'var(--accent-cyan)' },
   { id: 'tile-sysres',    title: 'System Resources',           icon: 'fa-solid fa-microchip',         desc: 'CPU %, memory used/free, system uptime',                strip: '.strip-3', accentColor: 'var(--accent-purple)' },
