@@ -26,11 +26,13 @@ widget into JUCI's AngularJS + Lua RPC framework, replacing mock data with live 
    - 3.10 [Top Active Flows](#310-top-active-flows)
    - 3.11 [Top Bandwidth Hosts](#311-top-bandwidth-hosts)
    - 3.12 [WWAN Failover](#312-wwan-failover)
+   - 3.13 [Bufferbloat Score (Simple View)](#313-bufferbloat-score-simple-view)
 4. [Grid Layout & Drag-Drop System](#4-grid-layout--drag-drop-system)
 5. [Tile Picker / Custom Tiles](#5-tile-picker--custom-tiles)
-6. [Open Engineering Questions](#6-open-engineering-questions)
-7. [CSS & Theming Notes](#7-css--theming-notes)
-8. [Testing Checklist](#8-testing-checklist)
+6. [Simple/Advanced View Toggle](#6-simpleadvanced-view-toggle)
+7. [Open Engineering Questions](#7-open-engineering-questions)
+8. [CSS & Theming Notes](#8-css--theming-notes)
+9. [Testing Checklist](#9-testing-checklist)
 
 ---
 
@@ -143,6 +145,8 @@ juci-mod-dashboard/
     │   ├── top-hosts-widget.html
     │   ├── wwan-failover-widget.js
     │   ├── wwan-failover-widget.html
+    │   ├── bbscore-widget.js        ← Bufferbloat Score (Simple view only)
+    │   ├── bbscore-widget.html
     │   └── sparkline-directive.js   ← Reusable SVG sparkline
     └── css/
         └── dashboard.css            ← Port from prototype styles.css
@@ -548,11 +552,11 @@ This is the most complex widget with multiple data sources.
 | WWAN uptime | `mwan.interfaces.wwan.uptime_secs` | Same for wwan |
 | Latency sparkline | `mwan.interfaces.{name}.latencyHistory` | Client-side 12-point buffer |
 | WAN access_tech badge | `mwan.interfaces.wan.access_tech` | `network.interface.wan` → `media_type` (XGSPON, GPON, etc.) |
-| WWAN access_tech badge | `mwan.interfaces.wwan.access_tech` | Modem manager → RAT field (4G LTE, 5G NR, etc.) See [6.2] |
+| WWAN access_tech badge | `mwan.interfaces.wwan.access_tech` | Modem manager → RAT field (4G LTE, 5G NR, etc.) See [7.2] |
 | WAN IP address | `mwan.interfaces.wan.ip_addr` | `network.interface.wan` → `ipv4-address[0].address` |
 | WWAN IP address | `mwan.interfaces.wwan.ip_addr` | `network.interface.wwan` → `ipv4-address[0].address` |
-| WAN carrier name | `rdnsToCarrier(wan.rdns_hostname)` | PTR lookup on WAN IP. See [6.1] |
-| WWAN carrier name | `rdnsToCarrier(wwan.rdns_hostname)` | PTR lookup on WWAN IP. See [6.1] |
+| WAN carrier name | `rdnsToCarrier(wan.rdns_hostname)` | PTR lookup on WAN IP. See [7.1] |
+| WWAN carrier name | `rdnsToCarrier(wwan.rdns_hostname)` | PTR lookup on WWAN IP. See [7.1] |
 | WWAN modem model | `mwan.interfaces.wwan.model` | `mwan-info.sh` → `wwan.model` |
 | Active policy | `mwan.active_policy` | Derive from default route or `mwan3 status` |
 | Policy badge | Derived: STANDBY / LTE ACTIVE | `wan_wwan` or `wan_only` → STANDBY; `wwan_only` → LTE ACTIVE |
@@ -605,6 +609,26 @@ Study `ltewan-accounting.py` in the `mwan3-srg` feed for the reference log parse
 
 ---
 
+### 3.13 Bufferbloat Score (Simple View)
+
+**Card ID:** `card-bbscore` | **Grid:** Simple view only, row 2 middle | **Poll:** 300s (shares data with WAN Status card)
+
+This card exists only in Simple view. It extracts the bufferbloat grade data that lives
+inside the WAN Status card in Advanced view and presents it as a standalone, glanceable card.
+
+| Displayed Field | MOCK Key | Production Source |
+|---|---|---|
+| Download bufferbloat grade | `speedtest[0].download_bufferbloat_grade` | `bbst_speedtest_get_history()` latest entry |
+| Upload bufferbloat grade | `speedtest[0].upload_bufferbloat_grade` | Same |
+
+**Render Notes:**
+- Two large grade pills (Download / Upload) with letter grades A through F
+- Grade color coding: A = green, B = cyan, C = amber, D/F = red
+- Card uses the `.basic-only` CSS class so it is hidden in Advanced view
+- Data source is identical to the bufferbloat section of the WAN Status card (section 3.2)
+
+---
+
 ## 4. Grid Layout & Drag-Drop System
 
 The prototype uses a 4-column CSS Grid with free-placement:
@@ -651,9 +675,121 @@ the grid or restoring previously hidden tiles.
 
 ---
 
-## 6. Open Engineering Questions
+## 6. Simple/Advanced View Toggle
 
-### 6.1 Carrier / ISP Name Display
+The dashboard supports two view modes, toggled via a pill switch in the top bar.
+
+### Architecture
+
+The view system is CSS-driven. Switching views sets `data-view="basic"` or
+`data-view="advanced"` on the `<body>` element. Individual cards and card sub-elements
+use two CSS classes to control visibility:
+
+- `.tech-only` -- visible only in Advanced view (hidden when `body[data-view="basic"]`)
+- `.basic-only` -- visible only in Simple view (hidden when `body[data-view="advanced"]`)
+
+This approach avoids JS-driven DOM manipulation for show/hide. The toggle function
+updates the body attribute, persists the choice to `localStorage` under
+`'dashboard_view'`, and the rest is handled by CSS selectors.
+
+### Simple View Layout
+
+Simple view uses a dedicated CSS grid (class `.basic-grid`) with a fixed max-width
+of 1100px, centered on the page:
+
+```
+Row 1: [QoE Score (full width)]
+Row 2: [WAN Status]  [Bufferbloat Score]  [Device Info]
+Row 3: [WiFi Airtime (full width)]
+Row 4: [WAN Throughput (full width)]
+Row 5: [Connection History (full width)]
+```
+
+Cards visible in Simple view: `card-qoe`, `card-wan`, `card-bbscore`, `card-device`,
+`card-airtime`, `card-wanperf`, `card-history`.
+
+Cards hidden in Simple view (`.tech-only`): `card-speedtest`, `card-events`,
+`card-alarms`, `card-topflows`, `card-tophosts`, `card-multiwan`.
+
+### Per-Card Simplifications
+
+In Simple view, several cards hide technical detail rows to reduce information density:
+
+| Card | Hidden Elements |
+|---|---|
+| QoE | Issues list, "/100" label, score date |
+| QoE (added) | "Last Speed Test" section with DL/UL bar graphs as % of service rate |
+| WAN Status | WAN Type, Gateway, DNS, MTU, Lease rows; full bufferbloat breakdown, Run Test button, History link |
+| Device Info | Serial, MAC, CDT, Upgraded rows; System Health gauge cluster |
+| WiFi Airtime | Tx/Rx/WiFi Int/Non-WiFi legend row |
+| Connection History | 7d/30d toggle (locked to 1yr); monthly uptime stats row |
+
+### Simple View Responsive Breakpoints
+
+| Breakpoint | Columns | Notes |
+|---|---|---|
+| 1280px+ | 3 columns | QoE full-width row 1; WAN/BB/Device in row 2; rest full-span |
+| 768-1279px | 2 columns | QoE and WAN full-width; BB and Device side-by-side; rest full-span |
+| Below 768px | 1 column | All cards stacked with explicit `order` for card sequencing |
+
+All cards use `height: auto` in Simple view (the 260px fixed row height from
+Advanced view does not apply).
+
+### Interaction Differences
+
+- **No edit mode** -- Long-press does not trigger wiggle/drag in Simple view
+- **No drag-and-drop** -- Card positions are fixed by the CSS grid
+- **No tile picker** -- The "Add Tile" placeholder is hidden
+- **Restore Default Layout** button is Advanced-view only (appears in edit mode,
+  fixed at top of viewport; resets layout to `LAYOUT_4COL`, clears hidden tiles,
+  reloads the page)
+
+### Last Speed Test (QoE Card, Simple View)
+
+The QoE card gains a "Last Speed Test" section visible only in Simple view. It displays:
+- Download and upload speeds from the most recent speed test
+- Horizontal bar graphs where bar length = percentage of ISP service rate (plan limit)
+- A "SERVICE RATE" label column with the plan limit value
+- A dotted end-cap on each bar marking the 100% service rate boundary
+
+### Speed Test History: Service Rate Reference Lines
+
+In both views, the Speed Test History chart now renders dotted horizontal reference
+lines at the configured DL and UL service rates:
+- Cyan dotted line at 8000 Mbps (DL service rate), labeled "8G DL" on the left axis
+- Green dotted line at 4000 Mbps (UL service rate), labeled "4G UL" on the left axis
+- Mock upload values are capped at approximately 4000 Mbps to reflect the asymmetric plan
+
+### WiFi Airtime: Dynamic Client Counts
+
+The WiFi Airtime card now shows a per-band client count that drifts over time in
+mock data. On each 5-second animation tick there is a 15% chance per radio of the
+client count incrementing or decrementing by 1. The DOM is updated in the same
+animation callback that updates the airtime bars.
+
+### localStorage Keys
+
+| Key | Values | Default |
+|---|---|---|
+| `dashboard_view` | `"basic"`, `"advanced"` | `"basic"` |
+| `dashboard_layout` | JSON layout object (Advanced view only) | `LAYOUT_4COL` |
+
+### JUCI Integration Notes
+
+In production JUCI, the view toggle should be ported as:
+- A directive or controller method that sets `data-view` on `<body>`
+- Persist preference via `localStorage` (same as prototype) or UCI user config
+- The `.tech-only` / `.basic-only` CSS classes port directly into the JUCI stylesheet
+- The `card-bbscore` widget needs its own JUCI directive but shares the speed test
+  data source with the WAN Status widget (section 3.2)
+- The "Last Speed Test" section in the QoE card requires the same speed test and
+  service rate data used by section 3.5
+
+---
+
+## 7. Open Engineering Questions
+
+### 7.1 Carrier / ISP Name Display
 
 The prototype shows a human-readable ISP name on each WWAN Failover interface panel.
 Three candidate sources:
@@ -679,7 +815,7 @@ the SIM/network registration.
 **Recommendation:** CDT for WAN (if a carrier field exists), modem manager for WWAN,
 fall back to rDNS. Never display raw rDNS hostnames. Show nothing if no source resolves.
 
-### 6.2 WWAN Access Technology Badge (4G LTE / 5G NR)
+### 7.2 WWAN Access Technology Badge (4G LTE / 5G NR)
 
 `mwan3track` and `mwan-info.sh` do not expose the radio access technology. This must come
 from the modem manager layer. Check `inseego-manager.sh` / `alcatel-manager.sh` for an
@@ -688,14 +824,14 @@ from the modem manager layer. Check `inseego-manager.sh` / `alcatel-manager.sh` 
 Expected values: `"4G LTE"`, `"5G NR"`, `"3G"`, `"2G"`. Map to CSS classes:
 `media-4glte`, `media-5gnr`, `media-3g`, `media-2g`.
 
-### 6.3 Latency / Loss Aggregation
+### 7.3 Latency / Loss Aggregation
 
 `mwan3track` tracks multiple IPs per interface (default: 2). The `rpcd/mwan3` script
 reports per-target latency and loss. The widget displays a single value per interface.
 
 **Recommendation:** Average latency across all targets; max loss across targets (conservative).
 
-### 6.4 subscriber_diags.json Location & Format
+### 7.4 subscriber_diags.json Location & Format
 
 Multiple widgets (QoE, Connection History, Events, Alarms) depend on `subscriber_diags.json`.
 Verify:
@@ -704,7 +840,7 @@ Verify:
 - Whether it's generated on-demand or periodically
 - The exact JSON schema (the prototype was built from a real sample)
 
-### 6.5 Speed Test API
+### 7.5 Speed Test API
 
 The prototype assumes `bbst_speedtest_get_history()` returns an array of test results.
 Verify:
@@ -713,7 +849,7 @@ Verify:
 - How to trigger a new test from the UI
 - Whether the `birth_certificate` flag exists in real data
 
-### 6.6 Throughput Data Source
+### 7.6 Throughput Data Source
 
 The WAN Throughput card needs sub-second byte counter polling. Options:
 1. Poll `/sys/class/net/<dev>/statistics/{rx,tx}_bytes` every 250ms from JS
@@ -722,13 +858,13 @@ The WAN Throughput card needs sub-second byte counter polling. Options:
 
 Option 1 is simplest. Option 3 is most elegant if Netdata is deployed.
 
-### 6.7 WiFi Airtime Data Source
+### 7.7 WiFi Airtime Data Source
 
 Verify the exact JUCI API for airtime data. The prototype assumes a
 `juci.wireless.airtime()` call returning `airtime_utilization[]` with 5 components per radio
 summing to 100%. The underlying data comes from `iw <dev> survey dump`.
 
-### 6.8 flowstatd Availability
+### 7.8 flowstatd Availability
 
 Top Flows and Top Hosts depend on `flowstatd`. Verify:
 - `flowstatd` is included in the SmartOS build
@@ -741,7 +877,7 @@ or show a "Not available" state.
 
 ---
 
-## 7. CSS & Theming Notes
+## 8. CSS & Theming Notes
 
 All CSS is in `styles.css`. The design uses CSS custom properties for theming:
 
@@ -772,7 +908,7 @@ CSS file. Override JUCI's default theme variables where they conflict.
 
 ---
 
-## 8. Testing Checklist
+## 9. Testing Checklist
 
 ### Per-Widget Verification
 
@@ -788,6 +924,18 @@ CSS file. Override JUCI's default theme variables where they conflict.
 - [ ] **Top Flows:** Flows sorted by rate; sparklines render; app protocol from classifi
 - [ ] **Top Hosts:** Hosts aggregated correctly; flow count shown; green theme
 - [ ] **WWAN Failover:** Both interface panels render; events list populated; usage bar proportional
+
+- [ ] **Bufferbloat Score:** Grade pills render with correct colors; card hidden in Advanced view
+- [ ] **Simple/Advanced Toggle:** Pill switch toggles `data-view` on body; preference persists across reload
+- [ ] **Simple View Layout:** 3-col grid at desktop, 2-col at tablet, 1-col at mobile; cards auto-height
+- [ ] **Simple View QoE:** Issues list and "/100" hidden; "Last Speed Test" bars render with service rate caps
+- [ ] **Simple View WAN:** Technical rows (Gateway, DNS, MTU) hidden; bufferbloat breakdown hidden
+- [ ] **Simple View Device:** Serial/MAC/CDT hidden; gauge cluster hidden
+- [ ] **Simple View WiFi Airtime:** Legend row hidden; client counts update on tick
+- [ ] **Simple View Connection History:** Locked to 1yr; monthly stats hidden
+- [ ] **Speed Test Service Rate Lines:** Cyan DL and green UL dotted lines render at correct Y positions
+- [ ] **Restore Default Layout:** Button appears in edit mode; resets layout and reloads
+- [ ] **WiFi Airtime Client Drift:** Client count changes over time in mock data
 
 ### System-Level
 

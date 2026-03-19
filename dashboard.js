@@ -20,7 +20,7 @@ const MOCK = {
     dns_secondary: '8.8.4.4',
     lease_remaining_secs: 7980,
     service_rate_dl: 8000,   // Mbps — plan/contracted rate; 0 = unconfigured
-    service_rate_ul: 8000,
+    service_rate_ul: 4000,
     ipv6_prefix: '2001:db8:abcd::/56',
     link_speed: '10 Gbps',
     pppoe_session_id: 0x1A3F,
@@ -274,18 +274,18 @@ const MOCK = {
 
   // Fabricated — matches bbst_speedtest_get_history() format; 30 daily entries + BC
   speedtest: [
-    { epoch: 1773783900, server: 'speedtest.adtran.net', download_mbps: 7970, upload_mbps: 7340, idle_avg: 12.1, download_avg: 18.3, upload_avg: 22.4, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
+    { epoch: 1773783900, server: 'speedtest.adtran.net', download_mbps: 7970, upload_mbps: 3860, idle_avg: 12.1, download_avg: 18.3, upload_avg: 22.4, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
     { epoch: 1773697500, server: 'speedtest.adtran.net', download_mbps: 6840, upload_mbps: 3210, idle_avg: 11.8, download_avg: 17.9, upload_avg: 21.1, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1773611100, server: 'speedtest.adtran.net', download_mbps: 7350, upload_mbps: 3890, idle_avg: 13.2, download_avg: 19.4, upload_avg: 23.8, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
     { epoch: 1773524700, server: 'speedtest.adtran.net', download_mbps: 5920, upload_mbps: 2760, idle_avg: 11.2, download_avg: 16.8, upload_avg: 20.3, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1773438300, server: 'speedtest.adtran.net', download_mbps: 4180, upload_mbps: 1840, idle_avg: 14.6, download_avg: 21.2, upload_avg: 26.1, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'C' },
     { epoch: 1773351900, server: 'speedtest.adtran.net', download_mbps: 7540, upload_mbps: 3820, idle_avg: 12.5, download_avg: 18.7, upload_avg: 22.9, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
     { epoch: 1773265500, server: 'speedtest.adtran.net', download_mbps: 6380, upload_mbps: 2970, idle_avg: 15.8, download_avg: 23.6, upload_avg: 28.4, upload_bufferbloat_grade: 'C', download_bufferbloat_grade: 'C' },
-    { epoch: 1773179100, server: 'speedtest.adtran.net', download_mbps: 7790, upload_mbps: 4130, idle_avg: 12.0, download_avg: 17.2, upload_avg: 21.6, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
+    { epoch: 1773179100, server: 'speedtest.adtran.net', download_mbps: 7790, upload_mbps: 3940, idle_avg: 12.0, download_avg: 17.2, upload_avg: 21.6, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1773092700, server: 'speedtest.adtran.net', download_mbps: 6910, upload_mbps: 3340, idle_avg: 13.9, download_avg: 20.1, upload_avg: 24.7, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
     { epoch: 1773006300, server: 'speedtest.adtran.net', download_mbps: 5480, upload_mbps: 2540, idle_avg: 15.1, download_avg: 22.3, upload_avg: 27.2, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'C' },
     { epoch: 1772919900, server: 'speedtest.adtran.net', download_mbps: 7210, upload_mbps: 3690, idle_avg: 12.3, download_avg: 18.5, upload_avg: 22.6, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
-    { epoch: 1772833500, server: 'speedtest.adtran.net', download_mbps: 7850, upload_mbps: 4260, idle_avg: 11.5, download_avg: 17.1, upload_avg: 20.8, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
+    { epoch: 1772833500, server: 'speedtest.adtran.net', download_mbps: 7850, upload_mbps: 3980, idle_avg: 11.5, download_avg: 17.1, upload_avg: 20.8, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1772747100, server: 'speedtest.adtran.net', download_mbps: 4120, upload_mbps: 1780, idle_avg: 16.4, download_avg: 24.8, upload_avg: 30.1, upload_bufferbloat_grade: 'D', download_bufferbloat_grade: 'C' },
     { epoch: 1772660700, server: 'speedtest.adtran.net', download_mbps: 6820, upload_mbps: 3420, idle_avg: 13.6, download_avg: 19.8, upload_avg: 24.1, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
     { epoch: 1772574300, server: 'speedtest.adtran.net', download_mbps: 7580, upload_mbps: 3950, idle_avg: 12.4, download_avg: 18.2, upload_avg: 22.3, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
@@ -294,11 +294,11 @@ const MOCK = {
     { epoch: 1772315100, server: 'speedtest.adtran.net', download_mbps: 5340, upload_mbps: 2540, idle_avg: 15.3, download_avg: 22.8, upload_avg: 27.9, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'C' },
     { epoch: 1772228700, server: 'speedtest.adtran.net', download_mbps: 7310, upload_mbps: 3750, idle_avg: 12.6, download_avg: 18.6, upload_avg: 22.8, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
     { epoch: 1772142300, server: 'speedtest.adtran.net', download_mbps: 6930, upload_mbps: 3340, idle_avg: 14.2, download_avg: 20.8, upload_avg: 25.3, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
-    { epoch: 1772055900, server: 'speedtest.adtran.net', download_mbps: 7610, upload_mbps: 4030, idle_avg: 11.6, download_avg: 17.3, upload_avg: 21.2, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
+    { epoch: 1772055900, server: 'speedtest.adtran.net', download_mbps: 7610, upload_mbps: 3920, idle_avg: 11.6, download_avg: 17.3, upload_avg: 21.2, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1771969500, server: 'speedtest.adtran.net', download_mbps: 6880, upload_mbps: 3380, idle_avg: 13.5, download_avg: 19.7, upload_avg: 24.0, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
     { epoch: 1771883100, server: 'speedtest.adtran.net', download_mbps: 7350, upload_mbps: 3810, idle_avg: 12.7, download_avg: 18.9, upload_avg: 23.1, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'B' },
     { epoch: 1771796700, server: 'speedtest.adtran.net', download_mbps: 6590, upload_mbps: 3160, idle_avg: 14.8, download_avg: 21.6, upload_avg: 26.4, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'C' },
-    { epoch: 1771710300, server: 'speedtest.adtran.net', download_mbps: 7660, upload_mbps: 4090, idle_avg: 11.4, download_avg: 16.9, upload_avg: 20.6, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
+    { epoch: 1771710300, server: 'speedtest.adtran.net', download_mbps: 7660, upload_mbps: 3970, idle_avg: 11.4, download_avg: 16.9, upload_avg: 20.6, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1771623900, server: 'speedtest.adtran.net', download_mbps: 7210, upload_mbps: 3720, idle_avg: 13.1, download_avg: 19.3, upload_avg: 23.6, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
     { epoch: 1771537500, server: 'speedtest.adtran.net', download_mbps: 7530, upload_mbps: 3870, idle_avg: 12.2, download_avg: 17.8, upload_avg: 21.8, upload_bufferbloat_grade: 'A', download_bufferbloat_grade: 'A' },
     { epoch: 1771451100, server: 'speedtest.adtran.net', download_mbps: 6940, upload_mbps: 3430, idle_avg: 14.0, download_avg: 20.4, upload_avg: 25.0, upload_bufferbloat_grade: 'B', download_bufferbloat_grade: 'B' },
@@ -457,9 +457,21 @@ const LAYOUT_2COL = {
   'card-placeholder':{ col: 2, row: 9, span: 1 },
 };
 
+/* Basic view layout (2-col, 5 cards, fixed) */
+const LAYOUT_BASIC = {
+  'card-qoe':      { col: 1, row: 1, span: 3 },
+  'card-wan':      { col: 1, row: 2, span: 1 },
+  'card-bbscore':  { col: 2, row: 2, span: 1 },
+  'card-device':   { col: 3, row: 2, span: 1 },
+  'card-airtime':  { col: 1, row: 3, span: 3 },
+  'card-wanperf':  { col: 1, row: 4, span: 3 },
+  'card-history':  { col: 1, row: 5, span: 3 },
+};
+
 /* DEFAULT_LAYOUT is the 4-col version (used for save/load) */
 const DEFAULT_LAYOUT = LAYOUT_4COL;
 
+let currentView = 'basic';  // 'basic' or 'tech'
 let cardLayout = {};
 
 function loadLayout() {
@@ -481,6 +493,32 @@ function saveLayout() {
   localStorage.setItem('dashboard_layout', JSON.stringify(cardLayout));
 }
 
+/* ===== View Mode (Basic / Tech) ===== */
+function loadView() {
+  currentView = localStorage.getItem('dashboard_view') || 'basic';
+  document.body.dataset.view = currentView;
+  document.querySelectorAll('.view-toggle').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.view === currentView)
+  );
+}
+
+function setView(mode) {
+  currentView = mode;
+  document.body.dataset.view = mode;
+  localStorage.setItem('dashboard_view', mode);
+  document.querySelectorAll('.view-toggle').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.view === mode)
+  );
+  if (mode === 'basic') {
+    cardLayout = JSON.parse(JSON.stringify(LAYOUT_BASIC));
+  } else {
+    loadLayout();
+  }
+  applyLayout();
+  // Re-render throughput canvas since container size may change
+  requestAnimationFrame(() => initThroughputCanvas());
+}
+
 let _lastGridMode = 0;
 
 function applyLayout() {
@@ -490,7 +528,17 @@ function applyLayout() {
   _lastGridMode = mode;
 
   grid.querySelectorAll(':scope > .card').forEach(card => {
-    if (mode === 1) {
+    if (currentView === 'basic') {
+      /* Basic view: use fixed 2-col layout for basic cards, hide others via CSS */
+      const pos = LAYOUT_BASIC[card.id];
+      if (pos) {
+        card.style.gridColumn = pos.col + ' / span ' + pos.span;
+        card.style.gridRow = String(pos.row);
+      } else {
+        card.style.gridColumn = '';
+        card.style.gridRow = '';
+      }
+    } else if (mode === 1) {
       /* 1-col: clear JS positions, let CSS order + auto-flow handle it */
       card.style.gridColumn = '';
       card.style.gridRow = '';
@@ -745,13 +793,14 @@ function renderDevice() {
   const d = MOCK.device;
   el('device-model').textContent = d.model;
 
+  // Items with techOnly:true are hidden in basic view
   const rows = [
-    ['MAC',      d.mac],
-    ['Serial',   d.serial],
-    ['Firmware', d.firmware],
-    ['CDT',      d.cdt + ' ' + d.cdt_version],
-    ['Uptime',   formatUptime(d.sys_uptime_secs)],
-    ['Upgraded', formatEpochShort(d.last_upgrade_epoch)],
+    { k: 'MAC',      v: d.mac,                             techOnly: true },
+    { k: 'Serial',   v: d.serial,                          techOnly: true },
+    { k: 'Firmware', v: d.firmware,                         techOnly: false },
+    { k: 'CDT',      v: d.cdt + ' ' + d.cdt_version,      techOnly: true },
+    { k: 'Uptime',   v: formatUptime(d.sys_uptime_secs),   techOnly: false },
+    { k: 'Upgraded', v: formatEpochShort(d.last_upgrade_epoch), techOnly: true },
   ];
 
   // Draw 2x2 gauge cluster
@@ -776,10 +825,10 @@ function renderDevice() {
     ]
   });
 
-  el('device-meta').innerHTML = rows.map(([k, v]) =>
-    `<div class="device-meta-row">
-      <span class="dmr-key">${k}</span>
-      <span class="dmr-val">${v}</span>
+  el('device-meta').innerHTML = rows.map(r =>
+    `<div class="device-meta-row${r.techOnly ? ' tech-only' : ''}">
+      <span class="dmr-key">${r.k}</span>
+      <span class="dmr-val">${r.v}</span>
     </div>`
   ).join('');
 }
@@ -1242,6 +1291,55 @@ function renderWANBufferbloat(st) {
   el('bb-ul-speed').textContent = st.upload_mbps.toFixed(0);
   el('bb-ul-lat').textContent   = st.upload_avg.toFixed(0) + 'ms loaded / ' + st.idle_avg.toFixed(0) + 'ms idle';
 
+  // --- BB options for simple view ---
+  // Option A: Grade pills
+  const pillDl = document.getElementById('bb-pill-dl-grade');
+  const pillUl = document.getElementById('bb-pill-ul-grade');
+  if (pillDl) { pillDl.textContent = dlG; pillDl.style.color = gradeColor(dlG); }
+  if (pillUl) { pillUl.textContent = ulG; pillUl.style.color = gradeColor(ulG); }
+  const pillDlBox = document.getElementById('bb-pill-dl');
+  const pillUlBox = document.getElementById('bb-pill-ul');
+  if (pillDlBox) pillDlBox.style.borderColor = gradeColor(dlG);
+  if (pillUlBox) pillUlBox.style.borderColor = gradeColor(ulG);
+
+  // Option B: Inline colored letters
+  const inlineDl = document.getElementById('bb-inline-dl-grade');
+  const inlineUl = document.getElementById('bb-inline-ul-grade');
+  if (inlineDl) { inlineDl.textContent = dlG; inlineDl.style.color = gradeColor(dlG); }
+  if (inlineUl) { inlineUl.textContent = ulG; inlineUl.style.color = gradeColor(ulG); }
+
+  // Option C: Single combined grade
+  const gradeMap = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0 };
+  const revMap = ['F', 'D', 'C', 'B', 'A'];
+  const avg = ((gradeMap[dlG] || 0) + (gradeMap[ulG] || 0)) / 2;
+  const combinedG = revMap[Math.round(avg)] || 'C';
+  const combEl = document.getElementById('bb-combined-grade');
+  const combDot = document.getElementById('bb-combined-dot');
+  if (combEl) { combEl.textContent = combinedG; combEl.style.color = gradeColor(combinedG); }
+  if (combDot) combDot.style.background = gradeColor(combinedG);
+
+  // Option D: Mini gauge arc
+  const miniCanvas = document.getElementById('bb-mini-gauge');
+  if (miniCanvas) {
+    const dpr = window.devicePixelRatio || 1;
+    miniCanvas.width = 48 * dpr; miniCanvas.height = 28 * dpr;
+    miniCanvas.style.width = '24px'; miniCanvas.style.height = '14px';
+    const mctx = miniCanvas.getContext('2d');
+    mctx.scale(dpr, dpr);
+    const cx = 24, cy = 16, r = 12;
+    // Arc background
+    mctx.beginPath(); mctx.arc(cx, cy, r, Math.PI, 0); mctx.lineWidth = 3;
+    mctx.strokeStyle = 'rgba(255,255,255,0.08)'; mctx.stroke();
+    // Arc fill (based on combined grade)
+    const pct = avg / 4;
+    mctx.beginPath(); mctx.arc(cx, cy, r, Math.PI, Math.PI + Math.PI * pct);
+    mctx.lineWidth = 3; mctx.strokeStyle = gradeColor(combinedG); mctx.stroke();
+    // Grade letter
+    mctx.textAlign = 'center'; mctx.textBaseline = 'middle';
+    mctx.font = 'bold 10px monospace'; mctx.fillStyle = gradeColor(combinedG);
+    mctx.fillText(combinedG, cx, cy - 2);
+  }
+
   // Summary sentence
   el('bb-summary').innerHTML = bbSummary(dlG, ulG);
 
@@ -1444,6 +1542,73 @@ function renderQoE() {
   } else {
     el('qoe-issues').innerHTML = `<div class="qoe-issue" style="color:var(--accent-green)"><i class="fa-solid fa-circle-check"></i> No issues detected</div>`;
   }
+
+  // Render last speedtest mini chart (simple view)
+  renderLastSpeedtest();
+}
+
+function renderLastSpeedtest() {
+  const container = document.getElementById('qoe-last-speedtest');
+  if (!container) return;
+
+  // Get the most recent speedtest
+  const tests = MOCK.speedtest.filter(s => !s.birth_certificate);
+  if (tests.length === 0) { container.innerHTML = ''; return; }
+  const latest = tests[0]; // newest first in mock data
+
+  const dlRate = MOCK.wan.service_rate_dl || 0;
+  const ulRate = MOCK.wan.service_rate_ul || 0;
+  const dlMbps = latest.download_mbps;
+  const ulMbps = latest.upload_mbps;
+
+  // Format values
+  const fmtSpeed = (v) => v >= 1000 ? (v / 1000).toFixed(1) : v.toFixed(0);
+  const fmtUnit  = (v) => v >= 1000 ? 'Gbps' : 'Mbps';
+  const hasRates = dlRate > 0 && ulRate > 0;
+  const dlPct = dlRate > 0 ? Math.min(100, dlMbps / dlRate * 100) : 0;
+  const ulPct = ulRate > 0 ? Math.min(100, ulMbps / ulRate * 100) : 0;
+
+  // Date
+  const d = new Date(latest.epoch * 1000);
+  const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  container.innerHTML = `
+    <div class="lst-header">
+      <span class="lst-title">Last Speed Test</span>
+      <span class="lst-date">${dateStr}</span>
+    </div>
+    <div class="lst-bars">
+      ${hasRates ? `<div class="lst-bar-group lst-col-headers">
+        <div class="lst-bar-label"></div>
+        <div class="lst-bar-track" style="background:none;height:auto;"></div>
+        <span class="lst-col-header">Service Rate</span>
+      </div>` : ''}
+      <div class="lst-bar-group">
+        <div class="lst-bar-label">
+          <span class="lst-arrow dl">↓</span>
+          <span class="lst-speed">${fmtSpeed(dlMbps)}</span>
+          <span class="lst-unit">${fmtUnit(dlMbps)}</span>
+        </div>
+        <div class="lst-bar-track">
+          <div class="lst-bar-fill dl" style="width:${dlPct}%"></div>
+          ${dlRate > 0 ? '<div class="lst-bar-limit"></div>' : ''}
+        </div>
+        ${dlRate > 0 ? `<span class="lst-plan-label">${fmtSpeed(dlRate)} ${fmtUnit(dlRate)}</span>` : ''}
+      </div>
+      <div class="lst-bar-group">
+        <div class="lst-bar-label">
+          <span class="lst-arrow ul">↑</span>
+          <span class="lst-speed">${fmtSpeed(ulMbps)}</span>
+          <span class="lst-unit">${fmtUnit(ulMbps)}</span>
+        </div>
+        <div class="lst-bar-track">
+          <div class="lst-bar-fill ul" style="width:${ulPct}%"></div>
+          ${ulRate > 0 ? '<div class="lst-bar-limit"></div>' : ''}
+        </div>
+        ${ulRate > 0 ? `<span class="lst-plan-label">${fmtSpeed(ulRate)} ${fmtUnit(ulRate)}</span>` : ''}
+      </div>
+    </div>
+  `;
 }
 
 function showQoEPillTooltip(pill) {
@@ -2198,6 +2363,32 @@ function renderSpeedtestHistory() {
     }
   }
 
+  // Service rate dotted lines (DL and UL plan limits)
+  if (!usePct && hasRates) {
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.2;
+    // DL service rate line (cyan)
+    const dlLineY = pad.top + cH - Math.min(dlRate, yMax) * yScale;
+    ctx.strokeStyle = 'rgba(0,210,190,0.50)';
+    ctx.beginPath(); ctx.moveTo(pad.left, dlLineY); ctx.lineTo(pad.left + cW, dlLineY); ctx.stroke();
+    // DL rate label
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = 'rgba(0,210,190,0.65)';
+    const dlLabel = dlRate >= 1000 ? (dlRate / 1000).toFixed(0) + 'G DL' : dlRate + 'M DL';
+    ctx.fillText(dlLabel, pad.left + 4, dlLineY - 2);
+    // UL service rate line (green)
+    const ulLineY = pad.top + cH - Math.min(ulRate, yMax) * yScale;
+    ctx.strokeStyle = 'rgba(0,210,100,0.50)';
+    ctx.beginPath(); ctx.moveTo(pad.left, ulLineY); ctx.lineTo(pad.left + cW, ulLineY); ctx.stroke();
+    // UL rate label
+    ctx.fillStyle = 'rgba(0,210,100,0.65)';
+    const ulLabel = ulRate >= 1000 ? (ulRate / 1000).toFixed(0) + 'G UL' : ulRate + 'M UL';
+    ctx.fillText(ulLabel, pad.left + 4, ulLineY - 2);
+    ctx.setLineDash([]);
+  }
+
   // Bars
   const groupW = cW / n;
   const gap    = groupW * 0.22;          // breathing room between groups
@@ -2539,7 +2730,12 @@ function renderPageSubtitle() {
 
 /* ===== Init ===== */
 function init() {
-  loadLayout();
+  loadView();
+  if (currentView === 'basic') {
+    cardLayout = JSON.parse(JSON.stringify(LAYOUT_BASIC));
+  } else {
+    loadLayout();
+  }
   applyLayout();
   renderPageSubtitle();
   renderWAN();
@@ -2785,6 +2981,25 @@ document.addEventListener('DOMContentLoaded', () => {
       applyLayout();
     }
     getAllCards().forEach(c => { c.classList.add('wiggle'); addDismissBtn(c); });
+    // Show restore default layout button
+    if (!document.getElementById('restore-layout-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'restore-layout-btn';
+      btn.className = 'restore-layout-btn';
+      btn.innerHTML = '<i class="fa-solid fa-rotate-left" style="margin-right:5px;"></i>Restore Default Layout';
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        cardLayout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT));
+        saveLayout();
+        hiddenTiles.clear();
+        localStorage.removeItem('dashboard_hidden_tiles');
+        applyLayout();
+        exitEditMode();
+        location.reload();
+      });
+      const grid = document.getElementById('dashboard-grid');
+      if (grid) grid.parentNode.insertBefore(btn, grid);
+    }
   }
 
   function exitEditMode() {
@@ -2795,6 +3010,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remove the temporarily restored placeholder
     const ph = el('card-placeholder');
     if (ph) ph.remove();
+    // Remove restore layout button
+    const rlb = document.getElementById('restore-layout-btn');
+    if (rlb) rlb.remove();
   }
 
   function dismissCard(card) {
