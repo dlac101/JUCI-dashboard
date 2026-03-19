@@ -799,7 +799,7 @@ function renderDevice() {
     { k: 'Serial',   v: d.serial,                          techOnly: true },
     { k: 'Firmware', v: d.firmware,                         techOnly: false },
     { k: 'CDT',      v: d.cdt + ' ' + d.cdt_version,      techOnly: true },
-    { k: 'Uptime',   v: formatUptime(d.sys_uptime_secs),   techOnly: false },
+    { k: 'Sys Uptime', v: formatUptime(d.sys_uptime_secs), techOnly: false },
     { k: 'Upgraded', v: formatEpochShort(d.last_upgrade_epoch), techOnly: true },
   ];
 
