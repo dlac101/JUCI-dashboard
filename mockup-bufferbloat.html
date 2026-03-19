@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bufferbloat Score — Layout Options</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary:    #0b0f19;
+      --bg-secondary:  #111827;
+      --bg-card:       #151c2c;
+      --border:        #1f2937;
+      --border-bright: #374151;
+      --accent-cyan:   #22d3ee;
+      --accent-green:  #34d399;
+      --accent-amber:  #f59e0b;
+      --accent-red:    #ef4444;
+      --text-primary:  #e5e7eb;
+      --text-secondary:#9ca3af;
+      --text-muted:    #6b7280;
+      --font-mono: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+      --radius: 8px;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 40px 32px;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 900px;
+    }
+
+    .option-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .card-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* Shared */
+    .ts { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 10px; }
+    .footer { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .btn-run { background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.3); border-radius: 5px; color: var(--accent-cyan); font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 14px; cursor: pointer; }
+    .history-link { font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); cursor: pointer; }
+
+    /* Grade badges */
+    .grade-badge { display: inline-block; font-family: var(--font-mono); font-size: 12px; font-weight: 700; border-radius: 4px; padding: 2px 8px; flex-shrink: 0; }
+    .grade-badge.a { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+    .grade-badge.b { background: rgba(34,211,238,0.15); color: var(--accent-cyan); }
+    .grade-badge.c { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+    .grade-badge.d { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+
+    /* ===== OPTION A — Row layout, grade leads ===== */
+    .opt-a-rows { display: flex; flex-direction: column; gap: 8px; }
+    .opt-a-row { display: flex; align-items: center; gap: 8px; }
+    .opt-a-dir { font-family: var(--font-mono); font-size: 11px; font-weight: 700; width: 28px; flex-shrink: 0; }
+    .opt-a-dir.dl { color: var(--accent-cyan); }
+    .opt-a-dir.ul { color: var(--accent-green); }
+    .opt-a-speed { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+    .opt-a-speed.dl { color: var(--accent-cyan); }
+    .opt-a-speed.ul { color: var(--accent-green); }
+    .opt-a-unit { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+    .opt-a-lat { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-left: auto; }
+
+    /* ===== OPTION B — Big grade scorecards ===== */
+    .opt-b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .opt-b-card { border-radius: 6px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .opt-b-grade { font-family: var(--font-mono); font-size: 36px; font-weight: 700; line-height: 1; }
+    .opt-b-dir { font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .opt-b-dir.dl { color: var(--accent-cyan); }
+    .opt-b-dir.ul { color: var(--accent-green); }
+    .opt-b-speed { font-family: var(--font-mono); font-size: 14px; font-weight: 700; }
+    .opt-b-speed.dl { color: var(--accent-cyan); }
+    .opt-b-speed.ul { color: var(--accent-green); }
+    .opt-b-unit { font-size: 9px; color: var(--text-muted); }
+    .opt-b-lat { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ===== OPTION C — Speed + grade inline ===== */
+    .opt-c-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .opt-c-col { display: flex; flex-direction: column; gap: 4px; }
+    .opt-c-dir { font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .opt-c-dir.dl { color: var(--accent-cyan); }
+    .opt-c-dir.ul { color: var(--accent-green); }
+    .opt-c-speed-row { display: flex; align-items: center; gap: 5px; }
+    .opt-c-speed { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+    .opt-c-speed.dl { color: var(--accent-cyan); }
+    .opt-c-speed.ul { color: var(--accent-green); }
+    .opt-c-unit { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); align-self: flex-end; padding-bottom: 3px; }
+    .opt-c-lat { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+
+    .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bufferbloat Score — Layout Options</h1>
+
+  <div class="grid">
+
+    <!-- OPTION A -->
+    <div class="option-wrapper">
+      <div class="option-label">Option A — Row layout</div>
+      <div class="card">
+        <div class="card-title">Bufferbloat Score</div>
+        <div class="opt-a-rows">
+          <div class="opt-a-row">
+            <span class="grade-badge b">B</span>
+            <span class="opt-a-dir dl">↓ DL</span>
+            <span class="opt-a-speed dl">487<span class="opt-a-unit"> Mbps</span></span>
+            <span class="opt-a-lat">18ms loaded</span>
+          </div>
+          <div class="opt-a-row">
+            <span class="grade-badge a">A</span>
+            <span class="opt-a-dir ul">↑ UL</span>
+            <span class="opt-a-speed ul">45<span class="opt-a-unit"> Mbps</span></span>
+            <span class="opt-a-lat">22ms loaded</span>
+          </div>
+        </div>
+        <div class="ts">Tested Mar 17 &middot; 12ms idle</div>
+        <div class="footer">
+          <button class="btn-run"><i class="fa-solid fa-bolt" style="margin-right:5px"></i>Run Test</button>
+          <span class="history-link">History &rarr;</span>
+        </div>
+      </div>
+      <div class="desc">Grade badge leads each row so it's the first thing you read. Direction, speed, and latency follow left-to-right. Clean table-like structure — great for quick scanning.</div>
+    </div>
+
+    <!-- OPTION B -->
+    <div class="option-wrapper">
+      <div class="option-label">Option B — Big grade cards</div>
+      <div class="card">
+        <div class="card-title">Bufferbloat Score</div>
+        <div class="opt-b-grid">
+          <div class="opt-b-card" style="background:rgba(34,211,238,0.10)">
+            <div class="opt-b-grade" style="color:var(--accent-cyan)">B</div>
+            <div class="opt-b-dir dl">↓ DL</div>
+            <div class="opt-b-speed dl">487<span class="opt-b-unit"> Mbps</span></div>
+            <div class="opt-b-lat">18ms loaded</div>
+          </div>
+          <div class="opt-b-card" style="background:rgba(52,211,153,0.10)">
+            <div class="opt-b-grade" style="color:var(--accent-green)">A</div>
+            <div class="opt-b-dir ul">↑ UL</div>
+            <div class="opt-b-speed ul">45<span class="opt-b-unit"> Mbps</span></div>
+            <div class="opt-b-lat">22ms loaded</div>
+          </div>
+        </div>
+        <div class="ts">Tested Mar 17 &middot; 12ms idle</div>
+        <div class="footer">
+          <button class="btn-run"><i class="fa-solid fa-bolt" style="margin-right:5px"></i>Run Test</button>
+          <span class="history-link">History &rarr;</span>
+        </div>
+      </div>
+      <div class="desc">Grade dominates the visual — a red "D" is impossible to miss. Color-tinted columns reinforce pass/fail instantly. More visual, more assertive.</div>
+    </div>
+
+    <!-- OPTION C -->
+    <div class="option-wrapper">
+      <div class="option-label">Option C — Grade inline with speed</div>
+      <div class="card">
+        <div class="card-title">Bufferbloat Score</div>
+        <div class="opt-c-grid">
+          <div class="opt-c-col">
+            <div class="opt-c-dir dl">↓ DL</div>
+            <div class="opt-c-speed-row">
+              <span class="opt-c-speed dl">487</span>
+              <span class="opt-c-unit">Mbps</span>
+              <span class="grade-badge b">B</span>
+            </div>
+            <div class="opt-c-lat">18ms loaded</div>
+          </div>
+          <div class="opt-c-col">
+            <div class="opt-c-dir ul">↑ UL</div>
+            <div class="opt-c-speed-row">
+              <span class="opt-c-speed ul">45</span>
+              <span class="opt-c-unit">Mbps</span>
+              <span class="grade-badge a">A</span>
+            </div>
+            <div class="opt-c-lat">22ms loaded</div>
+          </div>
+        </div>
+        <div class="ts">Tested Mar 17 &middot; 12ms idle</div>
+        <div class="footer">
+          <button class="btn-run"><i class="fa-solid fa-bolt" style="margin-right:5px"></i>Run Test</button>
+          <span class="history-link">History &rarr;</span>
+        </div>
+      </div>
+      <div class="desc">Speed is the hero number — big and colored. Grade sits inline as a qualifier. Most similar to current layout but with speed emphasized over grade.</div>
+    </div>
+
+  </div>
+</body>
+</html>

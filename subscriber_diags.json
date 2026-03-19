@@ -1,0 +1,353 @@
+{
+	"network_qoe": {
+		"timestamp_epoch": 1773783904,
+		"timestamp_iso": "2026-03-17T21:45:04Z",
+		"qoe_score": 94.2,
+		"categories": {
+			"wan": {
+				"score": 100.0,
+				"weight": 25,
+				"factors": [
+				]
+			},
+			"system": {
+				"score": 96.2,
+				"weight": 15,
+				"factors": [
+					{
+						"timestamp_epoch": 1773783904,
+						"timestamp_iso": "2026-03-17T21:45:04Z",
+						"type": "cpu_load",
+						"subject": "System",
+						"detail": "Load average 1.23"
+					}
+				]
+			},
+			"wifi": {
+				"score": 79.0,
+				"weight": 25,
+				"factors": [
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "Adams-iPhone-13",
+						"detail": "WiFi 5G on SDG-8733v-94C0: low SNR, high retransmission rate (score 72)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "SonosZP",
+						"detail": "WiFi 5G on SDG-8733A-B4A0-Livingroom: high retransmission rate, low PHY rate (score 73)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "F8:25:51:48:12:01",
+						"detail": "WiFi 2G on SDG-8733v-94C0: low SNR, high retransmission rate, low PHY rate (score 81)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "38:F8:F6:75:94:C8",
+						"detail": "WiFi 6G on SDG-8632-2A30-Kitchen: high retransmission rate (score 81)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "MacBookPro",
+						"detail": "WiFi 5G on SDG-8733A-B4A0-Livingroom:  (score 92)"
+					}
+				]
+			},
+			"lan": {
+				"score": 100.0,
+				"weight": 10,
+				"factors": [
+				]
+			},
+			"mesh": {
+				"score": 100.0,
+				"weight": 25,
+				"factors": [
+				]
+			}
+		}
+	},
+	"network_audit": {
+		"timestamp_epoch": 1773783904,
+		"timestamp_iso": "2026-03-17T21:45:04Z",
+		"qoe_score": 94.2,
+		"categories": {
+			"wan": {
+				"score": 100.0,
+				"weight": 25,
+				"factors": [
+				]
+			},
+			"system": {
+				"score": 96.2,
+				"weight": 15,
+				"factors": [
+					{
+						"timestamp_epoch": 1773783904,
+						"timestamp_iso": "2026-03-17T21:45:04Z",
+						"type": "cpu_load",
+						"subject": "System",
+						"detail": "Load average 1.23"
+					}
+				]
+			},
+			"wifi": {
+				"score": 79.0,
+				"weight": 25,
+				"factors": [
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "Adams-iPhone-13",
+						"detail": "WiFi 5G on SDG-8733v-94C0: low SNR, high retransmission rate (score 72)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "SonosZP",
+						"detail": "WiFi 5G on SDG-8733A-B4A0-Livingroom: high retransmission rate, low PHY rate (score 73)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "F8:25:51:48:12:01",
+						"detail": "WiFi 2G on SDG-8733v-94C0: low SNR, high retransmission rate, low PHY rate (score 81)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "38:F8:F6:75:94:C8",
+						"detail": "WiFi 6G on SDG-8632-2A30-Kitchen: high retransmission rate (score 81)"
+					},
+					{
+						"timestamp_epoch": 1773783606,
+						"timestamp_iso": "2026-03-17T21:40:06Z",
+						"type": "wifi_client_health",
+						"subject": "MacBookPro",
+						"detail": "WiFi 5G on SDG-8733A-B4A0-Livingroom:  (score 92)"
+					}
+				]
+			},
+			"lan": {
+				"score": 100.0,
+				"weight": 10,
+				"factors": [
+				]
+			},
+			"mesh": {
+				"score": 100.0,
+				"weight": 25,
+				"factors": [
+				]
+			}
+		}
+	},
+	"downtime": {
+		"schema_version": "1.0.0",
+		"current_epoch": 1773783906,
+		"current_time": "Tue Mar 17 21:45:06 WET 2026",
+		"scan_duration": "27d:21:59",
+		"down_periods": [
+			{
+				"from": "Wed Feb 25 10:12:38 WET 2026",
+				"from_epoch": 1772014358,
+				"to": "Wed Mar  4 15:56:01 WET 2026",
+				"to_epoch": 1772639761,
+				"secs_down": 625403,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Wed Mar  4 15:56:27 WET 2026",
+				"from_epoch": 1772639787,
+				"to": "Wed Mar  4 15:57:23 WET 2026",
+				"to_epoch": 1772639843,
+				"secs_down": 56,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Thu Mar  5 10:44:34 WET 2026",
+				"from_epoch": 1772707474,
+				"to": "Thu Mar  5 10:45:29 WET 2026",
+				"to_epoch": 1772707529,
+				"secs_down": 55,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Thu Mar  5 10:57:15 WET 2026",
+				"from_epoch": 1772708235,
+				"to": "Thu Mar  5 10:58:10 WET 2026",
+				"to_epoch": 1772708290,
+				"secs_down": 55,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Sat Mar 07 12:47:03 WET 2026",
+				"from_epoch": 1772887623,
+				"to": "Sun Mar  8 01:41:03 WET 2026",
+				"to_epoch": 1772934063,
+				"secs_down": 46440,
+				"down_event": "powerDown",
+				"down_event_data": {
+					"Reason": "Power Lost",
+					"OfflineEstimate": "774 minutes"
+				}
+			},
+			{
+				"from": "Sun Mar 08 14:46:06 WET 2026",
+				"from_epoch": 1772981166,
+				"to": "Sun Mar  8 14:51:06 WET 2026",
+				"to_epoch": 1772981466,
+				"secs_down": 300,
+				"down_event": "powerDown",
+				"down_event_data": {
+					"Reason": "Power Lost",
+					"OfflineEstimate": "5 minutes"
+				}
+			},
+			{
+				"from": "Sun Mar 08 18:19:01 WET 2026",
+				"from_epoch": 1772993941,
+				"to": "Sun Mar  8 18:29:01 WET 2026",
+				"to_epoch": 1772994541,
+				"secs_down": 600,
+				"down_event": "powerDown",
+				"down_event_data": {
+					"Reason": "Power Lost",
+					"OfflineEstimate": "10 minutes"
+				}
+			},
+			{
+				"from": "Wed Mar 11 08:01:02 WET 2026",
+				"from_epoch": 1773216062,
+				"to": "Wed Mar 11 08:02:45 WET 2026",
+				"to_epoch": 1773216165,
+				"secs_down": 103,
+				"down_event": "internet/down",
+				"down_event_data": {
+					"Reason": "Internet Connectivity Lost"
+				}
+			},
+			{
+				"from": "Wed Mar 11 08:52:39 WET 2026",
+				"from_epoch": 1773219159,
+				"to": "Wed Mar 11 08:53:35 WET 2026",
+				"to_epoch": 1773219215,
+				"secs_down": 56,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Thu Mar 12 08:38:04 WET 2026",
+				"from_epoch": 1773304684,
+				"to": "Thu Mar 12 09:31:04 WET 2026",
+				"to_epoch": 1773307864,
+				"secs_down": 3180,
+				"down_event": "powerDown",
+				"down_event_data": {
+					"Reason": "Power Lost",
+					"OfflineEstimate": "53 minutes"
+				}
+			},
+			{
+				"from": "Thu Mar 12 20:48:51 WET 2026",
+				"from_epoch": 1773348531,
+				"to": "Thu Mar 12 20:49:46 WET 2026",
+				"to_epoch": 1773348586,
+				"secs_down": 55,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Thu Mar 12 20:58:50 WET 2026",
+				"from_epoch": 1773349130,
+				"to": "Thu Mar 12 21:00:24 WET 2026",
+				"to_epoch": 1773349224,
+				"secs_down": 94,
+				"down_event": "internet/down",
+				"down_event_data": {
+					"Reason": "Internet Connectivity Lost"
+				}
+			},
+			{
+				"from": "Sat Mar 14 05:03:06 WET 2026",
+				"from_epoch": 1773464586,
+				"to": "Sat Mar 14 05:38:06 WET 2026",
+				"to_epoch": 1773466686,
+				"secs_down": 2100,
+				"down_event": "powerDown",
+				"down_event_data": {
+					"Reason": "Power Lost",
+					"OfflineEstimate": "35 minutes"
+				}
+			},
+			{
+				"from": "Mon Mar 16 22:51:36 WET 2026",
+				"from_epoch": 1773701496,
+				"to": "Mon Mar 16 22:52:32 WET 2026",
+				"to_epoch": 1773701552,
+				"secs_down": 56,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			},
+			{
+				"from": "Tue Mar 17 15:54:44 WET 2026",
+				"from_epoch": 1773762884,
+				"to": "Tue Mar 17 15:56:00 WET 2026",
+				"to_epoch": 1773762960,
+				"secs_down": 76,
+				"down_event": "shutDown",
+				"down_event_data": {
+					"Reason": "Upgrade",
+					"ReasonDetail": "System going down for Upgrade"
+				}
+			}
+		],
+		"grey_period": {
+			"from": "Sun Feb 15 21:45:06 WET 2026",
+			"from_epoch": 1771191906,
+			"to": "Tue Feb 17 23:46:02 WET 2026",
+			"to_epoch": 1771371962,
+			"grey_secs": 180056
+		}
+	}
+}
