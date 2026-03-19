@@ -621,7 +621,11 @@ ul { list-style: none; }
 .wan-interface-badge.media-gpon    { color: var(--accent-blue);   background: rgba(59,130,246,0.1);  border-color: rgba(59,130,246,0.3); }
 .wan-interface-badge.media-10gbe   { color: var(--accent-cyan);   background: var(--accent-cyan-dim); border-color: rgba(34,211,238,0.3); }
 .wan-interface-badge.media-25gbe   { color: var(--accent-green);  background: var(--accent-green-dim); border-color: rgba(52,211,153,0.3); }
+.wan-interface-badge.media-25gbe   { color: var(--accent-green);  background: var(--accent-green-dim); border-color: rgba(52,211,153,0.3); }
 .wan-interface-badge.media-gbe     { color: var(--text-secondary); background: var(--bg-primary); border-color: var(--border-bright); }
+.wan-interface-badge.media-4glte   { color: var(--accent-amber);  background: var(--accent-amber-dim); border-color: rgba(245,158,11,0.3); }
+.wan-interface-badge.media-5g      { color: var(--accent-green);  background: var(--accent-green-dim); border-color: rgba(52,211,153,0.3); }
+.wan-interface-badge.media-5gnr    { color: var(--accent-green);  background: var(--accent-green-dim); border-color: rgba(52,211,153,0.3); }
 
 .wan-type-badge {
   font-family: var(--font-mono);
@@ -2290,6 +2294,311 @@ ul { list-style: none; }
   transition: background 0.15s;
 }
 .tile-option-restore:hover { background: var(--accent-amber-dim); }
+
+/* ===== Multi-WAN / LTE Failover Card ===== */
+.mwan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.mwan-iface-panel {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  padding: 6px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mwan-iface-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mwan-iface-name {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mwan-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mwan-state-dot.online     { background: var(--accent-green); box-shadow: 0 0 5px var(--accent-green); }
+.mwan-state-dot.active     { background: var(--accent-green); box-shadow: 0 0 5px var(--accent-green); }
+.mwan-state-dot.standby    { background: var(--accent-amber); }
+.mwan-state-dot.offline    { background: var(--accent-red); }
+.mwan-state-dot.connecting { background: var(--accent-amber); animation: mwan-pulse 1s ease-in-out infinite; }
+.mwan-state-dot.disabled   { background: var(--text-muted); }
+@keyframes mwan-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+.mwan-state-badge {
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+.mwan-state-badge.online    { background: rgba(52,211,153,0.15);  color: var(--accent-green); }
+.mwan-state-badge.active    { background: rgba(52,211,153,0.15);  color: var(--accent-green); }
+.mwan-state-badge.standby   { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.mwan-state-badge.offline   { background: var(--accent-red-dim);   color: var(--accent-red); }
+.mwan-state-badge.connecting { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.mwan-state-badge.disabled  { background: rgba(107,114,128,0.15);  color: var(--text-muted); }
+.mwan-iface-device {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mwan-iface-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: auto;
+  padding-top: 2px;
+}
+.mwan-iface-ip {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-heading);
+  flex-shrink: 0;
+}
+
+.mwan-lat-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.mwan-lat-val {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mwan-iface-row2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mwan-uptime {
+  font-size: 9px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.mwan-metrics {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.mwan-metric-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.mwan-metric-chip .chip-label {
+  color: var(--text-muted);
+  font-size: 8.5px;
+}
+.mwan-metric-chip.lat-warn  .chip-val { color: var(--accent-amber); }
+.mwan-metric-chip.lat-crit  .chip-val { color: var(--accent-red); }
+.mwan-metric-chip.loss-warn .chip-val { color: var(--accent-amber); }
+.mwan-metric-chip.loss-crit .chip-val { color: var(--accent-red); }
+.mwan-divider {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 4px 0;
+}
+/* Failover events */
+.mwan-events-section {
+  margin-bottom: 4px;
+}
+.mwan-events-label {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 3px;
+}
+.mwan-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 72px;
+  overflow-y: auto;
+}
+.mwan-event-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.mwan-event-row:last-child {
+  border-bottom: none;
+}
+.mwan-event-icon {
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 9px;
+}
+.mwan-event-icon.failover        { color: var(--accent-red); }
+.mwan-event-icon.backup-up       { color: var(--accent-green); }
+.mwan-event-icon.recovery        { color: var(--accent-cyan); }
+.mwan-event-icon.backup-standby  { color: var(--text-muted); }
+.mwan-event-path {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mwan-event-path .ev-from { color: var(--accent-amber); }
+.mwan-event-path .ev-arr  { color: var(--text-muted); margin: 0 2px; }
+.mwan-event-path .ev-to   { color: var(--accent-cyan); }
+.ev-probe {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  font-style: normal;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mwan-event-ts {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.mwan-event-dur {
+  font-size: 8.5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+/* Usage bar */
+.mwan-usage-section {
+  margin-top: 0;
+}
+.mwan-usage-label {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 3px;
+}
+.mwan-usage-bar-track {
+  width: 100%;
+  height: 9px;
+  background: var(--bg-secondary);
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 4px;
+}
+.mwan-usage-bar-wan {
+  height: 100%;
+  background: var(--accent-amber);
+  border-radius: 5px 0 0 5px;
+  transition: width 0.4s ease;
+}
+.mwan-usage-bar-wwan {
+  height: 100%;
+  background: var(--accent-cyan);
+  transition: width 0.4s ease;
+}
+.mwan-usage-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+}
+.mwan-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+.mwan-legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mwan-legend-dot.wan     { background: var(--accent-amber); }
+.mwan-legend-dot.wwan    { background: var(--accent-cyan); }
+.mwan-legend-dot.offline { background: var(--accent-grey); }
+.mwan-legend-days {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+/* Policy badge in card header */
+/* Harmonize all three badge types in the panel row to identical height */
+.mwan-iface-row2 .wan-interface-badge,
+.mwan-iface-row2 .mwan-state-badge,
+.mwan-iface-row2 .mwan-metric-chip {
+  font-size: 8.5px;
+  padding: 0 5px;
+  line-height: 16px;
+  height: 16px;
+  letter-spacing: 0.3px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mwan-policy-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--accent-amber-dim);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245,158,11,0.3);
+  vertical-align: middle;
+}
 
 /* ===== Responsive Breakpoints ===== */
 @media (max-width: 1200px) {

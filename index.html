@@ -429,6 +429,33 @@
           <div class="topflows-list" id="tophosts-list"></div>
         </div>
 
+        <!-- Multi-WAN / LTE Failover Card -->
+        <div class="card" id="card-multiwan">
+          <div class="card-label">
+            <i class="fa-solid fa-shuffle" style="color:var(--accent-amber);margin-right:6px;font-size:11px;"></i>
+            WWAN FAILOVER
+            <span class="mwan-policy-badge" id="mwan-policy-badge">STANDBY</span>
+          </div>
+          <div class="mwan-grid">
+            <div class="mwan-iface-panel" id="mwan-panel-wan"></div>
+            <div class="mwan-iface-panel" id="mwan-panel-wwan"></div>
+          </div>
+          <hr class="mwan-divider">
+          <div class="mwan-events-section">
+            <div class="mwan-events-label">Failover Events</div>
+            <div class="mwan-events-list" id="mwan-events-list"></div>
+          </div>
+          <hr class="mwan-divider">
+          <div class="mwan-usage-section">
+            <div class="mwan-usage-label">30-Day WAN Usage</div>
+            <div class="mwan-usage-bar-track">
+              <div class="mwan-usage-bar-wan"  id="mwan-bar-wan"  style="width:0%"></div>
+              <div class="mwan-usage-bar-wwan" id="mwan-bar-wwan" style="width:0%"></div>
+            </div>
+            <div class="mwan-usage-legend" id="mwan-usage-legend"></div>
+          </div>
+        </div>
+
         <!-- Placeholder Tile -->
         <div class="card" id="card-placeholder">
           <div class="card-label">
