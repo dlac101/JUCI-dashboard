@@ -1661,6 +1661,12 @@ ul { list-style: none; }
   color: var(--text-secondary);
 }
 
+/* Client count inline with airtime percentage */
+.airtime-client-count {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
 .airtime-track {
   height: 22px;
   background: var(--bg-primary);
@@ -2642,6 +2648,43 @@ body.sidebar-open::after { display: block; }
 .search-input { max-width: 120px; }
 html { font-size: 13px; }
 
+/* Speed Test History: give chart a fixed height when card is auto-height */
+.sth-chart-wrap { min-height: 160px; height: 160px; flex: none; position: relative; }
+.sth-scroll { overflow-x: auto; margin-left: 30px; }
+/* Fixed Y-axis overlay — visible only when chart scrolls (mobile/tablet) */
+.sth-yaxis {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0 36px 0;  /* match canvas pad.top / pad.bottom */
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--bg-card) 85%, transparent 100%);
+}
+.sth-yaxis-tick {
+  font: 11px monospace;
+  color: rgba(255,255,255,0.38);
+  text-align: left;
+  padding-left: 0;
+}
+
+/* Device card: fix System Health title overlap when stacked */
+.gauge-col-title { margin-top: 8px; align-self: flex-start; }
+.device-gauges-col { margin-top: 6px; align-items: flex-start; border-left: none; padding-left: 0; }
+
+/* WAN card: hide bufferbloat header label on mobile — it moves into wan-right */
+.wan-header-right { display: none; }
+.wan-right-title { display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #ffffff; margin-bottom: 8px; }
+.wan-right { border-left: none; padding-left: 0; border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 4px; }
+
+/* QoE pills: shrink to fit on narrow screens */
+.qoe-pills { flex-wrap: wrap; }
+.qoe-pill { width: 52px; height: 52px; flex-shrink: 1; }
+.qoe-pill-score { font-size: 17px; }
+
 /* Internal card splits: stack vertically on phones */
 .wan-split { grid-template-columns: 1fr; }
 .device-split { grid-template-columns: 1fr; }
@@ -2656,14 +2699,14 @@ html { font-size: 13px; }
 #card-device     { order: 3; }
 #card-events     { order: 4; }
 #card-alarms     { order: 5; }
-#card-multiwan   { order: 6; }
+#card-multiwan   { order: 14; }
 #card-history    { order: 7; }
 #card-speedtest  { order: 8; }
 #card-wanperf    { order: 9; }
 #card-airtime    { order: 10; }
 #card-topflows   { order: 11; }
 #card-tophosts   { order: 12; }
-#card-placeholder{ order: 13; }
+#card-placeholder{ order: 15; }
 
 /* Hide edit layout button on mobile */
 .edit-layout-btn { display: none; }
@@ -2693,6 +2736,11 @@ html { font-size: 13px; }
 
   /* Restore 2-col internal splits */
   .wan-split { grid-template-columns: 1fr 1fr; }
+  .device-gauges-col { margin-top: 0; align-items: center; border-left: 1px solid var(--border-light); padding-left: 10px; }
+  .gauge-col-title { margin-top: -24px; }
+  .wan-header-right { display: flex; }
+  .wan-right-title { display: none; }
+  .wan-right { border-left: 1px solid var(--border-light); padding-left: 10px; border-top: none; padding-top: 0; margin-top: 0; }
   .device-split { grid-template-columns: 1fr 1fr; }
   .mwan-grid { grid-template-columns: 1fr 1fr; }
 
@@ -2726,6 +2774,10 @@ html { font-size: 13px; }
   .dashboard-grid .card { height: 260px; min-height: 260px; }
   /* Remove mobile list caps — cards have fixed height with overflow scroll */
   .events-list, .alarm-list, .topflows-list { max-height: none; }
+  /* Restore flex chart sizing when card has fixed height */
+  .sth-chart-wrap { min-height: 0; height: auto; flex: 1 1 0; }
+  .sth-yaxis { display: none; }
+  .sth-scroll { margin-left: 0; }
 }
 
 /* --- 2xl: large / 4K displays (1920px+) --- */
