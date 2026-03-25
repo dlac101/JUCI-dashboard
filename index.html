@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartOS Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -101,6 +102,12 @@
         <a class="nav-link" href="#" id="nav-alarms">
           <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
           <span class="nav-label">Alarms</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-link" href="#" id="nav-statsview">
+          <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+          <span class="nav-label">StatsView</span>
         </a>
       </li>
     </ul>
@@ -494,11 +501,227 @@
 
       </div><!-- /dashboard-grid -->
 
+      <!-- StatsView Page (hidden by default) -->
+      <div id="page-statsview" class="page-panel" style="display:none">
+        <!-- StatsView sub-header with time range and status -->
+        <div class="sv-header">
+          <div class="sv-header-left">
+            <div class="pill-group sv-time-group">
+              <button class="sv-pill" data-range="300" onclick="svSetTimeRange(300)">5m</button>
+              <button class="sv-pill active" data-range="900" onclick="svSetTimeRange(900)">15m</button>
+              <button class="sv-pill" data-range="3600" onclick="svSetTimeRange(3600)">1h</button>
+              <button class="sv-pill" data-range="21600" onclick="svSetTimeRange(21600)">6h</button>
+              <button class="sv-pill" data-range="86400" onclick="svSetTimeRange(86400)">24h</button>
+            </div>
+            <div class="sv-goto-group">
+              <label class="sv-goto-label">Go to</label>
+              <input type="datetime-local" class="sv-goto-input" id="sv-goto-time" step="1">
+              <button class="sv-pill sv-goto-btn" id="sv-goto-btn">Go</button>
+            </div>
+          </div>
+          <div class="sv-header-right">
+            <div class="sv-status-badge" id="sv-status">
+              <span class="sv-status-dot"></span>
+              <span class="sv-status-label">CONNECTING</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sv-grid" id="sv-grid">
+
+          <!-- Row 1: WAN, LAN1, LAN2 -->
+          <div class="card sv-span4" id="sv-card-iface-wan">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">WAN <span class="sv-iface-media">10GbE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-wan"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-wan"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-iface-lan1">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">LAN1 <span class="sv-iface-media">10GbE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-lan1"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-lan1"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-iface-lan2">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">LAN2 <span class="sv-iface-media">GbE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-lan2"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-lan2"></div>
+          </div>
+
+          <!-- Row 2: LAN3, LAN4, WWAN -->
+          <div class="card sv-span4" id="sv-card-iface-lan3">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">LAN3 <span class="sv-iface-media">GbE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-lan3"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-lan3"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-iface-lan4">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">LAN4 <span class="sv-iface-media">GbE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-lan4"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-lan4"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-iface-wwan">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">WWAN <span class="sv-iface-media">LTE</span></span><span class="sv-card-legend-slot" id="sv-legend-iface-wwan"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-iface-wwan"></div>
+          </div>
+
+          <!-- Row 3: WiFi 2.4G, 5G, 6G -->
+          <div class="card sv-span4" id="sv-card-airtime-2g">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">WiFi 2.4 GHz</span><span class="sv-card-legend-slot" id="sv-legend-airtime-2g"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-airtime-2g"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-airtime-5g">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">WiFi 5 GHz</span><span class="sv-card-legend-slot" id="sv-legend-airtime-5g"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-airtime-5g"></div>
+          </div>
+          <div class="card sv-span4" id="sv-card-airtime-6g">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">WiFi 6 GHz</span><span class="sv-card-legend-slot" id="sv-legend-airtime-6g"></span></div></div>
+            <div class="sv-card-body" id="sv-chart-airtime-6g"></div>
+          </div>
+
+          <!-- Connected Clients (full width) -->
+          <div class="card sv-span12" id="sv-card-clients">
+            <div class="sv-card-header">
+              <div class="sv-card-title-group">
+                <span class="card-label">Clients <span class="sv-card-meta" id="sv-clients-count"></span></span>
+                <span class="sv-card-legend-slot">
+                  <select class="sv-sort-select" id="sv-client-sort">
+                    <option value="throughput">Throughput</option>
+                    <option value="daily">Daily Usage</option>
+                    <option value="airtime">Airtime</option>
+                    <option value="signal">Signal</option>
+                    <option value="qoe">QoE Score</option>
+                  </select>
+                  </span>
+              </div>
+            </div>
+            <!-- Search & Filter Bar -->
+            <div class="sv-client-toolbar">
+              <div class="sv-client-search-wrap">
+                <i class="fa-solid fa-magnifying-glass sv-client-search-icon"></i>
+                <input type="text" class="sv-client-search-input" id="sv-client-search" placeholder="Search by name, MAC, or type..." autocomplete="off">
+                <button class="sv-client-search-clear" id="sv-client-search-clear" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+                <div class="sv-client-autocomplete" id="sv-client-autocomplete"></div>
+              </div>
+              <div class="sv-client-filters">
+                <div class="cf-multi" id="sv-filter-band">
+                  <button class="cf-multi-btn">Band</button>
+                  <div class="cf-multi-menu">
+                    <div class="cf-multi-actions"><button class="cf-action-btn cf-select-all">All</button><button class="cf-action-btn cf-clear-all">Clear</button></div>
+                    <label class="cf-multi-item"><input type="checkbox" value="2.4 GHz" checked> 2.4 GHz</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="5 GHz" checked> 5 GHz</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="6 GHz" checked> 6 GHz</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="wired" checked> Wired</label>
+                  </div>
+                </div>
+                <div class="cf-multi" id="sv-filter-category">
+                  <button class="cf-multi-btn">Category</button>
+                  <div class="cf-multi-menu">
+                    <div class="cf-multi-actions"><button class="cf-action-btn cf-select-all">All</button><button class="cf-action-btn cf-clear-all">Clear</button></div>
+                    <label class="cf-multi-item"><input type="checkbox" value="computing" checked> Computing</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="media" checked> Media</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="iot" checked> IoT</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="gaming" checked> Gaming</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="networking" checked> Networking</label>
+                    <label class="cf-multi-item"><input type="checkbox" value="other" checked> Other</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sv-card-body" id="sv-clients-body"></div>
+            <!-- Client drill-down (inside clients card, hidden by default) -->
+            <div id="sv-client-drilldown" style="display:none; padding: 0 10px 8px;">
+              <div class="sv-drilldown-header">
+                <button class="sv-pill sv-drilldown-back" id="sv-drilldown-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <span class="sv-drilldown-title" id="sv-drilldown-title"></span>
+                <span class="sv-drilldown-badges" id="sv-drilldown-badges"></span>
+              </div>
+              <div class="sv-drilldown-charts" id="sv-drilldown-charts"></div>
+            </div>
+          </div>
+
+          <!-- CPU (quarter width) -->
+          <div class="card sv-span3" id="sv-card-cpu">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">CPU</span><span class="sv-card-subtitle" id="sv-cpu-meta"></span><span class="sv-card-legend-slot" id="sv-legend-cpu"></span></div></div>
+            <div class="sv-card-body" id="sv-cpu-chart"></div>
+          </div>
+
+          <!-- Memory -->
+          <div class="card sv-span3" id="sv-card-memory">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">Memory</span><span class="sv-card-subtitle" id="sv-memory-meta"></span><span class="sv-card-legend-slot" id="sv-legend-memory"></span></div></div>
+            <div class="sv-card-body" id="sv-memory-chart"></div>
+          </div>
+
+          <!-- System Load -->
+          <div class="card sv-span3" id="sv-card-load">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">Load</span><span class="sv-card-subtitle" id="sv-load-meta"></span><span class="sv-card-legend-slot" id="sv-legend-load"></span></div></div>
+            <div class="sv-card-body" id="sv-load-chart"></div>
+          </div>
+
+          <!-- Disk I/O -->
+          <div class="card sv-span3" id="sv-card-diskio">
+            <div class="sv-card-header"><div class="sv-card-title-group"><span class="card-label">Disk I/O</span><span class="sv-card-legend-slot" id="sv-legend-diskio"></span></div></div>
+            <div class="sv-card-body" id="sv-diskio-charts"></div>
+          </div>
+
+          <!-- Disk Space -->
+          <div class="card sv-span3" id="sv-card-diskspace">
+            <div class="sv-card-header">
+              <div class="sv-card-title-group"><span class="card-label">Disk Space</span><span class="sv-card-legend-slot" id="sv-legend-diskspace"></span></div>
+            </div>
+            <div class="sv-card-body" id="sv-diskspace-body"></div>
+          </div>
+
+          <!-- Processes -->
+          <div class="card sv-span3" id="sv-card-processes">
+            <div class="sv-card-header">
+              <div class="sv-card-title-group"><span class="card-label">Processes</span><span class="sv-card-legend-slot" id="sv-legend-processes"></span></div>
+            </div>
+            <div class="sv-card-body" id="sv-processes-body"></div>
+          </div>
+
+          <!-- Context Switches / Interrupts -->
+          <div class="card sv-span3" id="sv-card-ctxint">
+            <div class="sv-card-header">
+              <div class="sv-card-title-group"><span class="card-label">Ctx Switches / Int</span><span class="sv-card-legend-slot" id="sv-legend-ctxint"></span></div>
+            </div>
+            <div class="sv-card-body" id="sv-ctxint-chart"></div>
+          </div>
+
+          <!-- File Descriptors -->
+          <div class="card sv-span3" id="sv-card-fds">
+            <div class="sv-card-header">
+              <div class="sv-card-title-group"><span class="card-label">File Descriptors</span><span class="sv-card-legend-slot" id="sv-legend-fds"></span></div>
+            </div>
+            <div class="sv-card-body" id="sv-fds-body"></div>
+          </div>
+
+          <!-- Placeholder: Add Tile -->
+          <div class="card sv-span3 sv-placeholder" id="sv-card-placeholder">
+            <div class="sv-placeholder-inner">
+              <i class="fa-solid fa-plus-circle sv-placeholder-icon"></i>
+              <div class="sv-placeholder-text">Add Tile</div>
+            </div>
+          </div>
+
+        </div><!-- /sv-grid -->
+      </div><!-- /page-statsview -->
+
     </main>
   </div><!-- /main-wrapper -->
 
   <!-- Global Tooltip -->
   <div id="tooltip"></div>
+
+  <!-- StatsView Chart Tooltip -->
+  <div class="sv-chart-tooltip" id="sv-chart-tooltip"></div>
+
+  <!-- StatsView Tile Picker Modal -->
+  <div id="sv-tile-picker-overlay" class="tile-picker-overlay hidden">
+    <div class="tile-picker-modal">
+      <div class="tile-picker-header">
+        <span class="tile-picker-title">Add StatsView Tile</span>
+        <button id="svTilePickerClose" class="tile-picker-close">&#x2715;</button>
+      </div>
+      <div class="tile-picker-grid" id="svTilePickerGrid"></div>
+      <div class="tile-picker-restore hidden" id="svTilePickerRestore">
+        <div class="tile-picker-section-label">Restore Hidden Tiles</div>
+        <div class="tile-picker-grid" id="svTilePickerRestoreGrid"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Add Tile Modal -->
   <div id="tile-picker-overlay" class="tile-picker-overlay hidden">
@@ -515,6 +738,9 @@
     </div>
   </div>
 
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="dashboard.js?v=1773945546"></script>
+  <script src="statsview-data.js?v=1"></script>
+  <script src="statsview.js?v=1"></script>
 </body>
 </html>
