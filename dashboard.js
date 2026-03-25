@@ -696,11 +696,66 @@ function ttRow(key, val) {
   return `<div class="tt-row"><span class="tt-key">${key}</span><span class="tt-val">${val}</span></div>`;
 }
 
-/* ===== Navigation (cosmetic in prototype) ===== */
+/* ===== Navigation ===== */
+let currentPage = 'dashboard';
+
 function navigateTo(page) {
-  console.log('[prototype] Navigate to:', page);
-  // In JUCI: window.location.hash = '#!/' + page;
+  if (page === currentPage) return;
+  currentPage = page;
+
+  // Update sidebar active state
+  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+  const activeNav = page === 'statsview'
+    ? document.getElementById('nav-statsview')
+    : document.querySelector('.sidebar-nav .nav-link'); // first = Dashboard
+  if (activeNav) activeNav.classList.add('active');
+
+  // Toggle page panels
+  const dashGrid = document.getElementById('dashboard-grid');
+  const svPage = document.getElementById('page-statsview');
+  const pageTitle = document.querySelector('.page-title');
+
+  // Hide Simple/Advanced toggle on StatsView (not relevant)
+  const viewToggleGroup = document.querySelector('.view-toggle-group');
+
+  if (page === 'statsview') {
+    dashGrid.style.display = 'none';
+    svPage.style.display = '';
+    if (pageTitle) pageTitle.textContent = 'StatsView';
+    if (viewToggleGroup) viewToggleGroup.style.display = 'none';
+    // Initialize StatsView if available
+    if (typeof svInit === 'function' && !window._svInitialized) {
+      svInit();
+      window._svInitialized = true;
+    }
+    if (typeof svResume === 'function') svResume();
+  } else {
+    dashGrid.style.display = '';
+    svPage.style.display = 'none';
+    if (pageTitle) pageTitle.textContent = 'Dashboard';
+    if (viewToggleGroup) viewToggleGroup.style.display = '';
+    if (typeof svPause === 'function') svPause();
+    // Reapply dashboard layout after re-show
+    requestAnimationFrame(() => applyLayout());
+  }
 }
+
+// Sidebar click handlers
+document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const label = this.querySelector('.nav-label');
+    if (!label) return;
+    const text = label.textContent.trim();
+    if (text === 'StatsView') {
+      navigateTo('statsview');
+    } else if (text === 'Dashboard') {
+      navigateTo('dashboard');
+    }
+    // Close mobile sidebar on navigation
+    document.body.classList.remove('sidebar-open');
+  });
+});
 
 /* ===== Sidebar Toggle ===== */
 el('sidebarToggle').addEventListener('click', function() {
@@ -732,8 +787,7 @@ el('themeToggle').addEventListener('click', function() {
 
 /* ===== Topbar Buttons ===== */
 el('btnCharts').addEventListener('click', function() {
-  // In real device: window.open(location.protocol + '//' + location.host + '/netdata/#net_wan');
-  alert('[Prototype] Would open Netdata charts in new tab.');
+  navigateTo('statsview');
 });
 el('btnTopology').addEventListener('click', function() {
   navigateTo('srg-intellifi-devices');
@@ -2906,8 +2960,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 (function initTileDrag() {
-  // Inject grip icons into all cards so users can discover they're draggable
-  document.querySelectorAll('.card').forEach(card => {
+  // Inject grip icons into dashboard cards (not StatsView cards)
+  document.querySelectorAll('#dashboard-grid .card').forEach(card => {
     if (card.querySelector('.card-grip')) return;
     const grip = document.createElement('span');
     grip.className = 'card-grip';
