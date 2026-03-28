@@ -707,34 +707,48 @@ function navigateTo(page) {
   document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
   const activeNav = page === 'statsview'
     ? document.getElementById('nav-statsview')
+    : page === 'pathpulse'
+    ? document.getElementById('nav-pathpulse')
     : document.querySelector('.sidebar-nav .nav-link'); // first = Dashboard
   if (activeNav) activeNav.classList.add('active');
 
   // Toggle page panels
   const dashGrid = document.getElementById('dashboard-grid');
   const svPage = document.getElementById('page-statsview');
+  const ppPage = document.getElementById('page-pathpulse');
   const pageTitle = document.querySelector('.page-title');
 
-  // Hide Simple/Advanced toggle on StatsView (not relevant)
+  // Hide Simple/Advanced toggle on non-dashboard pages
   const viewToggleGroup = document.querySelector('.view-toggle-group');
 
+  // Hide all pages first
+  dashGrid.style.display = 'none';
+  svPage.style.display = 'none';
+  if (ppPage) ppPage.style.display = 'none';
+  if (viewToggleGroup) viewToggleGroup.style.display = 'none';
+  if (typeof svPause === 'function') svPause();
+
   if (page === 'statsview') {
-    dashGrid.style.display = 'none';
     svPage.style.display = '';
     if (pageTitle) pageTitle.textContent = 'StatsView';
-    if (viewToggleGroup) viewToggleGroup.style.display = 'none';
     // Initialize StatsView if available
     if (typeof svInit === 'function' && !window._svInitialized) {
       svInit();
       window._svInitialized = true;
     }
     if (typeof svResume === 'function') svResume();
+  } else if (page === 'pathpulse') {
+    if (ppPage) ppPage.style.display = '';
+    if (pageTitle) pageTitle.textContent = 'PathPulse';
+    // Initialize PathPulse if available
+    if (typeof ppInit === 'function' && !window._ppInitialized) {
+      ppInit();
+      window._ppInitialized = true;
+    }
   } else {
     dashGrid.style.display = '';
-    svPage.style.display = 'none';
     if (pageTitle) pageTitle.textContent = 'Dashboard';
     if (viewToggleGroup) viewToggleGroup.style.display = '';
-    if (typeof svPause === 'function') svPause();
     // Reapply dashboard layout after re-show
     requestAnimationFrame(() => applyLayout());
   }
@@ -749,6 +763,8 @@ document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
     const text = label.textContent.trim();
     if (text === 'StatsView') {
       navigateTo('statsview');
+    } else if (text === 'PathPulse') {
+      navigateTo('pathpulse');
     } else if (text === 'Dashboard') {
       navigateTo('dashboard');
     }
