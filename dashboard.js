@@ -702,6 +702,8 @@ let currentPage = 'dashboard';
 function navigateTo(page) {
   if (page === currentPage) return;
   currentPage = page;
+  // Update URL hash for deep linking
+  window.history.replaceState(null, '', page === 'dashboard' ? '#' : '#' + page);
 
   // Update sidebar active state
   document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -740,6 +742,7 @@ function navigateTo(page) {
   } else if (page === 'pathpulse') {
     if (ppPage) ppPage.style.display = '';
     if (pageTitle) pageTitle.textContent = 'PathPulse';
+    if (viewToggleGroup) viewToggleGroup.style.display = '';
     // Initialize PathPulse if available
     if (typeof ppInit === 'function' && !window._ppInitialized) {
       ppInit();
@@ -1406,7 +1409,7 @@ function renderWANBufferbloat(st) {
     mctx.lineWidth = 3; mctx.strokeStyle = gradeColor(combinedG); mctx.stroke();
     // Grade letter
     mctx.textAlign = 'center'; mctx.textBaseline = 'middle';
-    mctx.font = 'bold 10px monospace'; mctx.fillStyle = gradeColor(combinedG);
+    mctx.font = 'bold 10px "Poppins", sans-serif'; mctx.fillStyle = gradeColor(combinedG);
     mctx.fillText(combinedG, cx, cy - 2);
   }
 
@@ -1536,7 +1539,7 @@ function drawNeedleGauge(canvasId, value, warnThreshold, opts) {
 
   // --- Digital readout (dropped 3-4px lower) ---
   const fontSize = Math.round(r * 0.28);
-  ctx.font = '700 ' + fontSize + 'px "JetBrains Mono", monospace';
+  ctx.font = '700 ' + fontSize + 'px "Poppins", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   // Color: warn if past highest bug threshold
@@ -2397,7 +2400,7 @@ function renderSpeedtestHistory() {
   const gridSteps = 4;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  ctx.font = '11px monospace';
+  ctx.font = '11px "Poppins", sans-serif';
   for (let i = 0; i <= gridSteps; i++) {
     const val = yMax * i / gridSteps;
     const y = pad.top + cH - val * yScale;
@@ -2442,7 +2445,7 @@ function renderSpeedtestHistory() {
     ctx.strokeStyle = 'rgba(0,210,190,0.50)';
     ctx.beginPath(); ctx.moveTo(pad.left, dlLineY); ctx.lineTo(pad.left + cW, dlLineY); ctx.stroke();
     // DL rate label
-    ctx.font = '9px monospace';
+    ctx.font = '9px "Poppins", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
     ctx.fillStyle = 'rgba(0,210,190,0.65)';
@@ -2704,7 +2707,7 @@ function drawThroughput(timestamp) {
   const ySteps = 4;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  ctx.font = '10px monospace';
+  ctx.font = '10px "Poppins", sans-serif';
   for (let i = 0; i <= ySteps; i++) {
     const val = maxY * i / ySteps;
     const y = chartH - (val / maxY) * chartH * 0.92;
@@ -2720,7 +2723,7 @@ function drawThroughput(timestamp) {
       else if (val >= 1) lbl = Math.round(val) + '';
       else lbl = val.toFixed(1);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '11px monospace';
+      ctx.font = '11px "Poppins", sans-serif';
       ctx.fillText(lbl, padL - 8, Math.round(y));
     }
   }
@@ -2822,6 +2825,7 @@ function init() {
   renderMWAN();
   // Canvas needs layout to be done first
   requestAnimationFrame(() => initThroughputCanvas());
+  // Deep link: check URL hash for page routing (handled in each page's script)
 }
 
 /* ===== Tile Drag & Drop + Hide ===== */
@@ -3331,5 +3335,50 @@ document.addEventListener('DOMContentLoaded', init);
   document.addEventListener('DOMContentLoaded', () => {
     applySmoothWheel('.strip-1 .alarm-list');
     applySmoothWheel('.strip-1 .events-list');
+  });
+})();
+
+/* =============================================================================
+   Easter Egg: Type "comicsans" to toggle Comic Sans mode
+   ============================================================================= */
+(function() {
+  const CODE = 'comicsans';
+  let buf = '';
+  let active = false;
+  let styleEl = null;
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'Escape' && active) {
+      active = false;
+      if (styleEl) { styleEl.remove(); styleEl = null; }
+      console.log('%c Comic Sans mode deactivated ', 'color:#666;font-size:12px;');
+      return;
+    }
+    buf += e.key.toLowerCase();
+    if (buf.length > CODE.length) buf = buf.slice(-CODE.length);
+    if (buf === CODE) {
+      buf = '';
+      active = !active;
+      if (active) {
+        const f = "'Comic Sans MS', 'Comic Sans', cursive";
+        styleEl = document.createElement('style');
+        styleEl.id = 'comicsans-egg';
+        styleEl.textContent =
+          ':root{--font-sans:' + f + ';--font-mono:' + f + ';}' +
+          'html,body,div,span,p,a,li,ul,button,input,label,h1,h2,h3,h4,h5,h6,td,th,caption,nav,' +
+          '.sidebar,.sidebar-nav,.nav-label,.nav-link,.page-title,.topbar,.search-input,' +
+          '.card,.card-label,.card-value,.stat-label,.stat-value,.tt-row,.tt-label,.tt-value,' +
+          '.pp-node-name,.pp-node-role,.pp-link-label,.pp-link-tooltip,.pp-link-speed,' +
+          '.pp-bottleneck-title,.pp-bottleneck-msg,.pp-detail-label,.pp-detail-value,' +
+          '.sv-card-title,.sv-card-value,.sv-fd-label,.sv-fd-value' +
+          '{font-family:' + f + '!important}';
+        document.head.appendChild(styleEl);
+        console.log('%c COMIC SANS MODE ACTIVATED ', 'background:#ff69b4;color:#fff;font-family:Comic Sans MS;font-size:24px;padding:8px;border-radius:8px;');
+      } else {
+        if (styleEl) { styleEl.remove(); styleEl = null; }
+        console.log('%c Comic Sans mode deactivated ', 'color:#666;font-size:12px;');
+      }
+    }
   });
 })();
