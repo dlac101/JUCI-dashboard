@@ -183,6 +183,11 @@ function ppToggleBottleneck() {
   ppRender();
 }
 
+function ppToggleMcard(headerEl) {
+  const card = headerEl.closest('.pp-mcard');
+  if (card) card.classList.toggle('expanded');
+}
+
 function ppRender() {
   const root = document.getElementById('pp-path-root');
   if (!root) return;
@@ -618,6 +623,100 @@ function ppRender() {
   });
 
   html += `</tbody></table></div>`;
+
+  // === Mobile cards: Hop-by-hop metrics (one card per link) ===
+  html += `<div class="pp-mobile-cards tech-only">`;
+  html += `<div class="pp-mobile-section-title">Hop-by-Hop Metrics</div>`;
+  linkData.forEach((d, i) => {
+    const autoExpand = s.links[i].quality === 'poor';
+    const qualClass = s.links[i].quality === 'poor' ? 'q-poor' : s.links[i].quality === 'moderate' ? 'q-moderate' : 'q-good';
+    const speedSummary = d.dlUl;
+    const latSummary = d.latency.val;
+    const qoeSummary = d.qoe.val;
+    const qoeColor = d.qoe.color || '';
+    html += `
+      <div class="pp-mcard ${qualClass}${autoExpand ? ' expanded' : ''}" data-mcard-idx="${i}">
+        <div class="pp-mcard-header" onclick="ppToggleMcard(this)">
+          <div class="pp-mcard-summary">
+            <span class="pp-mcard-name">${d.label}</span>
+            <span class="pp-mcard-chips">
+              <span class="pp-mcard-chip">${speedSummary} Mbps</span>
+              <span class="pp-mcard-chip" ${qoeColor ? `style="color:${qoeColor}"` : ''}>QoE ${qoeSummary}</span>
+              <span class="pp-mcard-chip">${latSummary}</span>
+            </span>
+          </div>
+          <span class="pp-mcard-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+        <div class="pp-mcard-body">
+          <div class="pp-mcard-grid">
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Medium</span><span class="pp-mcard-val">${d.medium}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Channel</span><span class="pp-mcard-val">${d.channel}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">MCS / PHY Rate</span><span class="pp-mcard-val">${d.mcsPhyRate}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">DL / UL</span><span class="pp-mcard-val">${speedSummary} Mbps</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">QoE</span><span class="pp-mcard-val" ${qoeColor ? `style="color:${qoeColor}"` : ''}>${d.qoe.val}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Noise</span><span class="pp-mcard-val">${d.noise}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">SNR</span><span class="pp-mcard-val" ${d.snr.color ? `style="color:${d.snr.color}"` : ''}>${d.snr.val}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Spatial Streams</span><span class="pp-mcard-val">${d.ss}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Retries</span><span class="pp-mcard-val" ${d.retries.color ? `style="color:${d.retries.color}"` : ''}>${d.retries.val}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Latency</span><span class="pp-mcard-val" ${d.latency.color ? `style="color:${d.latency.color}"` : ''}>${d.latency.val}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Jitter</span><span class="pp-mcard-val">${d.jitter}</span></div>
+          </div>
+        </div>
+      </div>`;
+  });
+  // Totals card
+  html += `
+    <div class="pp-mcard pp-mcard-total">
+      <div class="pp-mcard-header" onclick="ppToggleMcard(this)">
+        <div class="pp-mcard-summary">
+          <span class="pp-mcard-name">Total (end-to-end)</span>
+          <span class="pp-mcard-chips">
+            <span class="pp-mcard-chip" style="color:${totalLatColor}">${totalLat.toFixed(1)} ms</span>
+            <span class="pp-mcard-chip">jitter ${totalJitter.toFixed(1)} ms</span>
+          </span>
+        </div>
+        <span class="pp-mcard-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+      </div>
+      <div class="pp-mcard-body">
+        <div class="pp-mcard-grid">
+          <div class="pp-mcard-row"><span class="pp-mcard-label">Total Latency</span><span class="pp-mcard-val" style="color:${totalLatColor}">${totalLat.toFixed(1)} ms</span></div>
+          <div class="pp-mcard-row"><span class="pp-mcard-label">Total Jitter (RSS)</span><span class="pp-mcard-val">${totalJitter.toFixed(1)} ms</span></div>
+        </div>
+      </div>
+    </div>`;
+
+  // === Mobile cards: Node Inventory (one card per node) ===
+  html += `<div class="pp-mobile-section-title">Node Inventory</div>`;
+  s.nodes.forEach((nd, i) => {
+    const cpuVal = nd.tech?.cpu;
+    const memVal = nd.tech?.mem;
+    const cpuColor = cpuVal == null ? '' : cpuVal <= 50 ? 'var(--accent-green)' : cpuVal <= 80 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    const memColor = memVal == null ? '' : memVal <= 60 ? 'var(--accent-green)' : memVal <= 85 ? 'var(--accent-amber)' : 'var(--accent-red)';
+    html += `
+      <div class="pp-mcard pp-mcard-node" data-mcard-node="${i}">
+        <div class="pp-mcard-header" onclick="ppToggleMcard(this)">
+          <div class="pp-mcard-summary">
+            <span class="pp-mcard-icon">${ppNodeIcon(nd.type)}</span>
+            <span class="pp-mcard-name">${nd.name}</span>
+            <span class="pp-mcard-role">${nd.role}</span>
+          </div>
+          <span class="pp-mcard-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+        <div class="pp-mcard-body">
+          <div class="pp-mcard-grid">
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Role</span><span class="pp-mcard-val">${nd.role}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Model</span><span class="pp-mcard-val">${nd.tech?.model || '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">IP</span><span class="pp-mcard-val">${nd.tech?.ip || '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">MAC</span><span class="pp-mcard-val">${nd.tech?.mac || '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Firmware</span><span class="pp-mcard-val">${nd.tech?.firmware || '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Uptime</span><span class="pp-mcard-val">${nd.tech?.uptime || '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">CPU</span><span class="pp-mcard-val" ${cpuColor ? `style="color:${cpuColor}"` : ''}>${cpuVal != null ? cpuVal + '%' : '-'}</span></div>
+            <div class="pp-mcard-row"><span class="pp-mcard-label">Memory</span><span class="pp-mcard-val" ${memColor ? `style="color:${memColor}"` : ''}>${memVal != null ? memVal + '%' : '-'}</span></div>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`; // close .pp-mobile-cards
 
   html += '</div>'; // close .pp-pipe-area
 

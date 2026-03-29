@@ -4921,6 +4921,9 @@ body:not([data-view="basic"]) .pp-pipeline {
   .pp-link-bar-wrap { display: none; }
   .pp-link-tooltip { display: none; }
   .pp-link-label { margin-top: 0; margin-left: 0; flex: 1; }
+  .pp-link-throughput { white-space: normal; font-size: 10px; }
+  .pp-link-tech-chip { white-space: normal; font-size: 9px; }
+  .pp-link { overflow: hidden; }
 
   /* Worst-link dot: center on vertical strip */
   .pp-link.worst-link .pp-link-bar-wrap { display: block; position: static; }
@@ -4943,6 +4946,218 @@ body:not([data-view="basic"]) .pp-pipeline {
   .pp-hero-val { font-size: 26px; }
   .pp-hero-speed-ul .pp-hero-val { font-size: 18px; }
   .pp-hero-dir { font-size: 14px; }
+
+  /* Hide desktop tables, show mobile cards */
+  .pp-tech-table-wrap { display: none !important; }
+  .pp-drop-lines { display: none !important; }
+  .pp-mobile-cards { display: block !important; }
+}
+
+/* ============================================================
+   PathPulse Mobile Cards (progressive disclosure)
+   ============================================================ */
+.pp-mobile-cards {
+  display: none; /* hidden on desktop, shown via media query */
+  padding: 0 4px;
+}
+
+.pp-mobile-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 14px 0 6px 2px;
+}
+
+.pp-mcard {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.2s;
+}
+.pp-mcard.expanded {
+  border-color: var(--border-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.pp-mcard.q-poor { border-left: 3px solid var(--accent-red); }
+.pp-mcard.q-moderate { border-left: 3px solid var(--accent-amber); }
+.pp-mcard.q-good { border-left: 3px solid var(--accent-green); }
+.pp-mcard.pp-mcard-total { border-left: 3px solid var(--accent-cyan, #22d3ee); }
+
+.pp-mcard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pp-mcard-header:active { background: rgba(255,255,255,0.03); }
+
+.pp-mcard-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pp-mcard-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.pp-mcard-role {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.pp-mcard-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pp-mcard-chip {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.pp-mcard-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.pp-mcard-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.pp-mcard-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+  margin-left: 8px;
+}
+.pp-mcard-chevron svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+.pp-mcard.expanded .pp-mcard-chevron { transform: rotate(180deg); }
+
+.pp-mcard-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.pp-mcard.expanded .pp-mcard-body {
+  max-height: 500px;
+}
+
+.pp-mcard-grid {
+  padding: 0 12px 12px;
+}
+
+.pp-mcard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pp-mcard-row:last-child { border-bottom: none; }
+
+.pp-mcard-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pp-mcard-val {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* Node card: icon in header */
+.pp-mcard-node .pp-mcard-summary {
+  gap: 8px;
+}
+
+/* Light theme overrides for mobile cards */
+[data-theme="light"] .pp-mcard {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+[data-theme="light"] .pp-mcard.expanded {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+[data-theme="light"] .pp-mcard-header:active {
+  background: rgba(0,0,0,0.03);
+}
+[data-theme="light"] .pp-mcard-chip {
+  background: rgba(0,0,0,0.05);
+}
+
+/* ============================================================
+   PathPulse Tablet (860-1200px): compressed pipeline + cards
+   ============================================================ */
+@media (min-width: 860px) and (max-width: 1200px) {
+  /* Compress pipeline nodes and links */
+  .pp-node-icon { width: 44px; height: 44px; border-radius: 11px; }
+  .pp-node-icon svg { width: 22px; height: 22px; }
+  .pp-node { flex-basis: 72px; }
+  .pp-node-name { font-size: 11px; max-width: 72px; }
+  .pp-node-role { font-size: 10px; }
+  .pp-link { min-width: 40px; padding-top: 18px; }
+  .pp-link-throughput { font-size: 9px; }
+  .pp-link-label { font-size: 10px; }
+  .pp-link-tech-chip { font-size: 9px; }
+  .pp-link-bar-wrap { height: 10px; border-radius: 5px; }
+
+  /* Node tech chips smaller */
+  .pp-node-tech-val { font-size: 9px; }
+  .pp-node-tech-chip { font-size: 8px; padding: 1px 4px; }
+
+  /* Hide desktop tables, show mobile cards */
+  .pp-tech-table-wrap { display: none !important; }
+  .pp-drop-lines { display: none !important; }
+  .pp-mobile-cards { display: block !important; }
+
+  /* Cards can be in 2-column grid at tablet */
+  .pp-mobile-cards {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .pp-mobile-section-title {
+    grid-column: 1 / -1;
+  }
+  /* Total card spans full width */
+  .pp-mcard-total {
+    grid-column: 1 / -1;
+  }
 }
 
 /* PathPulse XL */
