@@ -4883,6 +4883,8 @@ body:not([data-view="basic"]) .pp-pipeline {
    PathPulse Responsive: Vertical (Mobile/Tablet)
    ============================================================ */
 @media (max-width: 860px) {
+  /* Remove table-alignment padding */
+  body:not([data-view="basic"]) .pp-pipeline { padding-left: 0; padding-right: 0; }
   .pp-pipeline { flex-direction: column; align-items: stretch; gap: 0; }
   .pp-pipeline::before { display: none; }
 
@@ -4899,17 +4901,17 @@ body:not([data-view="basic"]) .pp-pipeline {
   .pp-link {
     flex-direction: row;
     align-items: center;
-    padding: 10px 0 10px 18px;
+    padding: 8px 0 8px 32px;
     min-width: unset;
-    gap: 10px;
+    gap: 8px;
     position: relative;
   }
   .pp-link::before {
     content: '';
     position: absolute;
-    left: 18px;
-    top: 0;
-    bottom: 0;
+    left: 12px;
+    top: 4px;
+    bottom: 4px;
     width: 4px;
     border-radius: 2px;
     background: var(--border);
@@ -4920,15 +4922,31 @@ body:not([data-view="basic"]) .pp-pipeline {
 
   .pp-link-bar-wrap { display: none; }
   .pp-link-tooltip { display: none; }
-  .pp-link-label { margin-top: 0; margin-left: 0; flex: 1; }
-  .pp-link-throughput { white-space: normal; font-size: 10px; }
-  .pp-link-tech-chip { white-space: normal; font-size: 9px; }
-  .pp-link { overflow: hidden; }
+  /* Hide throughput & tech chips - data is in mobile cards */
+  .pp-link-throughput { display: none !important; }
+  .pp-link-tech-chip { display: none !important; }
+  .pp-link-label { margin-top: 0; margin-left: 8px; flex: 1; font-size: 12px; white-space: nowrap; }
+  .pp-link { overflow: visible; }
 
-  /* Worst-link dot: center on vertical strip */
-  .pp-link.worst-link .pp-link-bar-wrap { display: block; position: static; }
+  /* Worst-link: show only the notification dot, hide bar, center on vertical strip */
+  .pp-link.worst-link .pp-link-bar-wrap {
+    display: block;
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 30px;
+    overflow: visible;
+  }
   .pp-link.worst-link .pp-link-bar { display: none; }
-  .pp-link.worst-link .pp-link-notif { top: 50%; right: auto; left: 11px; margin-top: -9px; }
+  .pp-link.worst-link .pp-link-notif {
+    position: absolute;
+    top: 50%; left: 4px;
+    margin-top: -10px;
+    z-index: 2;
+  }
+
+  /* Node tech info: hide IP/CPU at phone, shown in mobile cards */
+  .pp-node-tech { display: none; }
+  .pp-node-tooltip { display: none; }
 
   .pp-detail { flex-direction: column; gap: 12px; margin-left: 12px; }
   .pp-detail::before {
@@ -5124,21 +5142,39 @@ body:not([data-view="basic"]) .pp-pipeline {
    PathPulse Tablet (860-1200px): compressed pipeline + cards
    ============================================================ */
 @media (min-width: 860px) and (max-width: 1200px) {
-  /* Compress pipeline nodes and links */
-  .pp-node-icon { width: 44px; height: 44px; border-radius: 11px; }
-  .pp-node-icon svg { width: 22px; height: 22px; }
-  .pp-node { flex-basis: 72px; }
-  .pp-node-name { font-size: 11px; max-width: 72px; }
-  .pp-node-role { font-size: 10px; }
-  .pp-link { min-width: 40px; padding-top: 18px; }
-  .pp-link-throughput { font-size: 9px; }
-  .pp-link-label { font-size: 10px; }
-  .pp-link-tech-chip { font-size: 9px; }
-  .pp-link-bar-wrap { height: 10px; border-radius: 5px; }
+  /* Remove table-alignment padding since tables are replaced by cards */
+  body:not([data-view="basic"]) .pp-pipeline { padding-left: 0; padding-right: 0; }
+  .pp-pipeline { flex-wrap: nowrap; gap: 0; width: 100%; max-width: 100%; overflow: hidden; }
+  .pp-pipe-area { padding: 16px 8px 12px; overflow: hidden; }
 
-  /* Node tech chips smaller */
-  .pp-node-tech-val { font-size: 9px; }
-  .pp-node-tech-chip { font-size: 8px; padding: 1px 4px; }
+  /* Compress pipeline nodes and links */
+  .pp-node-icon { width: 36px; height: 36px; border-radius: 9px; }
+  .pp-node-icon svg { width: 18px; height: 18px; }
+  .pp-node { flex: 0 0 auto; min-width: 0; width: 56px; }
+  .pp-node-name { font-size: 9px; max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pp-node-role { font-size: 8px; }
+  .pp-link { min-width: 0; padding-top: 10px; flex: 1 1 0px; position: relative; overflow: visible; }
+  .pp-link-bar-wrap { height: 8px; border-radius: 4px; min-width: 0; }
+  .pp-link-notif { transform: scale(0.7); right: 2px; left: auto; }
+
+  /* Hide throughput, tech chips, tooltip on links - data is in cards below */
+  .pp-link-throughput { display: none !important; }
+  .pp-link-tech-chip { display: none !important; }
+  .pp-link-tooltip { display: none !important; }
+  /* Position label absolutely so it doesn't inflate link width */
+  .pp-link-label {
+    font-size: 8px;
+    white-space: nowrap;
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* Node tech: hide at tablet, data is in cards */
+  .pp-node-tech { display: none; }
+  .pp-node-tooltip { display: none; }
 
   /* Hide desktop tables, show mobile cards */
   .pp-tech-table-wrap { display: none !important; }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PathPulse RWD Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #ccc; font-family: system-ui, sans-serif; padding: 16px; display: flex; gap: 16px; height: 100vh; }
+  .frame-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .frame-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    color: #888;
+    letter-spacing: 0.03em;
+  }
+  .frame-label span { color: #22d3ee; }
+  iframe {
+    border: 1px solid #333;
+    border-radius: 8px;
+    background: #0b0f19;
+    flex: 1;
+  }
+</style>
+</head>
+<body>
+  <div class="frame-wrap" style="width:375px">
+    <div class="frame-label">Phone <span>375px</span></div>
+    <iframe src="index.html#pathpulse" width="375" style="height:100%"></iframe>
+  </div>
+  <div class="frame-wrap" style="width:640px">
+    <div class="frame-label">Phablet <span>640px</span></div>
+    <iframe src="index.html#pathpulse" width="640" style="height:100%"></iframe>
+  </div>
+  <div class="frame-wrap" style="width:1000px">
+    <div class="frame-label">Tablet <span>1000px</span></div>
+    <iframe src="index.html#pathpulse" width="1000" style="height:100%"></iframe>
+  </div>
+<script>
+  // After iframes load, switch them to Advanced view + PathPulse
+  document.querySelectorAll('iframe').forEach(f => {
+    f.addEventListener('load', () => {
+      try {
+        const doc = f.contentDocument || f.contentWindow.document;
+        const win = f.contentWindow;
+        doc.body.setAttribute('data-view', 'advanced');
+        doc.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+        const pp = doc.getElementById('page-pathpulse');
+        if (pp) pp.style.display = '';
+        // Hide sidebar for cleaner view
+        const sidebar = doc.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+        doc.body.style.gridTemplateColumns = '1fr';
+        // Trigger render
+        if (win.ppSetScenario) win.ppSetScenario('problem');
+      } catch(e) {}
+    });
+  });
+</script>
+</body>
+</html>
