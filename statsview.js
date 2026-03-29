@@ -392,7 +392,7 @@
       }
       svDisks.forEach(disk => {
         const div = document.createElement('div'); div.id = `sv-chart-diskio-${disk}`;
-        div.innerHTML = `<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:0.5px;padding:2px 0">${disk.toUpperCase()}</div>`;
+        div.innerHTML = `<div style="font-family:'Poppins',sans-serif;font-size:9px;color:var(--text-muted);letter-spacing:0.5px;padding:2px 0">${disk.toUpperCase()}</div>`;
         dioContainer.appendChild(div);
         svCharts[`disk.${disk}`] = createChart(`#sv-chart-diskio-${disk}`, {
           series: [{ key: 'reads', color: C.cyan, label: 'Read' }, { key: 'writes', color: C.green, label: 'Write' }],
