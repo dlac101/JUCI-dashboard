@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Speed Hero Layout Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0b0f19;
+    --bg-card: #151c2c;
+    --bg-input: #1a2236;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-heading: #f9fafb;
+    --border: #1f2937;
+    --border-bright: #374151;
+    --accent-cyan: #00C8E6;
+    --accent-green: #34d399;
+    --accent-red: #ef4444;
+    --accent-amber: #f59e0b;
+    --font-sans: 'Poppins', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-sans); padding: 40px; margin: 0; }
+  h1 { font-size: 18px; color: var(--text-heading); margin-bottom: 6px; }
+  .subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 36px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 1000px; }
+  .option {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .option-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--accent-cyan); margin-bottom: 4px;
+  }
+  .option-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+  .tag {
+    display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px;
+    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    vertical-align: middle; margin-left: 8px;
+  }
+  .tag-current { background: var(--border-bright); color: var(--text-muted); }
+  .tag-rec { background: var(--accent-cyan); color: #0b0f19; }
+
+  /* === Option A: Current (stacked arrows) === */
+  .a-wrap { display: flex; align-items: flex-start; gap: 16px; }
+  .a-speeds { display: flex; flex-direction: column; gap: 0; }
+  .a-row { display: flex; align-items: baseline; gap: 4px; }
+  .a-arrow { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+  .a-val { font-family: var(--font-mono); font-size: 36px; font-weight: 700; color: var(--accent-red); line-height: 1.1; }
+  .a-unit { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); margin-left: 2px; }
+  .a-bar-area { flex: 1; padding-top: 6px; }
+  .a-bar-label { font-family: var(--font-sans); font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .a-bar { height: 6px; background: var(--bg-input); border-radius: 3px; width: 100%; }
+  .a-bar-fill { height: 100%; border-radius: 3px; background: var(--accent-red); }
+  .a-pct { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+  /* === Option B: Single hero + secondary === */
+  .b-hero { display: flex; align-items: baseline; gap: 4px; margin-bottom: 2px; }
+  .b-val { font-family: var(--font-mono); font-size: 48px; font-weight: 700; color: var(--accent-red); line-height: 1; }
+  .b-unit { font-family: var(--font-mono); font-size: 16px; color: var(--text-secondary); }
+  .b-label { font-family: var(--font-sans); font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+  .b-secondary { display: flex; gap: 20px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .b-sec-item { display: flex; align-items: baseline; gap: 6px; }
+  .b-sec-label { font-family: var(--font-sans); font-size: 10px; color: var(--text-muted); }
+  .b-sec-val { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+  /* === Option C: Side-by-side cards === */
+  .c-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .c-card {
+    background: var(--bg-input); border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .c-card-label { font-family: var(--font-sans); font-size: 10px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .c-card-arrow { font-family: var(--font-mono); font-size: 12px; }
+  .c-card-val { font-family: var(--font-mono); font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .c-card-unit { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+  .c-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; }
+  .c-bar-fill { height: 100%; border-radius: 2px; }
+  .c-card-pct { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+  /* === Option D: Horizontal stacked bars === */
+  .d-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .d-label { font-family: var(--font-sans); font-size: 10px; color: var(--text-muted); width: 65px; text-align: right; }
+  .d-bar-wrap { flex: 1; position: relative; }
+  .d-bar { height: 22px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+  .d-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; }
+  .d-bar-text { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #fff; }
+  .d-plan { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); width: 80px; text-align: right; }
+  .d-context { font-family: var(--font-sans); font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+  /* === Option E: Gauge arc + numbers === */
+  .e-wrap { display: flex; align-items: center; gap: 24px; }
+  .e-gauge { position: relative; width: 100px; height: 60px; }
+  .e-gauge canvas { width: 100px; height: 60px; }
+  .e-info { flex: 1; }
+  .e-main { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
+  .e-val { font-family: var(--font-mono); font-size: 32px; font-weight: 700; color: var(--accent-red); line-height: 1; }
+  .e-unit { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .e-sub { font-family: var(--font-sans); font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .e-detail { display: flex; gap: 16px; }
+  .e-detail-item { display: flex; align-items: baseline; gap: 4px; }
+  .e-detail-arrow { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .e-detail-val { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--accent-red); }
+  .e-detail-unit { font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary); }
+
+  /* === Option F: Plain text sentence === */
+  .f-sentence { font-family: var(--font-sans); font-size: 14px; color: var(--text-primary); line-height: 1.8; }
+  .f-speed { font-family: var(--font-mono); font-weight: 700; font-size: 15px; }
+  .f-speed.dl { color: var(--accent-red); }
+  .f-speed.ul { color: var(--accent-red); }
+  .f-plan { font-family: var(--font-mono); font-weight: 600; color: var(--text-secondary); font-size: 14px; }
+  .f-bar { height: 6px; background: var(--bg-input); border-radius: 3px; margin-top: 10px; }
+  .f-bar-fill { height: 100%; border-radius: 3px; background: var(--accent-red); }
+</style>
+</head>
+<body>
+
+<h1>Speed Hero Options</h1>
+<div class="subtitle">How to display download/upload speeds on the PathPulse page. All examples show the "Problem Network" scenario (85/62 Mbps on a 1,000 Mbps plan).</div>
+
+<div class="grid">
+
+  <!-- A: Current -->
+  <div class="option">
+    <div class="option-label">A: Stacked Arrows <span class="tag tag-current">Current</span></div>
+    <div class="option-desc">Both speeds stacked with arrows. Compact but the two large red numbers compete for attention.</div>
+    <div class="a-wrap">
+      <div class="a-speeds">
+        <div class="a-row"><span class="a-arrow">&darr;</span><span class="a-val">85</span><span class="a-unit">Mbps</span></div>
+        <div class="a-row"><span class="a-arrow">&uarr;</span><span class="a-val">62</span><span class="a-unit">Mbps</span></div>
+      </div>
+      <div class="a-bar-area">
+        <div class="a-bar-label">Your Speed</div>
+        <div class="a-bar"><div class="a-bar-fill" style="width:9%"></div></div>
+        <div class="a-pct">9% of your 1,000 Mbps plan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: Single hero -->
+  <div class="option">
+    <div class="option-label">B: Single Hero <span class="tag tag-rec">Recommended</span></div>
+    <div class="option-desc">One big number (download) as the focal point. Upload and plan tucked below as context. Clearest hierarchy.</div>
+    <div class="b-hero">
+      <span class="b-val">85</span>
+      <span class="b-unit">Mbps</span>
+    </div>
+    <div class="b-label">Download to your device</div>
+    <div class="b-secondary">
+      <div class="b-sec-item">
+        <span class="b-sec-label">Upload</span>
+        <span class="b-sec-val">62 Mbps</span>
+      </div>
+      <div class="b-sec-item">
+        <span class="b-sec-label">Plan</span>
+        <span class="b-sec-val">1,000 Mbps</span>
+      </div>
+      <div class="b-sec-item">
+        <span class="b-sec-label">Utilization</span>
+        <span class="b-sec-val">9%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- C: Side by side cards -->
+  <div class="option">
+    <div class="option-label">C: Side-by-Side Cards</div>
+    <div class="option-desc">Download and upload as equal-weight cards with mini progress bars. Balanced emphasis on both directions.</div>
+    <div class="c-cards">
+      <div class="c-card">
+        <div class="c-card-label"><span class="c-card-arrow" style="color:var(--accent-red)">&darr;</span> Download</div>
+        <div><span class="c-card-val" style="color:var(--accent-red)">85</span> <span class="c-card-unit">Mbps</span></div>
+        <div class="c-bar"><div class="c-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+        <div class="c-card-pct">9% of 1,000 Mbps</div>
+      </div>
+      <div class="c-card">
+        <div class="c-card-label"><span class="c-card-arrow" style="color:var(--accent-red)">&uarr;</span> Upload</div>
+        <div><span class="c-card-val" style="color:var(--accent-red)">62</span> <span class="c-card-unit">Mbps</span></div>
+        <div class="c-bar"><div class="c-bar-fill" style="width:6%;background:var(--accent-red)"></div></div>
+        <div class="c-card-pct">6% of 1,000 Mbps</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D: Horizontal bars -->
+  <div class="option">
+    <div class="option-label">D: Horizontal Bars</div>
+    <div class="option-desc">Speed as filled bars proportional to plan. Immediately shows how far below plan you are.</div>
+    <div>
+      <div class="d-row">
+        <div class="d-label">Download</div>
+        <div class="d-bar-wrap">
+          <div class="d-bar"><div class="d-bar-fill" style="width:9%;background:var(--accent-red)"><span class="d-bar-text">85</span></div></div>
+        </div>
+        <div class="d-plan">/ 1,000 Mbps</div>
+      </div>
+      <div class="d-row">
+        <div class="d-label">Upload</div>
+        <div class="d-bar-wrap">
+          <div class="d-bar"><div class="d-bar-fill" style="width:6%;background:var(--accent-red)"><span class="d-bar-text">62</span></div></div>
+        </div>
+        <div class="d-plan">/ 1,000 Mbps</div>
+      </div>
+      <div class="d-context">Your device is getting 9% of your plan speed through this path.</div>
+    </div>
+  </div>
+
+  <!-- E: Mini gauge + numbers -->
+  <div class="option">
+    <div class="option-label">E: Mini Gauge</div>
+    <div class="option-desc">Small arc gauge shows utilization at a glance. Numbers beside it for exact values.</div>
+    <div class="e-wrap">
+      <div class="e-gauge">
+        <canvas id="gauge-e" width="200" height="120"></canvas>
+      </div>
+      <div class="e-info">
+        <div class="e-main">
+          <span class="e-val">85</span>
+          <span class="e-unit">Mbps</span>
+        </div>
+        <div class="e-sub">9% of your 1,000 Mbps plan</div>
+        <div class="e-detail">
+          <div class="e-detail-item">
+            <span class="e-detail-arrow">&darr;</span>
+            <span class="e-detail-val">85</span>
+            <span class="e-detail-unit">Mbps</span>
+          </div>
+          <div class="e-detail-item">
+            <span class="e-detail-arrow">&uarr;</span>
+            <span class="e-detail-val">62</span>
+            <span class="e-detail-unit">Mbps</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F: Sentence style -->
+  <div class="option">
+    <div class="option-label">F: Natural Language</div>
+    <div class="option-desc">Speeds embedded in a readable sentence. Most subscriber-friendly, least dashboard-like.</div>
+    <div class="f-sentence">
+      Your device can download at <span class="f-speed dl">85 Mbps</span> and upload at <span class="f-speed ul">62 Mbps</span> through this path, out of your <span class="f-plan">1,000 Mbps</span> plan.
+    </div>
+    <div class="f-bar"><div class="f-bar-fill" style="width:9%"></div></div>
+  </div>
+
+</div>
+
+<script>
+// Draw mini gauge for option E
+const canvas = document.getElementById('gauge-e');
+const ctx = canvas.getContext('2d');
+const cx = 100, cy = 105, r = 85;
+const startAngle = Math.PI * 0.8;
+const endAngle = Math.PI * 2.2;
+const pct = 0.09;
+
+// Background arc
+ctx.beginPath();
+ctx.arc(cx, cy, r, startAngle, endAngle);
+ctx.strokeStyle = '#1f2937';
+ctx.lineWidth = 14;
+ctx.lineCap = 'round';
+ctx.stroke();
+
+// Filled arc
+const fillEnd = startAngle + (endAngle - startAngle) * pct;
+ctx.beginPath();
+ctx.arc(cx, cy, r, startAngle, fillEnd);
+ctx.strokeStyle = '#ef4444';
+ctx.lineWidth = 14;
+ctx.lineCap = 'round';
+ctx.stroke();
+
+// Center text
+ctx.fillStyle = '#ef4444';
+ctx.font = '700 28px "IBM Plex Mono", monospace';
+ctx.textAlign = 'center';
+ctx.fillText('9%', cx, cy - 10);
+</script>
+
+</body>
+</html>

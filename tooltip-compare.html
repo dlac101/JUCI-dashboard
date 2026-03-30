@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tooltip Layout Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0b0f19;
+    --bg-card: #151c2c;
+    --bg-input: #1a2236;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-heading: #f9fafb;
+    --border: #1f2937;
+    --border-bright: #374151;
+    --accent-cyan: #00C8E6;
+    --accent-green: #34d399;
+    --font-sans: 'Poppins', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    padding: 40px;
+    margin: 0;
+  }
+  h1 { font-size: 18px; color: var(--text-heading); margin-bottom: 8px; }
+  .subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 40px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 900px; }
+  .option {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+  }
+  .option-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent-cyan);
+    margin-bottom: 16px;
+  }
+  .option-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Simulated link bar context */
+  .sim-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .sim-icon {
+    width: 44px; height: 44px;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-bright);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sim-icon svg { width: 22px; height: 22px; stroke: var(--text-secondary); stroke-width: 1.5; fill: none; }
+  .sim-bar {
+    flex: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #34d399 0%, #00C8E6 100%);
+    position: relative;
+  }
+  .sim-node-name { font-family: var(--font-sans); font-size: 10px; color: var(--text-primary); text-align: center; }
+  .sim-node-role { font-size: 9px; color: var(--text-muted); text-align: center; }
+  .sim-node { text-align: center; }
+
+  /* Tooltip styles */
+  .tooltip {
+    background: var(--bg-input);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 6px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: inline-block;
+    margin: 16px auto 0;
+  }
+  .tooltip-center { text-align: center; }
+
+  /* Option 1: Single line (current) */
+  .tt-oneline {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-heading);
+    white-space: nowrap;
+  }
+
+  /* Option 2: Stacked + color coded */
+  .tt-stacked {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.7;
+  }
+  .tt-dl { color: var(--accent-cyan); }
+  .tt-ul { color: var(--accent-green); }
+
+  /* Option 3: Stacked + labels */
+  .tt-labeled {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2px 10px;
+  }
+  .tt-label-word { color: var(--text-muted); font-size: 10px; font-family: var(--font-sans); font-weight: 500; }
+  .tt-label-val { color: var(--text-heading); font-weight: 600; }
+
+  /* Option 4: Mini card */
+  .tt-minicard {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.7;
+  }
+  .tt-minicard-header {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rec {
+    display: inline-block;
+    background: var(--accent-cyan);
+    color: #0b0f19;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .current-tag {
+    display: inline-block;
+    background: var(--border-bright);
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>Tooltip Layout Options</h1>
+<div class="subtitle">Hover tooltip for PathPulse link bars. Pick the most subscriber-friendly layout.</div>
+
+<div class="options">
+
+  <!-- Option 1: Current (single line) -->
+  <div class="option">
+    <div class="option-label">Option 1: Single Line <span class="current-tag">Current</span></div>
+    <div class="option-desc">Everything on one line. Compact but dense, hard to scan quickly.</div>
+    <div class="sim-bar-wrap">
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg></div>
+        <div class="sim-node-name">Living Room</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+      <div class="sim-bar"></div>
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/></svg></div>
+        <div class="sim-node-name">Upstairs Office</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+    </div>
+    <div class="tooltip-center">
+      <div class="tooltip">
+        <div class="tt-oneline">&darr; 420 / 1,000 Mbps &nbsp; &uarr; 380 / 1,000 Mbps</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option 2: Stacked + color coded -->
+  <div class="option">
+    <div class="option-label">Option 2: Stacked + Color <span class="rec">Recommended</span></div>
+    <div class="option-desc">Download and upload on separate lines, color coded. Instantly scannable.</div>
+    <div class="sim-bar-wrap">
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg></div>
+        <div class="sim-node-name">Living Room</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+      <div class="sim-bar"></div>
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/></svg></div>
+        <div class="sim-node-name">Upstairs Office</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+    </div>
+    <div class="tooltip-center">
+      <div class="tooltip">
+        <div class="tt-stacked">
+          <div class="tt-dl">&darr; 420 / 1,000 Mbps</div>
+          <div class="tt-ul">&uarr; 380 / 1,000 Mbps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option 3: Stacked + labels -->
+  <div class="option">
+    <div class="option-label">Option 3: Stacked + Labels</div>
+    <div class="option-desc">Explicit "Download" / "Upload" labels. Clearest for non-technical subscribers.</div>
+    <div class="sim-bar-wrap">
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg></div>
+        <div class="sim-node-name">Living Room</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+      <div class="sim-bar"></div>
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/></svg></div>
+        <div class="sim-node-name">Upstairs Office</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+    </div>
+    <div class="tooltip-center">
+      <div class="tooltip">
+        <div class="tt-labeled">
+          <div class="tt-label-word">Download</div><div class="tt-label-val">420 / 1,000 Mbps</div>
+          <div class="tt-label-word">Upload</div><div class="tt-label-val">380 / 1,000 Mbps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option 4: Mini card -->
+  <div class="option">
+    <div class="option-label">Option 4: Mini Card</div>
+    <div class="option-desc">Structured with a header. Feels more like a detail popover than a tooltip.</div>
+    <div class="sim-bar-wrap">
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="10" y1="18" x2="14" y2="18"/></svg></div>
+        <div class="sim-node-name">Living Room</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+      <div class="sim-bar"></div>
+      <div class="sim-node">
+        <div class="sim-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="20" r="1.5" fill="currentColor" stroke="none"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5.5 13.5a9 9 0 0 1 13 0"/></svg></div>
+        <div class="sim-node-name">Upstairs Office</div>
+        <div class="sim-node-role">Satellite</div>
+      </div>
+    </div>
+    <div class="tooltip-center">
+      <div class="tooltip">
+        <div class="tt-minicard">
+          <div class="tt-minicard-header">Link Speed</div>
+          <div class="tt-dl">&darr; 420 / 1,000 Mbps</div>
+          <div class="tt-ul">&uarr; 380 / 1,000 Mbps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

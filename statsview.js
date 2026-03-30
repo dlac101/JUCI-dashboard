@@ -40,7 +40,7 @@
 
   function getColors() {
     return {
-      cyan: cssVar('--accent-cyan') || '#22d3ee',
+      cyan: cssVar('--accent-cyan') || '#00C8E6',
       green: cssVar('--accent-green') || '#34d399',
       amber: cssVar('--accent-amber') || '#f59e0b',
       red: cssVar('--accent-red') || '#ef4444',

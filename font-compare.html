@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poppins + Mono Pairing - SmartOS WebUI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&family=Fira+Code:wght@400;500;600&family=Inconsolata:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1120;
+    --bg-card: #111827;
+    --bg-input: #1a2236;
+    --border: #1e293b;
+    --border-bright: #334155;
+    --border-light: #2a3548;
+    --text-heading: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-green: #34d399;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-cyan: #00C8E6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text-secondary); padding: 32px; min-height: 100vh; font-family: 'Poppins', sans-serif; }
+
+  h1 { font-size: 20px; font-weight: 600; color: var(--text-heading); margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 32px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    max-width: 1400px;
+  }
+  .card-full { grid-column: 1 / -1; }
+  @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } .card-full { grid-column: auto; } }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    position: relative;
+  }
+  .card.highlight { border-color: var(--accent-cyan); box-shadow: 0 0 24px rgba(0,200,230,0.07); }
+  .card-badge {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--accent-cyan);
+    color: #0b1120;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .mono-name {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent-cyan);
+    margin-bottom: 3px;
+  }
+  .mono-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+  }
+
+  /* Simulated PathPulse content */
+  .sim { display: flex; flex-direction: column; gap: 18px; }
+
+  .sim-section-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: -8px;
+  }
+
+  /* Hero speed */
+  .sim-hero { display: flex; align-items: baseline; gap: 6px; }
+  .sim-hero-val { font-size: 42px; font-weight: 700; color: var(--accent-red); }
+  .sim-hero-unit { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .sim-hero-label { font-size: 11px; color: var(--text-muted); margin-left: 8px; }
+  .sim-hero-bar { height: 6px; border-radius: 3px; background: var(--border); margin-top: 6px; position: relative; overflow: hidden; }
+  .sim-hero-bar-fill { height: 100%; border-radius: 3px; background: var(--accent-red); width: 9%; }
+  .sim-hero-pct { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+  /* Bottleneck */
+  .sim-bottleneck {
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .sim-bn-title { font-size: 14px; font-weight: 600; color: var(--text-heading); margin-bottom: 6px; }
+  .sim-bn-body { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* Pipeline row */
+  .sim-pipe { display: flex; align-items: center; gap: 0; }
+  .sim-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-width: 68px;
+  }
+  .sim-node-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 2px solid var(--border-bright);
+    background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sim-node-icon svg { width: 20px; height: 20px; stroke: var(--text-secondary); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .sim-node-icon.bad { border-color: var(--accent-red); }
+  .sim-node-icon.bad svg { stroke: var(--accent-red); }
+  .sim-node-name { font-size: 10px; font-weight: 600; color: var(--text-secondary); text-align: center; }
+  .sim-node-role { font-size: 9px; color: var(--text-muted); text-align: center; margin-top: -2px; }
+
+  .sim-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    margin: 0 -2px;
+    position: relative;
+    margin-top: -20px;
+  }
+  .sim-bar.good { background: var(--accent-green); box-shadow: 0 0 8px rgba(52,211,153,0.2); }
+  .sim-bar.moderate { background: var(--accent-amber); box-shadow: 0 0 8px rgba(245,158,11,0.2); }
+  .sim-bar.poor { background: var(--accent-red); box-shadow: 0 0 8px rgba(239,68,68,0.2); }
+
+  /* Tooltip */
+  .sim-tooltip {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-heading);
+    background: var(--bg-input);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 5px 12px;
+    white-space: nowrap;
+  }
+  .sim-tooltip .lbl { font-family: 'Poppins', sans-serif; color: var(--text-muted); }
+
+  /* Detail panel */
+  .sim-detail {
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .sim-detail-speeds { display: flex; gap: 16px; }
+  .sim-detail-speed { display: flex; align-items: baseline; gap: 4px; }
+  .sim-detail-dir { font-size: 14px; color: var(--text-muted); }
+  .sim-detail-val { font-size: 16px; font-weight: 600; color: var(--text-heading); }
+  .sim-detail-unit { font-size: 10px; color: var(--text-muted); }
+  .sim-detail-bar-wrap { flex: 1; }
+  .sim-detail-bar { height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+  .sim-detail-bar-fill { height: 100%; border-radius: 3px; }
+  .sim-detail-pct { font-size: 10px; color: var(--text-muted); margin-top: 2px; text-align: right; }
+  .sim-detail-badge {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .sim-detail-badge.poor { background: rgba(239,68,68,0.12); color: var(--accent-red); }
+
+  /* Connection info */
+  .sim-conn { display: flex; gap: 24px; font-size: 11px; }
+  .sim-conn-label { color: var(--text-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sim-conn-val { color: var(--text-secondary); margin-top: 2px; }
+
+  .divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+  .note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 36px;
+    max-width: 900px;
+    line-height: 1.7;
+  }
+  .note strong { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<h1>Poppins + Monospace Pairing</h1>
+<p class="subtitle">Poppins for all text. Each card uses a different monospace for numbers, speeds, IPs, and percentages.</p>
+
+<div class="grid">
+
+  <!-- A. JetBrains Mono -->
+  <div class="card" style="--mono: 'JetBrains Mono', monospace;">
+    <div class="mono-name" style="font-family:'JetBrains Mono',monospace">A. Poppins + JetBrains Mono</div>
+    <div class="mono-desc">Current. Wide, developer-oriented. Strong contrast with Poppins' soft geometry.</div>
+    <div class="sim">
+      <div class="sim-hero">
+        <span class="sim-hero-val" style="font-family:'JetBrains Mono',monospace">85</span>
+        <span class="sim-hero-unit">Mbps</span>
+        <span class="sim-hero-label">Your Speed</span>
+      </div>
+      <div class="sim-hero-bar"><div class="sim-hero-bar-fill"></div></div>
+      <div class="sim-hero-pct"><span style="font-family:'JetBrains Mono',monospace">9%</span> of your <span style="font-family:'JetBrains Mono',monospace">1,000</span> Mbps plan</div>
+      <div class="divider"></div>
+      <div class="sim-bottleneck">
+        <div class="sim-bn-title">Weak Wi-Fi to Living Room</div>
+        <div class="sim-bn-body">Your MacBook Pro has a poor connection to the Living Room satellite. Try moving closer or removing obstructions.</div>
+      </div>
+      <div class="sim-tooltip" style="font-family:'JetBrains Mono',monospace">&darr; 85 / 1,000 <span class="lbl">Mbps</span> &nbsp; &uarr; 62 / 1,000 <span class="lbl">Mbps</span></div>
+      <div class="sim-detail">
+        <div class="sim-detail-speeds">
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&darr;</span><span class="sim-detail-val" style="font-family:'JetBrains Mono',monospace">85</span><span class="sim-detail-unit">Mbps</span></div>
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&uarr;</span><span class="sim-detail-val" style="font-family:'JetBrains Mono',monospace">62</span><span class="sim-detail-unit">Mbps</span></div>
+        </div>
+        <div class="sim-detail-bar-wrap">
+          <div class="sim-detail-bar"><div class="sim-detail-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+          <div class="sim-detail-pct" style="font-family:'JetBrains Mono',monospace">9%</div>
+        </div>
+        <span class="sim-detail-badge poor">Weak signal</span>
+      </div>
+      <div class="sim-conn">
+        <div><div class="sim-conn-label">IP Address</div><div class="sim-conn-val" style="font-family:'JetBrains Mono',monospace">99.39.42.110</div></div>
+        <div><div class="sim-conn-label">ISP</div><div class="sim-conn-val">AT&T Internet</div></div>
+        <div><div class="sim-conn-label">Latency</div><div class="sim-conn-val" style="font-family:'JetBrains Mono',monospace">8.2 ms</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. IBM Plex Mono -->
+  <div class="card highlight">
+    <div class="card-badge">Recommended</div>
+    <div class="mono-name" style="font-family:'IBM Plex Mono',monospace">B. Poppins + IBM Plex Mono</div>
+    <div class="mono-desc">Clean, neutral, professional. Numbers feel informational, not code-like.</div>
+    <div class="sim">
+      <div class="sim-hero">
+        <span class="sim-hero-val" style="font-family:'IBM Plex Mono',monospace">85</span>
+        <span class="sim-hero-unit">Mbps</span>
+        <span class="sim-hero-label">Your Speed</span>
+      </div>
+      <div class="sim-hero-bar"><div class="sim-hero-bar-fill"></div></div>
+      <div class="sim-hero-pct"><span style="font-family:'IBM Plex Mono',monospace">9%</span> of your <span style="font-family:'IBM Plex Mono',monospace">1,000</span> Mbps plan</div>
+      <div class="divider"></div>
+      <div class="sim-bottleneck">
+        <div class="sim-bn-title">Weak Wi-Fi to Living Room</div>
+        <div class="sim-bn-body">Your MacBook Pro has a poor connection to the Living Room satellite. Try moving closer or removing obstructions.</div>
+      </div>
+      <div class="sim-tooltip" style="font-family:'IBM Plex Mono',monospace">&darr; 85 / 1,000 <span class="lbl">Mbps</span> &nbsp; &uarr; 62 / 1,000 <span class="lbl">Mbps</span></div>
+      <div class="sim-detail">
+        <div class="sim-detail-speeds">
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&darr;</span><span class="sim-detail-val" style="font-family:'IBM Plex Mono',monospace">85</span><span class="sim-detail-unit">Mbps</span></div>
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&uarr;</span><span class="sim-detail-val" style="font-family:'IBM Plex Mono',monospace">62</span><span class="sim-detail-unit">Mbps</span></div>
+        </div>
+        <div class="sim-detail-bar-wrap">
+          <div class="sim-detail-bar"><div class="sim-detail-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+          <div class="sim-detail-pct" style="font-family:'IBM Plex Mono',monospace">9%</div>
+        </div>
+        <span class="sim-detail-badge poor">Weak signal</span>
+      </div>
+      <div class="sim-conn">
+        <div><div class="sim-conn-label">IP Address</div><div class="sim-conn-val" style="font-family:'IBM Plex Mono',monospace">99.39.42.110</div></div>
+        <div><div class="sim-conn-label">ISP</div><div class="sim-conn-val">AT&T Internet</div></div>
+        <div><div class="sim-conn-label">Latency</div><div class="sim-conn-val" style="font-family:'IBM Plex Mono',monospace">8.2 ms</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. Fira Code -->
+  <div class="card">
+    <div class="mono-name" style="font-family:'Fira Code',monospace">C. Poppins + Fira Code</div>
+    <div class="mono-desc">Softer than JetBrains, similar width. Good all-rounder with ligature support.</div>
+    <div class="sim">
+      <div class="sim-hero">
+        <span class="sim-hero-val" style="font-family:'Fira Code',monospace">85</span>
+        <span class="sim-hero-unit">Mbps</span>
+        <span class="sim-hero-label">Your Speed</span>
+      </div>
+      <div class="sim-hero-bar"><div class="sim-hero-bar-fill"></div></div>
+      <div class="sim-hero-pct"><span style="font-family:'Fira Code',monospace">9%</span> of your <span style="font-family:'Fira Code',monospace">1,000</span> Mbps plan</div>
+      <div class="divider"></div>
+      <div class="sim-bottleneck">
+        <div class="sim-bn-title">Weak Wi-Fi to Living Room</div>
+        <div class="sim-bn-body">Your MacBook Pro has a poor connection to the Living Room satellite. Try moving closer or removing obstructions.</div>
+      </div>
+      <div class="sim-tooltip" style="font-family:'Fira Code',monospace">&darr; 85 / 1,000 <span class="lbl">Mbps</span> &nbsp; &uarr; 62 / 1,000 <span class="lbl">Mbps</span></div>
+      <div class="sim-detail">
+        <div class="sim-detail-speeds">
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&darr;</span><span class="sim-detail-val" style="font-family:'Fira Code',monospace">85</span><span class="sim-detail-unit">Mbps</span></div>
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&uarr;</span><span class="sim-detail-val" style="font-family:'Fira Code',monospace">62</span><span class="sim-detail-unit">Mbps</span></div>
+        </div>
+        <div class="sim-detail-bar-wrap">
+          <div class="sim-detail-bar"><div class="sim-detail-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+          <div class="sim-detail-pct" style="font-family:'Fira Code',monospace">9%</div>
+        </div>
+        <span class="sim-detail-badge poor">Weak signal</span>
+      </div>
+      <div class="sim-conn">
+        <div><div class="sim-conn-label">IP Address</div><div class="sim-conn-val" style="font-family:'Fira Code',monospace">99.39.42.110</div></div>
+        <div><div class="sim-conn-label">ISP</div><div class="sim-conn-val">AT&T Internet</div></div>
+        <div><div class="sim-conn-label">Latency</div><div class="sim-conn-val" style="font-family:'Fira Code',monospace">8.2 ms</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D. Space Mono -->
+  <div class="card">
+    <div class="mono-name" style="font-family:'Space Mono',monospace">D. Poppins + Space Mono</div>
+    <div class="mono-desc">Quirky geometric with personality. Bold number shapes that stand out on dashboards.</div>
+    <div class="sim">
+      <div class="sim-hero">
+        <span class="sim-hero-val" style="font-family:'Space Mono',monospace">85</span>
+        <span class="sim-hero-unit">Mbps</span>
+        <span class="sim-hero-label">Your Speed</span>
+      </div>
+      <div class="sim-hero-bar"><div class="sim-hero-bar-fill"></div></div>
+      <div class="sim-hero-pct"><span style="font-family:'Space Mono',monospace">9%</span> of your <span style="font-family:'Space Mono',monospace">1,000</span> Mbps plan</div>
+      <div class="divider"></div>
+      <div class="sim-bottleneck">
+        <div class="sim-bn-title">Weak Wi-Fi to Living Room</div>
+        <div class="sim-bn-body">Your MacBook Pro has a poor connection to the Living Room satellite. Try moving closer or removing obstructions.</div>
+      </div>
+      <div class="sim-tooltip" style="font-family:'Space Mono',monospace">&darr; 85 / 1,000 <span class="lbl">Mbps</span> &nbsp; &uarr; 62 / 1,000 <span class="lbl">Mbps</span></div>
+      <div class="sim-detail">
+        <div class="sim-detail-speeds">
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&darr;</span><span class="sim-detail-val" style="font-family:'Space Mono',monospace">85</span><span class="sim-detail-unit">Mbps</span></div>
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&uarr;</span><span class="sim-detail-val" style="font-family:'Space Mono',monospace">62</span><span class="sim-detail-unit">Mbps</span></div>
+        </div>
+        <div class="sim-detail-bar-wrap">
+          <div class="sim-detail-bar"><div class="sim-detail-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+          <div class="sim-detail-pct" style="font-family:'Space Mono',monospace">9%</div>
+        </div>
+        <span class="sim-detail-badge poor">Weak signal</span>
+      </div>
+      <div class="sim-conn">
+        <div><div class="sim-conn-label">IP Address</div><div class="sim-conn-val" style="font-family:'Space Mono',monospace">99.39.42.110</div></div>
+        <div><div class="sim-conn-label">ISP</div><div class="sim-conn-val">AT&T Internet</div></div>
+        <div><div class="sim-conn-label">Latency</div><div class="sim-conn-val" style="font-family:'Space Mono',monospace">8.2 ms</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. Inconsolata -->
+  <div class="card highlight">
+    <div class="card-badge">Recommended</div>
+    <div class="mono-name" style="font-family:'Inconsolata',monospace">E. Poppins + Inconsolata</div>
+    <div class="mono-desc">Narrow, light, unobtrusive. Numbers blend naturally with Poppins. Most subscriber-friendly.</div>
+    <div class="sim">
+      <div class="sim-hero">
+        <span class="sim-hero-val" style="font-family:'Inconsolata',monospace">85</span>
+        <span class="sim-hero-unit">Mbps</span>
+        <span class="sim-hero-label">Your Speed</span>
+      </div>
+      <div class="sim-hero-bar"><div class="sim-hero-bar-fill"></div></div>
+      <div class="sim-hero-pct"><span style="font-family:'Inconsolata',monospace">9%</span> of your <span style="font-family:'Inconsolata',monospace">1,000</span> Mbps plan</div>
+      <div class="divider"></div>
+      <div class="sim-bottleneck">
+        <div class="sim-bn-title">Weak Wi-Fi to Living Room</div>
+        <div class="sim-bn-body">Your MacBook Pro has a poor connection to the Living Room satellite. Try moving closer or removing obstructions.</div>
+      </div>
+      <div class="sim-tooltip" style="font-family:'Inconsolata',monospace">&darr; 85 / 1,000 <span class="lbl">Mbps</span> &nbsp; &uarr; 62 / 1,000 <span class="lbl">Mbps</span></div>
+      <div class="sim-detail">
+        <div class="sim-detail-speeds">
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&darr;</span><span class="sim-detail-val" style="font-family:'Inconsolata',monospace">85</span><span class="sim-detail-unit">Mbps</span></div>
+          <div class="sim-detail-speed"><span class="sim-detail-dir">&uarr;</span><span class="sim-detail-val" style="font-family:'Inconsolata',monospace">62</span><span class="sim-detail-unit">Mbps</span></div>
+        </div>
+        <div class="sim-detail-bar-wrap">
+          <div class="sim-detail-bar"><div class="sim-detail-bar-fill" style="width:9%;background:var(--accent-red)"></div></div>
+          <div class="sim-detail-pct" style="font-family:'Inconsolata',monospace">9%</div>
+        </div>
+        <span class="sim-detail-badge poor">Weak signal</span>
+      </div>
+      <div class="sim-conn">
+        <div><div class="sim-conn-label">IP Address</div><div class="sim-conn-val" style="font-family:'Inconsolata',monospace">99.39.42.110</div></div>
+        <div><div class="sim-conn-label">ISP</div><div class="sim-conn-val">AT&T Internet</div></div>
+        <div><div class="sim-conn-label">Latency</div><div class="sim-conn-val" style="font-family:'Inconsolata',monospace">8.2 ms</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="note">
+  <strong>All text is Poppins.</strong> Only numbers, speeds, IPs, and percentages use the monospace candidate.
+  Notice how each mono changes the "feel" of the data: JetBrains/Fira feel technical, IBM Plex feels neutral/professional,
+  Space Mono adds character, and Inconsolata almost disappears into the layout.
+  Pick based on whether you want numbers to <strong>stand out</strong> (Space Mono, JetBrains) or <strong>blend in</strong> (Inconsolata, IBM Plex).
+</p>
+
+</body>
+</html>

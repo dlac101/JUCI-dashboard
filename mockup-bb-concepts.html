@@ -6,7 +6,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #0b1121; color: #e5e7eb; font-family: 'SFMono-Regular','Menlo','Monaco','Consolas',monospace; padding: 30px; }
-  h1 { font-size: 18px; color: #22d3ee; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  h1 { font-size: 18px; color: #00C8E6; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
   .concepts { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
   .concept { width: 320px; }
   .concept-title { font-size: 13px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: center; }
@@ -16,15 +16,15 @@
   /* Shared */
   .bb-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; font-weight: 700; margin-bottom: 10px; }
   .bb-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
-  .btn-rt { padding: 5px 12px; font-size: 11px; font-family: inherit; border: 1px solid rgba(34,211,238,0.3); background: rgba(34,211,238,0.08); color: #22d3ee; border-radius: 4px; cursor: pointer; }
+  .btn-rt { padding: 5px 12px; font-size: 11px; font-family: inherit; border: 1px solid rgba(0,200,230,0.3); background: rgba(0,200,230,0.08); color: #00C8E6; border-radius: 4px; cursor: pointer; }
   .bb-ts { font-size: 10px; color: #6b7280; }
-  .bb-ts a { color: #22d3ee; text-decoration: none; }
+  .bb-ts a { color: #00C8E6; text-decoration: none; }
   .grade-a { color: #34d399; }
-  .grade-b { color: #22d3ee; }
+  .grade-b { color: #00C8E6; }
   .grade-c { color: #f59e0b; }
   .grade-d { color: #ef4444; }
   .tint-a { background: rgba(52,211,153,0.12); }
-  .tint-b { background: rgba(34,211,238,0.12); }
+  .tint-b { background: rgba(0,200,230,0.12); }
   .tint-c { background: rgba(245,158,11,0.12); }
   .tint-d { background: rgba(239,68,68,0.12); }
 
@@ -91,7 +91,7 @@
     <div class="bb-label">Bufferbloat Score</div>
     <div class="c0-cards">
       <div class="c0-card tint-b">
-        <div class="c0-dir" style="color:#22d3ee;">&darr; DL</div>
+        <div class="c0-dir" style="color:#00C8E6;">&darr; DL</div>
         <div class="c0-grade grade-b">B</div>
         <div class="c0-speed">7970 <span class="c0-unit">Mbps</span></div>
         <div class="c0-stat">18ms loaded</div>
@@ -127,7 +127,7 @@
         <span class="c1-speed">7970 <span class="c1-speed-unit">Mbps</span></span>
       </div>
       <div class="c1-bar-wrap">
-        <div class="c1-bar-fill" style="width:18%; background: linear-gradient(90deg, #22d3ee, rgba(34,211,238,0.4));"></div>
+        <div class="c1-bar-fill" style="width:18%; background: linear-gradient(90deg, #00C8E6, rgba(0,200,230,0.4));"></div>
         <div class="c1-bar-idle" style="left:12%;"></div>
       </div>
       <div class="c1-lat">
@@ -174,15 +174,15 @@
           <!-- Green zone (A): 0-25% -->
           <path d="M 20 100 A 80 80 0 0 1 60 35" fill="none" stroke="rgba(52,211,153,0.3)" stroke-width="14" stroke-linecap="round"/>
           <!-- Cyan zone (B): 25-50% -->
-          <path d="M 60 35 A 80 80 0 0 1 100 20" fill="none" stroke="rgba(34,211,238,0.15)" stroke-width="14"/>
+          <path d="M 60 35 A 80 80 0 0 1 100 20" fill="none" stroke="rgba(0,200,230,0.15)" stroke-width="14"/>
           <!-- Amber zone (C): 50-75% -->
           <path d="M 100 20 A 80 80 0 0 1 140 35" fill="none" stroke="rgba(245,158,11,0.15)" stroke-width="14"/>
           <!-- Red zone (D/F): 75-100% -->
           <path d="M 140 35 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(239,68,68,0.15)" stroke-width="14"/>
           <!-- Active fill (B grade = ~30% from left) -->
-          <path d="M 20 100 A 80 80 0 0 1 70 30" fill="none" stroke="#22d3ee" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 20 100 A 80 80 0 0 1 70 30" fill="none" stroke="#00C8E6" stroke-width="14" stroke-linecap="round"/>
           <!-- Glow effect -->
-          <circle cx="70" cy="30" r="5" fill="#22d3ee" filter="url(#glow)"/>
+          <circle cx="70" cy="30" r="5" fill="#00C8E6" filter="url(#glow)"/>
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
@@ -221,7 +221,7 @@
   <div class="concept-desc">Full-width rows with colored left border. English summary at bottom.</div>
   <div class="widget" style="display:flex;flex-direction:column;">
     <div class="bb-label">Bufferbloat Score</div>
-    <div class="c3-card" style="border-color: #22d3ee;">
+    <div class="c3-card" style="border-color: #00C8E6;">
       <div class="c3-card-header">
         <span class="c3-dir-label">Download</span>
       </div>

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "meta": {
+    "name": "SmartOS / SpeedWave Unified Design Tokens",
+    "version": "1.0.0",
+    "description": "Shared design language for SmartOS WebUI and SpeedWave iOS",
+    "updated": "2026-03-29"
+  },
+
+  "color": {
+    "background": {
+      "primary":    { "value": "#0A0E17", "description": "Full-screen / page background" },
+      "card":       { "value": "#131928", "description": "Card and container background" },
+      "cardHover":  { "value": "#1a2236", "description": "Card hover / input background" }
+    },
+
+    "brand": {
+      "accent":     { "value": "#00C8E6", "description": "Adtran brand cyan. Primary accent everywhere." }
+    },
+
+    "data": {
+      "download":       { "value": "#00C8E6", "description": "Download accent (cyan)" },
+      "uploadActive":   { "value": "#D047DA", "description": "Upload during active test (purple)" },
+      "uploadStatic":   { "value": "#34d399", "description": "Upload in history / static results (green)" },
+      "latency":        { "value": "#808080", "description": "Latency / ping (gray)" }
+    },
+
+    "grade": {
+      "a": { "value": "#34d399", "description": "Grade A: excellent (green)" },
+      "b": { "value": "#00C8E6", "description": "Grade B: good (cyan)" },
+      "c": { "value": "#f59e0b", "description": "Grade C: fair (amber)" },
+      "d": { "value": "#ef4444", "description": "Grade D: poor (red)" }
+    },
+
+    "status": {
+      "good":    { "value": "#34d399", "description": "Healthy / online / success" },
+      "warn":    { "value": "#f59e0b", "description": "Warning / degraded" },
+      "bad":     { "value": "#ef4444", "description": "Critical / error / offline" }
+    },
+
+    "text": {
+      "primary":    { "value": "#e5e7eb", "description": "Primary text (dark theme)" },
+      "secondary":  { "value": "#808080", "description": "Secondary / muted text" },
+      "heading":    { "value": "#f9fafb", "description": "Heading text (dark theme)" }
+    },
+
+    "wifi": {
+      "band6ghz":  { "value": "#00C8E6", "description": "6 GHz band (cyan)" },
+      "band5ghz":  { "value": "#A673E6", "description": "5 GHz band (purple)" },
+      "band2ghz":  { "value": "#E68C33", "description": "2.4 GHz band (orange)" }
+    },
+
+    "gauge": {
+      "idle":      { "value": "#00C8E6", "description": "Gauge idle / default state" },
+      "download":  { "value": "#00C8E6", "description": "Gauge during download test" },
+      "upload":    { "value": "#D047DA", "description": "Gauge during upload test" },
+      "warning":   { "value": "#f59e0b", "description": "Gauge warning threshold" },
+      "critical":  { "value": "#ef4444", "description": "Gauge critical threshold" }
+    }
+  },
+
+  "radius": {
+    "card":   { "value": "10px", "description": "Card / container corner radius" },
+    "badge":  { "value": "5px",  "description": "Badge / pill corner radius" },
+    "pill":   { "value": "20px", "description": "Full pill / count badge radius" }
+  },
+
+  "shadow": {
+    "card": {
+      "dark":  { "value": "none", "description": "Cards have no shadow in dark mode" },
+      "light": { "value": "0 1px 3px rgba(0,0,0,0.08)", "description": "Subtle shadow in light mode" }
+    }
+  },
+
+  "border": {
+    "card": {
+      "dark":  { "value": "none", "description": "No card borders in dark mode" },
+      "light": { "value": "1px solid #e5e7eb", "description": "Subtle border in light mode only" }
+    }
+  },
+
+  "typography": {
+    "heroNumber":    { "weight": 300, "description": "Large speed / score readouts: thin/light" },
+    "resultValue":   { "weight": 400, "description": "Medium result values" },
+    "label":         { "weight": 700, "description": "Section labels, card headers" },
+    "badge":         { "weight": 700, "description": "Grade badges, status pills" },
+    "sectionHeader": {
+      "transform": "uppercase",
+      "letterSpacing": "1.5px",
+      "design": "monospaced",
+      "description": "ALL-CAPS monospaced section headers on both platforms"
+    }
+  }
+}

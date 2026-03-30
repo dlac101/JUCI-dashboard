@@ -1260,7 +1260,7 @@ function renderTimeline(spanDays) {
     // Color: green = 100%, cyan = 99-99.99%, amber = 95-99%, red = <95%
     let bg, fg;
     if (moPct >= 99.995) { bg = 'rgba(16,185,129,0.15)'; fg = 'var(--accent-green)'; }
-    else if (moPct >= 99)  { bg = 'rgba(34,211,238,0.12)'; fg = 'var(--accent-cyan)'; }
+    else if (moPct >= 99)  { bg = 'rgba(0,200,230,0.12)'; fg = 'var(--accent-cyan)'; }
     else if (moPct >= 95)  { bg = 'rgba(245,158,11,0.15)'; fg = 'var(--accent-amber)'; }
     else                   { bg = 'rgba(239,68,68,0.15)';  fg = 'var(--accent-red)'; }
     pill.style.background = bg;
@@ -1318,7 +1318,7 @@ function gradeColor(g) {
   return g === 'A' ? 'var(--accent-green)' : g === 'B' ? 'var(--accent-cyan)' : g === 'C' ? 'var(--accent-amber)' : 'var(--accent-red)';
 }
 function gradeTint(g) {
-  return g === 'A' ? 'rgba(52,211,153,0.12)' : g === 'B' ? 'rgba(34,211,238,0.12)' : g === 'C' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+  return g === 'A' ? 'rgba(52,211,153,0.12)' : g === 'B' ? 'rgba(0,200,230,0.12)' : g === 'C' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
 }
 
 function gradeRank(g) { return { A: 0, B: 1, C: 2, D: 3, F: 4 }[g] || 4; }
@@ -1948,7 +1948,7 @@ function renderFlowSparkline(dataPoints, color) {
   const w = 48, h = 16;
   if (!dataPoints || dataPoints.length < 2) return '';
   const stroke = color || 'var(--accent-cyan)';
-  const fill = color === 'var(--accent-green)' ? 'rgba(52,211,153,0.12)' : 'rgba(34,211,238,0.12)';
+  const fill = color === 'var(--accent-green)' ? 'rgba(52,211,153,0.12)' : 'rgba(0,200,230,0.12)';
   const min = Math.min(...dataPoints);
   const max = Math.max(...dataPoints);
   const range = max - min || 1;
@@ -2442,21 +2442,21 @@ function renderSpeedtestHistory() {
     ctx.lineWidth = 1.2;
     // DL service rate line (cyan)
     const dlLineY = pad.top + cH - Math.min(dlRate, yMax) * yScale;
-    ctx.strokeStyle = 'rgba(0,210,190,0.50)';
+    ctx.strokeStyle = 'rgba(0,200,230,0.50)';
     ctx.beginPath(); ctx.moveTo(pad.left, dlLineY); ctx.lineTo(pad.left + cW, dlLineY); ctx.stroke();
     // DL rate label
     ctx.font = '9px "Poppins", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillStyle = 'rgba(0,210,190,0.65)';
+    ctx.fillStyle = 'rgba(0,200,230,0.65)';
     const dlLabel = dlRate >= 1000 ? (dlRate / 1000).toFixed(0) + 'G DL' : dlRate + 'M DL';
     ctx.fillText(dlLabel, pad.left + 4, dlLineY - 2);
     // UL service rate line (green)
     const ulLineY = pad.top + cH - Math.min(ulRate, yMax) * yScale;
-    ctx.strokeStyle = 'rgba(0,210,100,0.50)';
+    ctx.strokeStyle = 'rgba(52,211,153,0.50)';
     ctx.beginPath(); ctx.moveTo(pad.left, ulLineY); ctx.lineTo(pad.left + cW, ulLineY); ctx.stroke();
     // UL rate label
-    ctx.fillStyle = 'rgba(0,210,100,0.65)';
+    ctx.fillStyle = 'rgba(52,211,153,0.65)';
     const ulLabel = ulRate >= 1000 ? (ulRate / 1000).toFixed(0) + 'G UL' : ulRate + 'M UL';
     ctx.fillText(ulLabel, pad.left + 4, ulLineY - 2);
     ctx.setLineDash([]);
@@ -2488,11 +2488,11 @@ function renderSpeedtestHistory() {
     const cx  = gx + barW;  // center of pair for label alignment
 
     // DL bar (cyan) with rounded top
-    ctx.fillStyle = 'rgba(0,210,190,0.82)';
+    ctx.fillStyle = 'rgba(0,200,230,0.82)';
     drawBar(dlX, baseY - dlH, barW, dlH);
 
     // UL bar (green) with rounded top
-    ctx.fillStyle = 'rgba(0,210,100,0.82)';
+    ctx.fillStyle = 'rgba(52,211,153,0.82)';
     drawBar(ulX, baseY - ulH, barW, ulH);
 
     // X-axis labels: day abbrev + m/d, shown every ~7th + first + last
@@ -2756,7 +2756,7 @@ function drawThroughput(timestamp) {
     ctx.stroke();
   }
 
-  drawTrace(throughputDL, '#22d3ee', 34, 211, 238, 1.0);
+  drawTrace(throughputDL, '#00C8E6', 0, 200, 230, 1.0);
   drawTrace(throughputUL, '#34d399', 52, 211, 153, 1.0);
 
   ctx.restore();
