@@ -158,6 +158,887 @@ const ppScenarios = {
   }
 };
 
+// === TEST STATE MACHINE ===
+// Phases: idle -> ping -> dl_segment[0..N] -> ul_segment[0..N] -> complete
+// Each segment tests one link in the pipeline, progressing from device toward internet.
+const PP_PHASE = { IDLE: 'idle', PING: 'ping', DOWNLOAD: 'download', UPLOAD: 'upload', COMPLETE: 'complete' };
+let ppTestPhase = PP_PHASE.IDLE;
+let ppTestAnim = null;
+let ppTestStart = 0;
+let ppTestSpeed = 0;
+let ppTestTarget = 0;
+let ppActiveSegment = -1;       // which link index is currently being tested
+let ppTestResults = { dl: 0, ul: 0, ping: 0, dlGrade: '', ulGrade: '', segmentSpeeds: [] };
+let ppGaugeCanvas = null;
+let ppGaugeCtx = null;
+let ppGaugeSize = 140;
+let ppDotAnimFrame = null;      // rAF for dot rendering
+
+// Colors matching iOS app
+const PP_COLOR_DL = '#00C8E6';
+const PP_COLOR_UL = '#e879f9';
+const PP_COLOR_PING = '#94a3b8';
+
+function ppInitGauge() {
+  ppGaugeCanvas = document.getElementById('pp-gauge-canvas');
+  if (!ppGaugeCanvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const ring = document.getElementById('pp-go-ring');
+  const size = ring ? ring.offsetWidth : 140;
+  ppGaugeSize = size;
+  ppGaugeCanvas.width = size * dpr;
+  ppGaugeCanvas.height = size * dpr;
+  ppGaugeCanvas.style.width = size + 'px';
+  ppGaugeCanvas.style.height = size + 'px';
+  ppGaugeCtx = ppGaugeCanvas.getContext('2d');
+  ppGaugeCtx.scale(dpr, dpr);
+}
+
+function ppDrawGaugeRing(fraction, color) {
+  if (!ppGaugeCtx) return;
+  const ctx = ppGaugeCtx;
+  const size = ppGaugeSize;
+  const cx = size / 2, cy = size / 2, r = size / 2 - 6; // 6px inset keeps 4px stroke inside canvas edge
+  ctx.clearRect(0, 0, size, size);
+  // Track
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  // Fill arc
+  if (fraction > 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(fraction, 1));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+
+function ppSpeedFormat(mbps) {
+  if (mbps >= 1000) return { value: (mbps / 1000).toFixed(2), unit: 'Gbps' };
+  if (mbps >= 100) return { value: Math.round(mbps).toString(), unit: 'Mbps' };
+  if (mbps >= 10) return { value: mbps.toFixed(1), unit: 'Mbps' };
+  return { value: mbps.toFixed(2), unit: 'Mbps' };
+}
+
+function ppGradeColor(grade) {
+  if (grade === 'A') return 'var(--accent-green)';
+  if (grade === 'B') return 'var(--accent-cyan)';
+  if (grade === 'C') return 'var(--accent-amber)';
+  if (grade === 'D') return 'var(--accent-red)';
+  return 'var(--text-secondary)';
+}
+
+function ppRandomGrade(latency) {
+  if (latency <= 5) return 'A';
+  if (latency <= 15) return Math.random() > 0.3 ? 'A' : 'B';
+  if (latency <= 30) return Math.random() > 0.4 ? 'B' : 'C';
+  return Math.random() > 0.5 ? 'C' : 'D';
+}
+
+// Neutral bar color during testing (dark slate)
+const PP_BAR_NEUTRAL = '#1e293b';
+
+// --- Full path reset: clear ALL scenario-specific decorations for a fresh test ---
+function ppResetPathForTest() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+
+  // 1. Remove "has-issue" from node icons (red border/glow)
+  root.querySelectorAll('.pp-node-icon.has-issue').forEach(icon => {
+    icon.classList.remove('has-issue');
+    icon.style.borderColor = '';
+    icon.style.boxShadow = '';
+    icon.querySelector('svg')?.style && (icon.querySelector('svg').style.stroke = '');
+  });
+
+  // 2. Remove "worst-link" from links (hides the ! notification dot)
+  root.querySelectorAll('.pp-link.worst-link').forEach(link => {
+    link.classList.remove('worst-link');
+  });
+
+  // 3. Hide all notification dots
+  root.querySelectorAll('.pp-link-notif').forEach(dot => {
+    dot.style.display = 'none';
+  });
+
+  // 4. Remove quality classes from links (controls vertical bar colors on mobile)
+  root.querySelectorAll('.pp-link').forEach(link => {
+    link.classList.remove('q-good', 'q-moderate', 'q-poor');
+  });
+
+  // 5. Hide throughput labels on horizontal bars
+  root.querySelectorAll('.pp-link-throughput').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // 6. Hide tech chips on horizontal bars
+  root.querySelectorAll('.pp-link-tech-chip').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // 7. Clear per-hop speed annotations from previous test
+  root.querySelectorAll('.pp-node-speed-annot').forEach(el => {
+    el.innerHTML = '';
+  });
+
+  // 8. Reset node opacity and icon styles
+  root.querySelectorAll('.pp-node').forEach(n => {
+    n.style.opacity = '';
+    const icon = n.querySelector('.pp-node-icon');
+    if (icon) { icon.style.borderColor = ''; icon.style.boxShadow = ''; }
+  });
+
+  // 9. Reset link opacity
+  root.querySelectorAll('.pp-link').forEach(l => {
+    l.style.opacity = '';
+  });
+
+  // 10. Hide bottleneck banner during test
+  const bottleneck = root.querySelector('.pp-bottleneck');
+  if (bottleneck) bottleneck.style.display = 'none';
+
+  // 11. Hide scenario buttons during test
+  const scenarioBar = root.querySelector('.pp-scenario-bar');
+  if (scenarioBar) scenarioBar.style.display = 'none';
+
+  // 12. Hide speed hero section during test
+  const hero = root.querySelector('.pp-hero, .pp-hero-b, .pp-hero-c, .pp-hero-c2');
+  if (hero) hero.style.display = 'none';
+}
+
+// Restore path decorations after test completes
+function ppRestorePathAfterTest() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+
+  // Restore bottleneck banner
+  const bottleneck = root.querySelector('.pp-bottleneck');
+  if (bottleneck) bottleneck.style.display = '';
+
+  // Restore scenario buttons
+  const scenarioBar = root.querySelector('.pp-scenario-bar');
+  if (scenarioBar) scenarioBar.style.display = '';
+
+  // Restore speed hero
+  const hero = root.querySelector('.pp-hero, .pp-hero-b, .pp-hero-c, .pp-hero-c2');
+  if (hero) hero.style.display = '';
+
+  // Restore throughput labels
+  root.querySelectorAll('.pp-link-throughput').forEach(el => el.style.display = '');
+  root.querySelectorAll('.pp-link-tech-chip').forEach(el => el.style.display = '');
+
+  // Notification dots are restored by ppApplyPostTestDecorations based on measured results
+}
+
+// --- Evaluate measured segments and apply/move bottleneck decoration ---
+// Called live after each DL segment completes AND again at test end.
+// Clears any previous bottleneck marking, finds the worst measured segment,
+// and applies the ! dot + red node border if it's below the poor threshold.
+function ppUpdateBottleneckDecoration() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+
+  const s = ppScenarios[ppCurrent];
+  const service = s.wan.service;
+  const links = root.querySelectorAll('.pp-link');
+  const nodes = root.querySelectorAll('.pp-node-icon');
+  const segSpeeds = ppTestResults.segmentSpeeds || [];
+
+  // 1. Clear any existing bottleneck decoration from a previous segment
+  links.forEach(link => {
+    link.classList.remove('worst-link');
+    const notif = link.querySelector('.pp-link-notif');
+    if (notif) notif.style.display = 'none';
+  });
+  nodes.forEach(icon => {
+    icon.classList.remove('has-issue');
+    icon.style.borderColor = '';
+    icon.style.boxShadow = '';
+    const svg = icon.querySelector('svg');
+    if (svg) svg.style.stroke = '';
+  });
+
+  // 2. Build map of measured DL speeds so far
+  const speedByIdx = {};
+  for (const seg of segSpeeds) {
+    speedByIdx[seg.idx] = seg.dl || 0;
+  }
+
+  // 3. Find the worst measured link (only consider segments we've measured)
+  let worstIdx = -1, worstSpeed = Infinity;
+  for (const idx in speedByIdx) {
+    if (speedByIdx[idx] < worstSpeed) {
+      worstSpeed = speedByIdx[idx];
+      worstIdx = parseInt(idx);
+    }
+  }
+
+  if (worstIdx < 0) return;
+
+  // 4. Check if worst link is below the poor threshold (<30% of service rate)
+  const worstPct = (worstSpeed / service) * 100;
+  if (worstPct >= 30) return; // no bottleneck
+
+  // 5. Apply worst-link class and show notification dot
+  const worstLink = links[worstIdx];
+  if (worstLink) {
+    worstLink.classList.add('worst-link');
+    const notif = worstLink.querySelector('.pp-link-notif');
+    if (notif) notif.style.display = '';
+  }
+
+  // 6. Apply has-issue to the downstream node (node at worstIdx + 1)
+  const nodeIdx = worstIdx + 1;
+  if (nodes[nodeIdx]) {
+    nodes[nodeIdx].classList.add('has-issue');
+  }
+}
+
+// --- Reset all bars to neutral at test start ---
+function ppNeutralizeBars() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-link-bar').forEach(bar => {
+    bar.classList.add('pp-neutral');
+  });
+}
+
+// --- Re-color a completed segment bar based on measured speed vs service rate ---
+function ppColorSegmentBar(linkIdx, speed) {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const links = root.querySelectorAll('.pp-link');
+  const link = links[linkIdx];
+  if (!link) return;
+  const bar = link.querySelector('.pp-link-bar');
+  if (!bar) return;
+
+  const s = ppScenarios[ppCurrent];
+  const service = s.wan.service;
+  const pct = (speed / service) * 100;
+
+  let color, shadow;
+  if (pct >= 60) {
+    color = 'var(--accent-green)';
+    shadow = '0 0 10px rgba(52,211,153,0.25)';
+  } else if (pct >= 30) {
+    color = 'var(--accent-amber)';
+    shadow = '0 0 10px rgba(245,158,11,0.25)';
+  } else {
+    color = 'var(--accent-red)';
+    shadow = '0 0 10px rgba(239,68,68,0.25)';
+  }
+
+  bar.classList.remove('pp-neutral');
+  bar.style.transition = 'background 0.5s ease, box-shadow 0.5s ease';
+  bar.style.background = color;
+  bar.style.boxShadow = shadow;
+  bar.style.animation = '';
+
+  // Also update the ::after arrow tip color via a data attribute + inline override
+  const arrowColor = pct >= 60 ? 'var(--accent-green)' : pct >= 30 ? 'var(--accent-amber)' : 'var(--accent-red)';
+  bar.classList.remove('good', 'moderate', 'poor');
+  bar.classList.add(pct >= 60 ? 'good' : pct >= 30 ? 'moderate' : 'poor');
+}
+
+// --- Restore bars to their original scenario colors ---
+function ppRestoreBars() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-link-bar').forEach(bar => {
+    bar.classList.remove('pp-neutral');
+    bar.style.background = '';
+    bar.style.boxShadow = '';
+    bar.style.animation = '';
+    bar.style.transition = '';
+  });
+}
+
+// --- Segment highlighting: dim inactive, highlight active ---
+function ppHighlightSegment(activeIdx, direction) {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const links = root.querySelectorAll('.pp-link');
+  const nodes = root.querySelectorAll('.pp-node');
+  const color = direction === 'dl' ? PP_COLOR_DL : PP_COLOR_UL;
+
+  // Dim everything first
+  nodes.forEach(n => n.style.opacity = '0.25');
+  links.forEach(l => {
+    l.style.opacity = '0.25';
+    const bar = l.querySelector('.pp-link-bar');
+    if (bar) {
+      bar.classList.remove('pp-seg-active');
+    }
+  });
+
+  // Light up everything up to and including the active segment
+  for (let i = 0; i <= activeIdx && i < links.length; i++) {
+    links[i].style.opacity = '1';
+    if (i === activeIdx) {
+      const bar = links[i].querySelector('.pp-link-bar');
+      if (bar) {
+        // Active bar gets a subtle glow in the phase color
+        bar.style.boxShadow = `0 0 14px ${color}66, 0 0 4px ${color}44`;
+        bar.classList.add('pp-seg-active');
+      }
+    }
+  }
+  // Nodes: light up from 0 to activeIdx+1
+  for (let i = 0; i <= activeIdx + 1 && i < nodes.length; i++) {
+    nodes[i].style.opacity = '1';
+  }
+  // Highlight the target node with the phase color
+  const targetNode = nodes[activeIdx + 1];
+  if (targetNode) {
+    const icon = targetNode.querySelector('.pp-node-icon');
+    if (icon) {
+      icon.style.borderColor = color;
+      icon.style.boxShadow = `0 0 12px ${color}33`;
+    }
+  }
+
+  // Activate mobile packet dot on active link
+  ppActivatePacketDot(activeIdx, direction);
+}
+
+function ppClearHighlights() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-link').forEach(l => {
+    l.style.opacity = '';
+    const bar = l.querySelector('.pp-link-bar');
+    if (bar) { bar.style.boxShadow = ''; bar.classList.remove('pp-seg-active'); }
+  });
+  root.querySelectorAll('.pp-node').forEach(n => {
+    n.style.opacity = '';
+    const icon = n.querySelector('.pp-node-icon');
+    if (icon) { icon.style.borderColor = ''; icon.style.boxShadow = ''; }
+  });
+  ppClearPacketDots();
+}
+
+// --- iOS-style mobile packet dots on vertical link bars ---
+function ppEnsurePacketDots() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-link').forEach(link => {
+    if (!link.querySelector('.pp-packet-dot')) {
+      const dot = document.createElement('div');
+      dot.className = 'pp-packet-dot';
+      link.appendChild(dot);
+    }
+  });
+}
+
+function ppActivatePacketDot(linkIdx, direction) {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const links = root.querySelectorAll('.pp-link');
+  // Deactivate all dots first
+  links.forEach(l => {
+    const dot = l.querySelector('.pp-packet-dot');
+    if (dot) {
+      dot.classList.remove('active', 'direction-ul', 'dl-color', 'ul-color');
+    }
+    l.classList.remove('pp-link-neutral');
+  });
+  // Activate the target link's dot
+  const link = links[linkIdx];
+  if (!link) return;
+  const dot = link.querySelector('.pp-packet-dot');
+  if (dot) {
+    dot.classList.add('active');
+    if (direction === 'ul') dot.classList.add('direction-ul');
+    dot.classList.add(direction === 'dl' ? 'dl-color' : 'ul-color');
+  }
+}
+
+function ppNeutralizeVerticalBars() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-link').forEach(l => l.classList.add('pp-link-neutral'));
+}
+
+function ppColorVerticalBar(linkIdx, quality) {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const links = root.querySelectorAll('.pp-link');
+  const link = links[linkIdx];
+  if (link) link.classList.remove('pp-link-neutral');
+}
+
+function ppClearPacketDots() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-packet-dot').forEach(dot => {
+    dot.classList.remove('active', 'direction-ul', 'dl-color', 'ul-color');
+  });
+  root.querySelectorAll('.pp-link').forEach(l => l.classList.remove('pp-link-neutral'));
+}
+
+// --- FlowSight-style comet sweep animation ---
+// A bright glowing comet head sweeps across each active link bar
+// with a luminous fading trail behind it. Canvas-rendered per bar.
+let ppCometCanvases = [];
+let ppCometDirection = 'dl';
+let ppCometRunning = false;
+
+function ppCreateCometCanvases(activeIdx, direction) {
+  ppRemoveCometCanvases();
+  ppCometDirection = direction;
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+
+  // Only animate the active segment's link bar
+  const links = root.querySelectorAll('.pp-link');
+  const link = links[activeIdx];
+  if (!link) return;
+
+  const bar = link.querySelector('.pp-link-bar');
+  if (!bar) return;
+
+  bar.style.position = 'relative';
+  bar.style.overflow = 'visible';
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'pp-comet-canvas';
+  canvas.style.cssText = 'position:absolute;top:-8px;left:-6px;right:-6px;bottom:-8px;width:calc(100% + 12px);height:calc(100% + 16px);pointer-events:none;z-index:4;';
+
+  // Size after appending so layout is resolved
+  bar.appendChild(canvas);
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ppCometCanvases.push({ canvas, ctx, w: rect.width, h: rect.height });
+}
+
+function ppRemoveCometCanvases() {
+  ppCometCanvases.forEach(({ canvas }) => canvas.remove());
+  ppCometCanvases = [];
+  ppCometRunning = false;
+  if (ppDotAnimFrame) { cancelAnimationFrame(ppDotAnimFrame); ppDotAnimFrame = null; }
+}
+
+function ppAnimateComet(timestamp) {
+  if (!ppCometRunning || ppCometCanvases.length === 0) return;
+
+  const isDl = ppCometDirection === 'dl';
+  const color = isDl ? PP_COLOR_DL : PP_COLOR_UL;
+
+  // Timing: fast enough that 2-3 full cycles fit per segment (~2s each)
+  const SWEEP = 600;
+  const PAUSE = 80;
+  const FADE = 120;
+  const TOTAL = SWEEP + PAUSE + FADE;
+
+  ppCometCanvases.forEach(({ ctx, w, h }) => {
+    ctx.clearRect(0, 0, w, h);
+    const cy = h / 2;
+    const padX = 6; // horizontal padding we added
+    const barW = w - padX * 2;
+
+    const elapsed = (timestamp % TOTAL);
+    let progress, opacity;
+
+    if (elapsed < SWEEP) {
+      // Sweeping
+      // Ease-in-out cubic for smooth acceleration/deceleration
+      const t = elapsed / SWEEP;
+      progress = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      opacity = 1;
+    } else if (elapsed < SWEEP + PAUSE) {
+      // Paused at destination
+      progress = 1;
+      opacity = 1;
+    } else {
+      // Fading out
+      progress = 1;
+      opacity = 1 - (elapsed - SWEEP - PAUSE) / FADE;
+    }
+
+    if (opacity <= 0) return;
+
+    const headX = padX + (isDl ? progress * barW : (1 - progress) * barW);
+
+    // Trail: gradient line from start to head
+    const trailLen = Math.min(progress, 0.35) * barW; // trail up to 35% of bar length
+    const trailStartX = isDl ? Math.max(padX, headX - trailLen) : Math.min(padX + barW, headX + trailLen);
+
+    if (trailLen > 2) {
+      const grad = ctx.createLinearGradient(trailStartX, 0, headX, 0);
+      grad.addColorStop(0, color + '00');
+      grad.addColorStop(0.6, color + Math.round(opacity * 0.4 * 255).toString(16).padStart(2, '0'));
+      grad.addColorStop(1, color + Math.round(opacity * 0.7 * 255).toString(16).padStart(2, '0'));
+      ctx.beginPath();
+      ctx.moveTo(trailStartX, cy);
+      ctx.lineTo(headX, cy);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    // Outer glow
+    const glowGrad = ctx.createRadialGradient(headX, cy, 0, headX, cy, 14);
+    glowGrad.addColorStop(0, color + Math.round(opacity * 0.5 * 255).toString(16).padStart(2, '0'));
+    glowGrad.addColorStop(0.5, color + Math.round(opacity * 0.15 * 255).toString(16).padStart(2, '0'));
+    glowGrad.addColorStop(1, color + '00');
+    ctx.beginPath();
+    ctx.arc(headX, cy, 14, 0, Math.PI * 2);
+    ctx.fillStyle = glowGrad;
+    ctx.fill();
+
+    // Bright core
+    ctx.beginPath();
+    ctx.arc(headX, cy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+    ctx.fill();
+
+    // White-hot center
+    ctx.beginPath();
+    ctx.arc(headX, cy, 2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${opacity * 0.9})`;
+    ctx.fill();
+  });
+
+  ppDotAnimFrame = requestAnimationFrame(ppAnimateComet);
+}
+
+function ppStartComet(activeIdx, direction) {
+  ppCreateCometCanvases(activeIdx, direction);
+  ppCometRunning = true;
+  ppDotAnimFrame = requestAnimationFrame(ppAnimateComet);
+}
+
+function ppStopComet() {
+  ppCometRunning = false;
+  ppRemoveCometCanvases();
+}
+
+// --- Segment-by-segment speed annotation on completed links ---
+function ppAnnotateSegment(linkIdx, speed, direction) {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const links = root.querySelectorAll('.pp-link');
+  const link = links[linkIdx];
+  if (!link) return;
+
+  // Remove existing annotation
+  link.querySelectorAll('.pp-seg-result').forEach(e => e.remove());
+
+  const color = direction === 'dl' ? PP_COLOR_DL : PP_COLOR_UL;
+  const arrow = direction === 'dl' ? '\u2193' : '\u2191';
+  const f = ppSpeedFormat(speed);
+  const el = document.createElement('div');
+  el.className = 'pp-seg-result';
+  el.innerHTML = `<span style="color:${color}">${arrow} ${f.value} ${f.unit}</span>`;
+  link.appendChild(el);
+}
+
+function ppClearAnnotations() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  root.querySelectorAll('.pp-seg-result').forEach(e => e.remove());
+}
+
+// === MAIN TEST FLOW ===
+function ppStartTest() {
+  if (ppTestPhase !== PP_PHASE.IDLE && ppTestPhase !== PP_PHASE.COMPLETE) return;
+
+  const s = ppScenarios[ppCurrent];
+  const numLinks = s.links.length;
+
+  // Build per-segment targets from scenario data with variance
+  const segDl = s.links.map(l => l.dl * (0.92 + Math.random() * 0.16));
+  const segUl = s.links.map(l => l.ul * (0.92 + Math.random() * 0.16));
+
+  ppTestResults = {
+    dl: 0, ul: 0, ping: 0, dlGrade: '', ulGrade: '',
+    segDl, segUl, numLinks,
+    segmentSpeeds: []
+  };
+
+  ppTestPhase = PP_PHASE.PING;
+  ppTestSpeed = 0;
+  ppTestStart = performance.now();
+  ppActiveSegment = -1;
+
+  // UI: hide GO, show gauge
+  const goBtn = document.getElementById('pp-go-btn');
+  const ring = document.getElementById('pp-go-ring');
+  const liveSpeed = document.getElementById('pp-live-speed');
+  if (goBtn) goBtn.classList.add('hidden');
+  if (ring) ring.classList.add('testing');
+  if (liveSpeed) liveSpeed.style.display = 'none';
+
+  // Reset result columns
+  const dlCol = document.getElementById('pp-result-dl');
+  const ulCol = document.getElementById('pp-result-ul');
+  if (dlCol) dlCol.innerHTML = '<div class="pp-result-placeholder">--</div><div class="pp-result-label">DOWNLOAD</div><div class="pp-result-ping">&nbsp;</div>';
+  if (ulCol) ulCol.innerHTML = '<div class="pp-result-placeholder">--</div><div class="pp-result-label">UPLOAD</div><div class="pp-result-ping">&nbsp;</div>';
+
+  ppInitGauge();
+  ppStopComet();
+  ppResetPathForTest();
+  ppClearAnnotations();
+  ppNeutralizeBars();
+  ppEnsurePacketDots();
+  ppNeutralizeVerticalBars();
+  ppAnimateTest();
+}
+
+function ppAnimateTest() {
+  const elapsed = performance.now() - ppTestStart;
+  const phaseLabel = document.getElementById('pp-phase-label');
+  const pingDisplay = document.getElementById('pp-ping-display');
+  const liveSpeed = document.getElementById('pp-live-speed');
+  const liveValue = document.getElementById('pp-live-value');
+  const liveUnit = document.getElementById('pp-live-unit');
+  const s = ppScenarios[ppCurrent];
+  const numLinks = ppTestResults.numLinks;
+
+  if (ppTestPhase === PP_PHASE.PING) {
+    const pingDuration = 2500;
+    if (phaseLabel) { phaseLabel.textContent = 'MEASURING LATENCY'; phaseLabel.style.color = PP_COLOR_PING; }
+    const totalLat = s.links.reduce((sum, lk) => sum + (lk.tech?.latency || 0), 0);
+    const targetPing = totalLat * (0.9 + Math.random() * 0.2);
+    const pingProgress = Math.min(elapsed / pingDuration, 1);
+    ppDrawGaugeRing(pingProgress, PP_COLOR_PING);
+
+    if (liveSpeed) liveSpeed.style.display = '';
+    if (liveValue) liveValue.textContent = (targetPing * pingProgress).toFixed(1);
+    if (liveUnit) liveUnit.textContent = 'ms';
+
+    if (elapsed >= pingDuration) {
+      ppTestResults.ping = Math.round(targetPing * 10) / 10;
+      if (pingDisplay) pingDisplay.textContent = ppTestResults.ping + 'ms idle';
+      // Start download, segment 0
+      ppTestPhase = PP_PHASE.DOWNLOAD;
+      ppActiveSegment = 0;
+      ppTestStart = performance.now();
+      ppTestTarget = ppTestResults.segDl[0];
+      ppTestSpeed = 0;
+      ppHighlightSegment(0, 'dl');
+      ppStartComet(0, 'dl');
+    }
+  } else if (ppTestPhase === PP_PHASE.DOWNLOAD) {
+    // Each segment gets a proportional share of total DL time
+    const segDuration = Math.max(2500, 10000 / numLinks);
+    const t = Math.min(elapsed / segDuration, 1);
+    const segIdx = ppActiveSegment;
+    const segLabel = s.links[segIdx]?.label || ('Segment ' + (segIdx + 1));
+
+    if (phaseLabel) {
+      phaseLabel.textContent = `DOWNLOAD: ${segLabel}`;
+      phaseLabel.style.color = PP_COLOR_DL;
+    }
+
+    // Speed ramp
+    const tau = 1.5;
+    const base = ppTestTarget * (1 - Math.exp(-t * (segDuration / 1000) / tau));
+    const jitter = ppTestTarget * 0.025 * (Math.sin(t * 47) + Math.sin(t * 73) * 0.5);
+    ppTestSpeed = Math.max(0, base + jitter);
+
+    const fmt = ppSpeedFormat(ppTestSpeed);
+    if (liveSpeed) liveSpeed.style.display = '';
+    if (liveValue) liveValue.textContent = fmt.value;
+    if (liveUnit) liveUnit.textContent = fmt.unit;
+
+    // Gauge: overall DL progress across all segments
+    const overallProgress = (segIdx + t) / numLinks;
+    ppDrawGaugeRing(overallProgress, PP_COLOR_DL);
+
+    // Live DL column
+    const dlCol = document.getElementById('pp-result-dl');
+    if (dlCol) {
+      const f = ppSpeedFormat(ppTestSpeed);
+      dlCol.innerHTML = `<div class="pp-result-value" style="color:${PP_COLOR_DL}">${f.value}<span class="pp-result-unit">${f.unit}</span></div><div class="pp-result-label">DOWNLOAD</div><div class="pp-result-ping">&nbsp;</div>`;
+    }
+
+    if (elapsed >= segDuration) {
+      // Segment complete: annotate and recolor the link bar
+      const finalSpeed = ppTestSpeed;
+      ppAnnotateSegment(segIdx, finalSpeed, 'dl');
+      ppColorSegmentBar(segIdx, finalSpeed);
+      ppColorVerticalBar(segIdx);
+      ppTestResults.segmentSpeeds.push({ idx: segIdx, dl: finalSpeed });
+
+      // Live bottleneck check: show ! as soon as a poor segment is measured
+      ppUpdateBottleneckDecoration();
+
+      if (segIdx + 1 < numLinks) {
+        // Next DL segment
+        ppActiveSegment = segIdx + 1;
+        ppTestStart = performance.now();
+        ppTestTarget = ppTestResults.segDl[segIdx + 1];
+        ppTestSpeed = 0;
+        ppStopComet();
+        ppHighlightSegment(segIdx + 1, 'dl');
+        ppStartComet(segIdx + 1, 'dl');
+      } else {
+        // DL complete: record overall result as the bottleneck (minimum)
+        ppTestResults.dl = Math.round(Math.min(...ppTestResults.segDl));
+        ppTestResults.dlGrade = ppRandomGrade(ppTestResults.ping);
+        ppStopComet();
+        ppClearHighlights();
+
+        // Switch to upload, segment 0
+        ppTestPhase = PP_PHASE.UPLOAD;
+        ppActiveSegment = 0;
+        ppTestStart = performance.now();
+        ppTestTarget = ppTestResults.segUl[0];
+        ppTestSpeed = 0;
+        ppHighlightSegment(0, 'ul');
+        ppStartComet(0, 'ul');
+      }
+    }
+  } else if (ppTestPhase === PP_PHASE.UPLOAD) {
+    const segDuration = Math.max(2500, 10000 / numLinks);
+    const t = Math.min(elapsed / segDuration, 1);
+    const segIdx = ppActiveSegment;
+    const segLabel = s.links[segIdx]?.label || ('Segment ' + (segIdx + 1));
+
+    if (phaseLabel) {
+      phaseLabel.textContent = `UPLOAD: ${segLabel}`;
+      phaseLabel.style.color = PP_COLOR_UL;
+    }
+
+    const tau = 1.5;
+    const base = ppTestTarget * (1 - Math.exp(-t * (segDuration / 1000) / tau));
+    const jitter = ppTestTarget * 0.025 * (Math.sin(t * 53) + Math.sin(t * 89) * 0.5);
+    ppTestSpeed = Math.max(0, base + jitter);
+
+    const fmt = ppSpeedFormat(ppTestSpeed);
+    if (liveSpeed) liveSpeed.style.display = '';
+    if (liveValue) liveValue.textContent = fmt.value;
+    if (liveUnit) liveUnit.textContent = fmt.unit;
+
+    const overallProgress = (segIdx + t) / numLinks;
+    ppDrawGaugeRing(overallProgress, PP_COLOR_UL);
+
+    const ulCol = document.getElementById('pp-result-ul');
+    if (ulCol) {
+      const f = ppSpeedFormat(ppTestSpeed);
+      ulCol.innerHTML = `<div class="pp-result-value" style="color:${PP_COLOR_UL}">${f.value}<span class="pp-result-unit">${f.unit}</span></div><div class="pp-result-label">UPLOAD</div><div class="pp-result-ping">&nbsp;</div>`;
+    }
+
+    if (elapsed >= segDuration) {
+      const finalSpeed = ppTestSpeed;
+      ppAnnotateSegment(segIdx, finalSpeed, 'ul');
+      // Store UL speed for this segment
+      const existing = ppTestResults.segmentSpeeds.find(s => s.idx === segIdx);
+      if (existing) existing.ul = finalSpeed;
+      else ppTestResults.segmentSpeeds.push({ idx: segIdx, ul: finalSpeed });
+
+      if (segIdx + 1 < numLinks) {
+        ppActiveSegment = segIdx + 1;
+        ppTestStart = performance.now();
+        ppTestTarget = ppTestResults.segUl[segIdx + 1];
+        ppTestSpeed = 0;
+        ppStopComet();
+        ppHighlightSegment(segIdx + 1, 'ul');
+        ppStartComet(segIdx + 1, 'ul');
+      } else {
+        ppTestResults.ul = Math.round(Math.min(...ppTestResults.segUl));
+        ppTestResults.ulGrade = ppRandomGrade(ppTestResults.ping * 1.3);
+        ppStopComet();
+        ppClearHighlights();
+        ppCompleteTest();
+        return;
+      }
+    }
+  }
+
+  if (ppTestPhase !== PP_PHASE.IDLE && ppTestPhase !== PP_PHASE.COMPLETE) {
+    ppTestAnim = requestAnimationFrame(ppAnimateTest);
+  }
+}
+
+function ppCompleteTest() {
+  ppTestPhase = PP_PHASE.COMPLETE;
+  if (ppTestAnim) { cancelAnimationFrame(ppTestAnim); ppTestAnim = null; }
+
+  const goBtn = document.getElementById('pp-go-btn');
+  const ring = document.getElementById('pp-go-ring');
+  const liveSpeed = document.getElementById('pp-live-speed');
+  const phaseLabel = document.getElementById('pp-phase-label');
+  const pingDisplay = document.getElementById('pp-ping-display');
+
+  if (liveSpeed) liveSpeed.style.display = 'none';
+  if (goBtn) { goBtn.classList.remove('hidden'); goBtn.classList.add('pulsing'); }
+  if (ring) ring.classList.remove('testing');
+  if (phaseLabel) { phaseLabel.textContent = 'Tap to test again'; phaseLabel.style.color = ''; }
+  if (pingDisplay) pingDisplay.textContent = ppTestResults.ping + 'ms idle';
+
+  if (ppGaugeCtx) ppGaugeCtx.clearRect(0, 0, ppGaugeSize, ppGaugeSize);
+
+  const dlCol = document.getElementById('pp-result-dl');
+  if (dlCol) {
+    const f = ppSpeedFormat(ppTestResults.dl);
+    dlCol.innerHTML = `
+      <div class="pp-result-value" style="color:${PP_COLOR_DL}">${f.value}<span class="pp-result-unit">${f.unit}</span></div>
+      <div class="pp-result-label">DOWNLOAD</div>
+      <div class="pp-result-ping">${ppTestResults.ping}ms <span class="pp-result-grade" style="color:${ppGradeColor(ppTestResults.dlGrade)}">${ppTestResults.dlGrade}</span></div>`;
+  }
+
+  const ulCol = document.getElementById('pp-result-ul');
+  if (ulCol) {
+    const f = ppSpeedFormat(ppTestResults.ul);
+    ulCol.innerHTML = `
+      <div class="pp-result-value" style="color:${PP_COLOR_UL}">${f.value}<span class="pp-result-unit">${f.unit}</span></div>
+      <div class="pp-result-label">UPLOAD</div>
+      <div class="pp-result-ping">${(ppTestResults.ping * 1.3).toFixed(1)}ms <span class="pp-result-grade" style="color:${ppGradeColor(ppTestResults.ulGrade)}">${ppTestResults.ulGrade}</span></div>`;
+  }
+
+  // Restore scenario UI elements
+  ppRestorePathAfterTest();
+
+  // Final bottleneck evaluation based on all measured results
+  ppUpdateBottleneckDecoration();
+
+  // Inject per-hop speed annotations (iOS-style)
+  ppInjectHopAnnotations();
+}
+
+function ppInjectHopAnnotations() {
+  const root = document.getElementById('pp-path-root');
+  if (!root) return;
+  const s = ppScenarios[ppCurrent];
+  const annots = root.querySelectorAll('.pp-node-speed-annot');
+
+  // Build link-index to measured speeds map
+  const segMap = {};
+  for (const seg of ppTestResults.segmentSpeeds || []) {
+    segMap[seg.idx] = seg;
+  }
+
+  annots.forEach((el, nodeIdx) => {
+    // Each node is bracketed by links: link[nodeIdx-1] before, link[nodeIdx] after
+    // Show the downstream link's speeds (link after this node)
+    const linkIdx = nodeIdx < s.links.length ? nodeIdx : nodeIdx - 1;
+    if (linkIdx < 0) { el.innerHTML = ''; return; }
+    // Skip the last node (Internet) - it has no downstream link, use upstream
+    const seg = segMap[linkIdx];
+    if (!seg) { el.innerHTML = ''; return; }
+    const dl = Math.round(seg.dl || 0);
+    const ul = Math.round(seg.ul || 0);
+    if (dl === 0 && ul === 0) { el.innerHTML = ''; return; }
+    let parts = [];
+    if (dl > 0) parts.push(`<span style="color:${PP_COLOR_DL};opacity:0.8">\u2193 ${dl} Mbps</span>`);
+    if (ul > 0) parts.push(`<span style="color:${PP_COLOR_UL};opacity:0.8">\u2191 ${ul} Mbps</span>`);
+    el.innerHTML = parts.join('');
+  });
+}
+
 let ppCurrent = 'problem';
 let ppOpenDetail = -1;
 let ppBottleneckExpanded = true;
@@ -195,12 +1076,17 @@ function ppRender() {
   const s = ppScenarios[ppCurrent];
   let html = '';
 
-  // === Scenario selector ===
-  html += '<div class="pp-scenario-bar">';
-  for (const [key, sc] of Object.entries(ppScenarios)) {
-    html += `<button class="pp-scenario-btn${key === ppCurrent ? ' active' : ''}" data-scenario="${key}" onclick="ppSetScenario('${key}')">${sc.name}</button>`;
+  // === Scenario selector (rendered into separate top-level container) ===
+  const scenarioRoot = document.getElementById('pp-scenario-root');
+  if (scenarioRoot) {
+    let scenarioHtml = '<div class="pp-scenario-bar">';
+    scenarioHtml += '<span class="pp-scenario-label">Demo:</span>';
+    for (const [key, sc] of Object.entries(ppScenarios)) {
+      scenarioHtml += `<button class="pp-scenario-btn${key === ppCurrent ? ' active' : ''}" data-scenario="${key}" onclick="ppSetScenario('${key}')">${sc.name}</button>`;
+    }
+    scenarioHtml += '</div>';
+    scenarioRoot.innerHTML = scenarioHtml;
   }
-  html += '</div>';
 
   // === Bottleneck section (top of card) ===
   const bnTitle = s.bottleneck.title || 'What can I do?';
@@ -404,6 +1290,7 @@ function ppRender() {
         <div class="pp-node-text-mobile">
           <div class="pp-node-name">${nd.name}</div>
           <div class="pp-node-role">${nodeRole}</div>
+          <div class="pp-node-speed-annot" data-node-idx="${i}"></div>
         </div>
       </div>`;
 
@@ -435,6 +1322,19 @@ function ppRender() {
 
       const throughputHtml = `<div class="pp-link-throughput tech-only" style="color:${qColor}">${fmt(lk.dl)} / ${fmt(lk.ul)}</div>`;
 
+      // Build mobile-visible inline tech details (iOS-style)
+      let mobileTechHtml = '';
+      if (lk.tech) {
+        const t = lk.tech;
+        let parts = [];
+        if (t.medium) parts.push(t.medium);
+        if (t.band && t.width) parts.push(`${t.channel || ''}ch ${t.width}`);
+        else if (t.band) parts.push(t.band);
+        if (t.snr != null) parts.push(`${t.snr} dB`);
+        else if (t.noise != null) parts.push(`${t.noise} dBm`);
+        mobileTechHtml = parts.length ? `<div class="pp-link-mobile-tech">${parts.join('<span class="pp-link-tech-sep">/</span>')}</div>` : '';
+      }
+
       html += `
         <div class="pp-link q-${lk.quality}${isWorst ? ' worst-link' : ''}" onclick="ppToggleDetail(${i})">
           <div class="pp-link-tooltip">${tipHtml}</div>
@@ -442,6 +1342,7 @@ function ppRender() {
           <div class="pp-link-bar-wrap"><div class="pp-link-bar ${lk.quality}"></div><div class="pp-link-notif"></div></div>
           <div class="pp-link-label">${lk.label}</div>
           ${techChipHtml}
+          ${mobileTechHtml}
         </div>`;
     }
   }

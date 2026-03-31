@@ -75,7 +75,7 @@
       <li>
         <a class="nav-link" href="#" id="nav-speedtest">
           <span class="nav-icon"><i class="fa-solid fa-bolt"></i></span>
-          <span class="nav-label">Speed Test</span>
+          <span class="nav-label">SpeedWave</span>
         </a>
       </li>
       <li>
@@ -707,6 +707,41 @@
 
       <!-- Page: PathPulse -->
       <div id="page-pathpulse" class="page-panel" style="display:none">
+
+        <!-- Demo scenario selector (prototype only, not part of real app) -->
+        <div id="pp-scenario-root"></div>
+
+        <!-- Test Gauge Area (iOS-style: DL | GO | UL) -->
+        <div class="pp-gauge-row" id="pp-gauge-row">
+          <div class="pp-result-col pp-result-dl" id="pp-result-dl">
+            <div class="pp-result-placeholder">--</div>
+            <div class="pp-result-label">DOWNLOAD</div>
+            <div class="pp-result-ping">&nbsp;</div>
+          </div>
+
+          <div class="pp-gauge-center">
+            <div class="pp-go-ring" id="pp-go-ring">
+              <canvas id="pp-gauge-canvas" width="280" height="280"></canvas>
+              <button class="pp-go-btn pulsing" id="pp-go-btn" onclick="ppStartTest()">
+                <span class="pp-go-text">GO</span>
+              </button>
+              <div class="pp-live-speed" id="pp-live-speed" style="display:none">
+                <span class="pp-live-value" id="pp-live-value">0</span>
+                <span class="pp-live-unit" id="pp-live-unit">Mbps</span>
+              </div>
+            </div>
+            <div class="pp-phase-label" id="pp-phase-label">Tap to test your path</div>
+            <div class="pp-ping-display" id="pp-ping-display"></div>
+          </div>
+
+          <div class="pp-result-col pp-result-ul" id="pp-result-ul">
+            <div class="pp-result-placeholder">--</div>
+            <div class="pp-result-label">UPLOAD</div>
+            <div class="pp-result-ping">&nbsp;</div>
+          </div>
+        </div>
+
+        <!-- Network Path Card -->
         <div class="pp-card">
           <div class="pp-card-label">
             <span>Your Network Path</span>
@@ -716,8 +751,295 @@
         </div>
       </div><!-- /page-pathpulse -->
 
+      <!-- Page: SpeedWave -->
+      <div id="page-speedwave" class="page-panel" style="display:none">
+        <div class="page-header-actions">
+          <span class="st-last-test-time" id="st-last-time"></span>
+        </div>
+
+        <!-- Centered content column -->
+        <div class="st-layout">
+
+          <!-- Test Card -->
+          <div class="card st-test-card" id="st-test-card">
+            <div class="st-gauge-area" id="st-gauge-area">
+              <canvas id="st-gauge-canvas"></canvas>
+              <button class="st-go-btn" id="st-go-btn" onclick="startTest()">
+                <span class="st-go-text">GO</span>
+              </button>
+              <div class="st-live-speed" id="st-live-speed" style="display:none;">
+                <span class="st-live-value" id="st-live-value">0</span>
+                <span class="st-live-unit">Mbps</span>
+              </div>
+              <div class="st-go-subtitle" id="st-go-subtitle">Tap to start speed test</div>
+            </div>
+
+            <div class="st-phase-bar" id="st-phase-bar" style="display:none;">
+              <div class="st-phase" id="st-phase-latency" data-phase="latency">
+                <div class="st-phase-dot"></div>
+                <span>Idle Latency</span>
+              </div>
+              <div class="st-phase-connector"></div>
+              <div class="st-phase" id="st-phase-download" data-phase="download">
+                <div class="st-phase-dot"></div>
+                <span>Download</span>
+              </div>
+              <div class="st-phase-connector"></div>
+              <div class="st-phase" id="st-phase-upload" data-phase="upload">
+                <div class="st-phase-dot"></div>
+                <span>Upload</span>
+              </div>
+            </div>
+
+            <div class="st-realtime-inline" id="st-realtime-inline" style="display:none;">
+              <canvas id="st-realtime-canvas"></canvas>
+            </div>
+
+            <div class="st-results" id="st-results" style="display:none;">
+              <div class="st-speed-results">
+                <div class="st-result-block st-dl" id="st-result-dl">
+                  <div class="st-result-label"><i class="fa-solid fa-arrow-down"></i> Download</div>
+                  <div class="st-result-speed">
+                    <span class="st-result-value" id="st-dl-value">0</span>
+                    <span class="st-result-unit" id="st-dl-unit">Mbps</span>
+                    <span class="st-grade-wrap" id="st-dl-grade-wrap">
+                      <span class="st-grade-pill" id="st-dl-grade">A</span>
+                      <span class="st-grade-label">Bufferbloat Grade</span>
+                      <div class="st-grade-tooltip" id="st-dl-grade-tip">
+                        <div class="st-grade-tip-header" id="st-dl-grade-tip-header">Grade A: Excellent</div>
+                        <div class="st-grade-tip-body" id="st-dl-grade-tip-body">Your latency under load is excellent.</div>
+                        <div class="st-grade-tip-explain">Bufferbloat is excessive buffering in network equipment that causes high latency and poor performance under load, affecting real-time applications like video calls and gaming.</div>
+                        <div class="st-grade-tip-shaper" id="st-dl-grade-tip-shaper" style="display:none;">
+                          A shaper may reduce bufferbloat for this network. <a href="#" onclick="event.preventDefault();event.stopPropagation();openShaperModal();">Configure shaper</a>
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="st-utilization" id="st-dl-util">
+                    <div class="st-util-bar"><div class="st-util-fill" id="st-dl-util-fill"></div></div>
+                    <div class="st-util-text" id="st-dl-util-text"></div>
+                  </div>
+                </div>
+                <div class="st-result-block st-ul" id="st-result-ul">
+                  <div class="st-result-label"><i class="fa-solid fa-arrow-up"></i> Upload</div>
+                  <div class="st-result-speed">
+                    <span class="st-result-value" id="st-ul-value">0</span>
+                    <span class="st-result-unit" id="st-ul-unit">Mbps</span>
+                    <span class="st-grade-wrap" id="st-ul-grade-wrap">
+                      <span class="st-grade-pill" id="st-ul-grade">A</span>
+                      <span class="st-grade-label">Bufferbloat Grade</span>
+                      <div class="st-grade-tooltip" id="st-ul-grade-tip">
+                        <div class="st-grade-tip-header" id="st-ul-grade-tip-header">Grade A: Excellent</div>
+                        <div class="st-grade-tip-body" id="st-ul-grade-tip-body">Your latency under load is excellent.</div>
+                        <div class="st-grade-tip-explain">Bufferbloat is excessive buffering in network equipment that causes high latency and poor performance under load, affecting real-time applications like video calls and gaming.</div>
+                        <div class="st-grade-tip-shaper" id="st-ul-grade-tip-shaper" style="display:none;">
+                          A shaper may reduce bufferbloat for this network. <a href="#" onclick="event.preventDefault();event.stopPropagation();openShaperModal();">Configure shaper</a>
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="st-utilization" id="st-ul-util">
+                    <div class="st-util-bar"><div class="st-util-fill" id="st-ul-util-fill"></div></div>
+                    <div class="st-util-text" id="st-ul-util-text"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="st-latency-row" id="st-latency-row">
+                <span class="st-latency-label">Latency</span>
+                <span class="st-latency-value" id="st-latency-value">--</span>
+                <span class="st-latency-unit">ms</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection + Throughput row -->
+          <div class="st-pair-row">
+            <div class="card st-info-card" id="st-info-card">
+              <div class="card-label">Connection</div>
+              <div class="st-info-grid" id="st-info-grid">
+                <div class="st-info-row"><span class="st-info-key">Server</span><span class="st-info-val" id="st-info-server">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">ISP</span><span class="st-info-val" id="st-info-isp">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">IP</span><span class="st-info-val" id="st-info-ip">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">Plan</span><span class="st-info-val" id="st-info-plan">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">Distance</span><span class="st-info-val" id="st-info-distance">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">Duration</span><span class="st-info-val" id="st-info-duration">--</span></div>
+                <div class="st-info-row"><span class="st-info-key">Tested</span><span class="st-info-val st-info-servers" id="st-info-servers">--</span></div>
+              </div>
+            </div>
+
+            <div class="card st-realtime-card" id="st-realtime-card">
+              <div class="card-label">
+                <span>Throughput</span>
+                <span class="st-realtime-status" id="st-realtime-status"></span>
+              </div>
+              <div class="st-realtime-chart-wrap">
+                <canvas id="st-realtime-adv-canvas"></canvas>
+                <div class="st-realtime-empty" id="st-realtime-empty">
+                  <i class="fa-solid fa-chart-area"></i>
+                  <span>Run a speed test to see throughput data</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full History Chart -->
+          <div class="card st-history-card" id="st-history-card-basic">
+            <div class="card-label">
+              <span>SpeedWave History</span>
+              <div class="st-history-controls">
+                <div class="st-history-legend">
+                  <span class="sth-legend-item dl"><span class="sth-legend-dot dl"></span> DL</span>
+                  <span class="sth-legend-item ul"><span class="sth-legend-dot ul"></span> UL</span>
+                  <span class="sth-legend-item rate"><span class="sth-legend-line"></span> Plan</span>
+                </div>
+                <div class="sth-toggle-group">
+                  <button class="sth-toggle" id="sth-btn-10" onclick="setHistoryWindow(10)">10</button>
+                  <button class="sth-toggle" id="sth-btn-30" onclick="setHistoryWindow(30)">30</button>
+                  <button class="sth-toggle active" id="sth-btn-all" onclick="setHistoryWindow(0)">All</button>
+                </div>
+                <div class="sth-toggle-group">
+                  <button class="sth-toggle active" id="sth-btn-raw" onclick="setHistoryMode('raw')">Mbps</button>
+                  <button class="sth-toggle" id="sth-btn-pct" onclick="setHistoryMode('pct')">%</button>
+                </div>
+                <button class="sth-export-btn" onclick="exportHistory()" title="Export as JSON">
+                  <i class="fa-solid fa-download"></i>
+                </button>
+              </div>
+            </div>
+            <div class="st-history-outer">
+              <div class="sth-yaxis" id="sth-yaxis"></div>
+              <div class="st-history-wrap" id="sth-scroll">
+                <canvas id="st-history-canvas"></canvas>
+                <canvas id="st-history-overlay" style="pointer-events:none;display:block;"></canvas>
+                <div class="sth-tooltip" id="st-history-tooltip"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Details Toggle -->
+          <button class="st-advanced-toggle" id="st-advanced-toggle" onclick="toggleAdvanced()">
+            <span id="st-advanced-toggle-text">Show Advanced Details</span>
+            <i class="fa-solid fa-chevron-down" id="st-advanced-toggle-icon"></i>
+          </button>
+        </div>
+
+        <!-- Advanced View -->
+        <div class="st-advanced" id="st-advanced" style="display:none;">
+          <div class="card st-bb-card" id="st-bb-card">
+            <div class="card-label">Bufferbloat Score</div>
+            <div class="st-bb-body" id="st-bb-body"></div>
+          </div>
+
+          <div class="card st-detail-card" id="st-detail-card" style="display:none;">
+            <div class="card-label">
+              <span id="st-detail-title">Test Detail</span>
+              <button class="st-detail-close" onclick="closeDetail()">&times;</button>
+            </div>
+            <div class="st-detail-body" id="st-detail-body"></div>
+          </div>
+
+          <div class="card st-latency-card">
+            <div class="card-label">Latency Breakdown</div>
+            <div class="st-latency-grid" id="st-latency-grid">
+              <div class="st-latency-col" id="st-latency-idle">
+                <div class="st-latency-phase">Idle</div>
+                <div class="st-latency-avg"><span id="st-lat-idle-avg">--</span> ms</div>
+                <div class="st-latency-jitter">jitter <span id="st-lat-idle-jitter">--</span> ms</div>
+                <div class="st-latency-delta st-latency-baseline">baseline</div>
+              </div>
+              <div class="st-latency-col" id="st-latency-dl">
+                <div class="st-latency-phase dl">Download</div>
+                <div class="st-latency-avg"><span id="st-lat-dl-avg">--</span> ms</div>
+                <div class="st-latency-jitter">jitter <span id="st-lat-dl-jitter">--</span> ms</div>
+                <div class="st-latency-delta" id="st-lat-dl-delta">--</div>
+              </div>
+              <div class="st-latency-col" id="st-latency-ul">
+                <div class="st-latency-phase ul">Upload</div>
+                <div class="st-latency-avg"><span id="st-lat-ul-avg">--</span> ms</div>
+                <div class="st-latency-jitter">jitter <span id="st-lat-ul-jitter">--</span> ms</div>
+                <div class="st-latency-delta" id="st-lat-ul-delta">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /page-speedwave -->
+
     </main>
   </div><!-- /main-wrapper -->
+
+  <!-- SpeedWave Shaper Modal -->
+  <div class="shaper-overlay" id="shaper-overlay" style="display:none;" onclick="if(event.target===this)closeShaperModal();">
+    <div class="shaper-modal">
+      <div class="shaper-modal-header">
+        <span class="shaper-modal-title">WAN Shaper Configuration</span>
+        <button class="shaper-modal-close" onclick="closeShaperModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="shaper-modal-body">
+        <!-- Enable toggle -->
+        <div class="shaper-row">
+          <label class="shaper-label">Shaper</label>
+          <div class="shaper-toggle-wrap">
+            <label class="shaper-switch">
+              <input type="checkbox" id="shaper-enabled" onchange="onShaperToggle()">
+              <span class="shaper-slider"></span>
+            </label>
+            <span class="shaper-toggle-text" id="shaper-enabled-text">Disabled</span>
+          </div>
+        </div>
+
+        <!-- Flow offloading warning -->
+        <div class="shaper-warning" id="shaper-warning" style="display:none;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Enabling the shaper will disable hardware flow offloading.</span>
+        </div>
+
+        <!-- Rate source -->
+        <div class="shaper-row" id="shaper-source-row">
+          <label class="shaper-label">Rate Source</label>
+          <select class="shaper-select" id="shaper-source" onchange="onShaperSourceChange()">
+            <option value="manual">Enter rate manually</option>
+            <option value="service">Derive from service rate (90%)</option>
+            <option value="speedtest">Derive from speedtest performance</option>
+          </select>
+        </div>
+
+        <!-- Rates -->
+        <div class="shaper-rates" id="shaper-rates">
+          <div class="shaper-row">
+            <label class="shaper-label">Download Rate</label>
+            <div class="shaper-input-wrap">
+              <input type="number" class="shaper-input" id="shaper-dl-rate" min="0" step="1" placeholder="0">
+              <span class="shaper-input-unit">Mbps</span>
+            </div>
+          </div>
+          <div class="shaper-row">
+            <label class="shaper-label">Upload Rate</label>
+            <div class="shaper-input-wrap">
+              <input type="number" class="shaper-input" id="shaper-ul-rate" min="0" step="1" placeholder="0">
+              <span class="shaper-input-unit">Mbps</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Derived rate info -->
+        <div class="shaper-derived-info" id="shaper-derived-info" style="display:none;"></div>
+
+        <!-- Help text -->
+        <div class="shaper-help">
+          <p>Setting a rate to 0 disables shaping in that direction.</p>
+        </div>
+      </div>
+
+      <div class="shaper-modal-footer">
+        <button class="shaper-btn shaper-btn-cancel" onclick="closeShaperModal()">Cancel</button>
+        <button class="shaper-btn shaper-btn-save" onclick="saveShaperConfig()">
+          <i class="fa-solid fa-check"></i> Apply
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Global Tooltip -->
   <div id="tooltip"></div>
@@ -760,5 +1082,6 @@
   <script src="statsview-data.js?v=1"></script>
   <script src="statsview.js?v=1"></script>
   <script src="pathpulse.js?v=2"></script>
+  <script src="speedwave.js?v=2"></script>
 </body>
 </html>

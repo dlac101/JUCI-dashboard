@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PathPulse Responsive Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 16px; overflow-x: auto; }
+  h1 { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; color: #64748b; margin-bottom: 12px; }
+  .row { display: flex; gap: 16px; align-items: flex-start; height: calc(100vh - 52px); }
+  .col { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; height: 100%; }
+  .col label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; text-align: center; }
+  .frame-wrap { flex: 1; overflow: auto; border: 1px solid #1e293b; border-radius: 8px; position: relative; }
+  .frame-wrap iframe { border: none; background: #0f172a; display: block; }
+</style>
+</head>
+<body>
+  <h1>PathPulse Responsive Preview</h1>
+  <div class="row">
+    <div class="col" style="width:390px">
+      <label>Phone (390px)</label>
+      <div class="frame-wrap">
+        <iframe src="index.html#pathpulse" width="390" height="2000" style="width:390px;height:2000px"></iframe>
+      </div>
+    </div>
+    <div class="col" style="width:600px">
+      <label>Phablet (600px)</label>
+      <div class="frame-wrap">
+        <iframe src="index.html#pathpulse" width="600" height="2000" style="width:600px;height:2000px"></iframe>
+      </div>
+    </div>
+    <div class="col" style="width:1000px">
+      <label>Tablet (1000px)</label>
+      <div class="frame-wrap">
+        <iframe src="index.html#pathpulse" width="1000" height="2000" style="width:1000px;height:2000px"></iframe>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

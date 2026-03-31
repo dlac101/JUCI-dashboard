@@ -711,6 +711,8 @@ function navigateTo(page) {
     ? document.getElementById('nav-statsview')
     : page === 'pathpulse'
     ? document.getElementById('nav-pathpulse')
+    : page === 'speedwave'
+    ? document.getElementById('nav-speedtest')
     : document.querySelector('.sidebar-nav .nav-link'); // first = Dashboard
   if (activeNav) activeNav.classList.add('active');
 
@@ -718,6 +720,7 @@ function navigateTo(page) {
   const dashGrid = document.getElementById('dashboard-grid');
   const svPage = document.getElementById('page-statsview');
   const ppPage = document.getElementById('page-pathpulse');
+  const swPage = document.getElementById('page-speedwave');
   const pageTitle = document.querySelector('.page-title');
 
   // Hide Simple/Advanced toggle on non-dashboard pages
@@ -727,6 +730,7 @@ function navigateTo(page) {
   dashGrid.style.display = 'none';
   svPage.style.display = 'none';
   if (ppPage) ppPage.style.display = 'none';
+  if (swPage) swPage.style.display = 'none';
   if (viewToggleGroup) viewToggleGroup.style.display = 'none';
   if (typeof svPause === 'function') svPause();
 
@@ -748,6 +752,14 @@ function navigateTo(page) {
       ppInit();
       window._ppInitialized = true;
     }
+  } else if (page === 'speedwave') {
+    if (swPage) swPage.style.display = '';
+    if (pageTitle) pageTitle.textContent = 'SpeedWave';
+    // Initialize SpeedWave if available
+    if (typeof swInit === 'function' && !window._swInitialized) {
+      swInit();
+      window._swInitialized = true;
+    }
   } else {
     dashGrid.style.display = '';
     if (pageTitle) pageTitle.textContent = 'Dashboard';
@@ -768,6 +780,8 @@ document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
       navigateTo('statsview');
     } else if (text === 'PathPulse') {
       navigateTo('pathpulse');
+    } else if (text === 'SpeedWave') {
+      navigateTo('speedwave');
     } else if (text === 'Dashboard') {
       navigateTo('dashboard');
     }
