@@ -7452,8 +7452,8 @@ body:not([data-view="basic"]) .pp-pipeline {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.port-event-dot.up { background: var(--accent-green); }
-.port-event-dot.down { background: var(--accent-red); }
+.port-event-dot.up   { background: var(--accent-green); }
+.port-event-dot.down { background: transparent; border: 1.5px solid var(--accent-red); }
 .port-event-time {
   color: var(--text-muted);
   min-width: 42px;
@@ -7562,11 +7562,20 @@ body:not([data-view="basic"]) .pp-pipeline {
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   font-family: var(--font-mono);
 }
-/* SVG port focus ring for keyboard nav (WCAG 2.4.7) */
+/* SVG port focus ring for keyboard nav (WCAG 2.4.7 / 2.4.11) */
 .port-svg-wrap [data-port-id]:focus-visible {
   outline: 2px solid var(--accent-cyan);
   outline-offset: 2px;
   border-radius: 4px;
+  filter: drop-shadow(0 0 6px var(--accent-cyan));
+}
+
+/* Detail card focus ring — glowing frame (WCAG 2.4.11) */
+.port-detail-item:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(0, 210, 190, 0.25);
+  border-color: var(--accent-cyan);
 }
 
 .port-detail-grid {
@@ -7628,8 +7637,16 @@ body:not([data-view="basic"]) .pp-pipeline {
 
 /* Last-connected device label (port down state) */
 .port-last-device {
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.port-last-icon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
 }
 
 /* FXS hook state badge */
@@ -7735,4 +7752,57 @@ body:not([data-view="basic"]) .pp-pipeline {
 }
 :focus:not(:focus-visible) {
   outline: none;
+}
+
+/* ===== Windows High Contrast Mode / forced-colors support (WCAG C.7, EAA) ===== */
+@media (forced-colors: active) {
+  /* State dots: preserve shape rendering, let system replace color */
+  .state-dot,
+  .port-event-dot,
+  .mwan-state-dot {
+    forced-color-adjust: none;
+  }
+
+  /* Port event dot shape coding survives forced-colors */
+  .port-event-dot.down {
+    border-color: ButtonText;
+  }
+
+  /* SVG port shapes: ensure focusable elements have a visible outline */
+  .port-svg-wrap [data-port-id]:focus-visible {
+    outline: 3px solid Highlight;
+    filter: none;
+  }
+
+  /* Detail card focus ring — use system Highlight color */
+  .port-detail-item:focus-visible {
+    outline: 3px solid Highlight;
+    box-shadow: none;
+  }
+
+  /* Badges need explicit borders to remain visible when backgrounds are forced */
+  .wan-interface-badge,
+  .state-badge,
+  .fxs-hook-badge,
+  .wan-type-badge {
+    border: 1px solid ButtonText;
+    forced-color-adjust: none;
+  }
+
+  /* Clock icon inherits ButtonText in forced-colors context */
+  .port-last-icon {
+    color: ButtonText;
+  }
+
+  /* Ensure LTE signal bars are distinguishable */
+  .lte-bar.active {
+    forced-color-adjust: none;
+  }
+
+  /* Tooltip: use system canvas colors */
+  #tooltip {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+  }
 }

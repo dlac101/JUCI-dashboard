@@ -2430,7 +2430,7 @@ const PORT_SHAPES = {
 /* Draw a single connector shape, returns SVG markup */
 function svgPortShape(connector, px, py, fillColor, portId, ariaLabel) {
   const s = PORT_SHAPES[connector] || PORT_SHAPES['rj45'];
-  const common = `data-port-id="${portId}" tabindex="0" role="button" aria-label="${ariaLabel}"`;
+  const common = `data-port-id="${portId}" tabindex="0" role="button" aria-label="${ariaLabel}" aria-describedby="port-detail-${portId}"`;
   const stroke = 'var(--border-bright)';
   let out = `<g ${common}>`;
 
@@ -2640,7 +2640,7 @@ function renderPortStatus() {
         const regState = fxs.registered ? 'Registered' : 'Unregistered';
         const hookClass = fxs.hook_state === 'off-hook' ? 'offhook' : 'onhook';
         const hookLabel = fxs.hook_state === 'off-hook' ? 'Off-hook' : 'On-hook';
-        return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+        return `<div class="port-detail-item" id="port-detail-${prof.id}" data-port-id="${prof.id}" role="listitem" tabindex="0">
           <div class="port-detail-header">
             <div class="state-dot ${fxs.registered ? 'up' : 'down'}"><span class="sr-only">${regState}</span></div>
             <span class="port-detail-name">${prof.label}</span>
@@ -2655,7 +2655,7 @@ function renderPortStatus() {
       if (prof.role === 'lte_modem') {
         const lte = p.lte;
         if (!isUp || !lte) {
-          return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+          return `<div class="port-detail-item" id="port-detail-${prof.id}" data-port-id="${prof.id}" role="listitem" tabindex="0">
             <div class="port-detail-header">
               <div class="state-dot down"><span class="sr-only">Empty</span></div>
               <span class="port-detail-name">${prof.label}</span>
@@ -2668,7 +2668,7 @@ function renderPortStatus() {
         const signalHtml = '<span class="lte-signal-bars">' +
           [1,2,3,4].map(i => `<span class="lte-bar${i <= bars ? ' active' : ''}"></span>`).join('') +
           '</span>';
-        return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+        return `<div class="port-detail-item" id="port-detail-${prof.id}" data-port-id="${prof.id}" role="listitem" tabindex="0">
           <div class="port-detail-header">
             <div class="state-dot up"><span class="sr-only">Connected</span></div>
             <span class="port-detail-name">${prof.label}</span>
@@ -2681,10 +2681,11 @@ function renderPortStatus() {
 
       // --- Ethernet (LAN/WAN) card ---
       const speedLabel = isUp ? formatPortSpeed(p.speed_mbps) : '\u2014';
+      const clockSvg = `<svg class="port-last-icon" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="6" x2="6" y2="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="6" x2="8.5" y2="7.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
       const deviceHtml = p.connected_device
         ? (isUp
             ? `<span>${p.connected_device.hostname}</span>`
-            : `<span class="port-last-device">Last: ${p.connected_device.hostname}</span>`)
+            : `<span class="port-last-device">${clockSvg}Last: ${p.connected_device.hostname}</span>`)
         : '\u2014';
       const poeHtml = p.poe
         ? `<div class="port-detail-row"><span class="port-dk">PoE</span><span class="port-dv">${p.poe.watts}W</span></div>`
@@ -2693,7 +2694,7 @@ function renderPortStatus() {
         ? `<span class="wan-interface-badge media-${p.media_type.toLowerCase().replace(/\./g,'').replace(/\s/g,'')}">${p.media_type}</span>`
         : '';
 
-      return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+      return `<div class="port-detail-item" id="port-detail-${prof.id}" data-port-id="${prof.id}" role="listitem" tabindex="0">
         <div class="port-detail-header">
           <div class="state-dot ${state}"><span class="sr-only">${isUp ? 'Online' : 'Offline'}</span></div>
           <span class="port-detail-name">${prof.label}</span>
@@ -2713,7 +2714,7 @@ function renderPortStatus() {
   const r2 = (l1, v1, l2, v2) => `<tr><td class="ptt-lbl">${l1}</td><td class="ptt-val">${v1}</td><td class="ptt-lbl">${l2}</td><td class="ptt-val">${v2}</td></tr>`;
 
   function bindPortTooltip(elem, p, prof) {
-    const handler = () => {
+    const showHandler = () => {
       const isUp = p.link_state === 'up';
       let html = `<div class="ptt-title">${prof.label} <span class="ptt-type">${prof.type}</span></div>`;
       html += '<table class="ptt-tbl">';
@@ -2742,11 +2743,16 @@ function renderPortStatus() {
 
       html += '</table>';
       showTooltip(html);
+      elem.setAttribute('aria-describedby', 'tooltip');
     };
-    elem.addEventListener('mouseenter', handler);
-    elem.addEventListener('focus', handler);
-    elem.addEventListener('mouseleave', hideTooltip);
-    elem.addEventListener('blur', hideTooltip);
+    const hideHandler = () => {
+      hideTooltip();
+      elem.removeAttribute('aria-describedby');
+    };
+    elem.addEventListener('mouseenter', showHandler);
+    elem.addEventListener('focus', showHandler);
+    elem.addEventListener('mouseleave', hideHandler);
+    elem.addEventListener('blur', hideHandler);
   }
 
   // Bind tooltips on SVG port shapes
@@ -2769,19 +2775,35 @@ function renderPortStatus() {
     });
   }
 
-  // --- Port event history log ---
+  // --- Port event history log (initial render only) ---
+  // Subsequent events are prepended by prependPortEvent() to preserve role="log" live region
   const evList = el('port-events-list');
-  if (evList) {
-    evList.innerHTML = MOCK.portEvents.map(ev => {
-      const ago = formatTimeAgo(ev.epoch);
-      return `<div class="port-event-row">
-        <div class="port-event-dot ${ev.state}"></div>
-        <span class="port-event-time">${ago}</span>
-        <span class="port-event-port">${ev.port}</span>
-        <span class="port-event-state">${ev.detail}</span>
-      </div>`;
-    }).join('');
+  if (evList && !evList.dataset.initialized) {
+    evList.innerHTML = MOCK.portEvents.map(ev => buildPortEventRow(ev)).join('');
+    evList.dataset.initialized = '1';
   }
+}
+
+/* Build a single port event row element */
+function buildPortEventRow(ev) {
+  const ago = formatTimeAgo(ev.epoch);
+  return `<div class="port-event-row">
+    <div class="port-event-dot ${ev.state}" aria-hidden="true"></div>
+    <span class="port-event-time">${ago}</span>
+    <span class="port-event-port">${ev.port}</span>
+    <span class="port-event-state">${ev.detail}</span>
+  </div>`;
+}
+
+/* Prepend a new event to the live log region without replacing existing entries */
+function prependPortEvent(ev) {
+  const evList = el('port-events-list');
+  if (!evList) return;
+  const row = document.createElement('div');
+  row.innerHTML = buildPortEventRow(ev);
+  evList.insertBefore(row.firstElementChild, evList.firstChild);
+  // Trim to max 20 entries to prevent unbounded growth
+  while (evList.children.length > 20) evList.removeChild(evList.lastChild);
 }
 
 /* Format epoch to relative time string */
@@ -2806,8 +2828,12 @@ function formatTimeAgo(epoch) {
       // FXS: toggle hook state (5% chance)
       if (prof.role === 'fxs' && p.fxs && Math.random() < 0.05) {
         p.fxs.hook_state = p.fxs.hook_state === 'on-hook' ? 'off-hook' : 'on-hook';
-        MOCK.portEvents.unshift({ epoch: Date.now()/1000, port: prof.label, state: 'up', detail: p.fxs.hook_state === 'off-hook' ? 'Off-hook' : 'On-hook' });
+        const ev = { epoch: Date.now()/1000, port: prof.label, state: 'up', detail: p.fxs.hook_state === 'off-hook' ? 'Off-hook' : 'On-hook' };
+        MOCK.portEvents.unshift(ev);
+        prependPortEvent(ev);
         changed = true;
+        const announceEl = el('port-status-announce');
+        if (announceEl) announceEl.textContent = prof.label + ' is now ' + p.fxs.hook_state;
       }
       // LTE modem: drift signal bars (8% chance)
       else if (prof.role === 'lte_modem' && p.lte && Math.random() < 0.08) {
@@ -2820,7 +2846,9 @@ function formatTimeAgo(epoch) {
         p.link_state = wasUp ? 'down' : 'up';
         if (!wasUp) p.speed_mbps = prof.max_speed_mbps;
         const evDetail = p.link_state === 'up' ? 'Link up at ' + formatPortSpeed(p.speed_mbps) : 'Link down';
-        MOCK.portEvents.unshift({ epoch: Date.now()/1000, port: prof.label, state: p.link_state, detail: evDetail });
+        const ev = { epoch: Date.now()/1000, port: prof.label, state: p.link_state, detail: evDetail };
+        MOCK.portEvents.unshift(ev);
+        prependPortEvent(ev);
         changed = true;
         const announceEl = el('port-status-announce');
         if (announceEl) announceEl.textContent = prof.label + ' port is now ' + p.link_state;

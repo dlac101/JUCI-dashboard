@@ -508,7 +508,7 @@
               <div class="port-svg-wrap" id="port-svg-wrap" role="img" aria-label="Rear panel port diagram"></div>
               <div class="port-events tech-only">
                 <div class="port-events-label">Port Events</div>
-                <div class="port-events-list" id="port-events-list" role="log" aria-label="Port event history"></div>
+                <div class="port-events-list" id="port-events-list" role="log" aria-label="Port event history" aria-relevant="additions" aria-live="polite"></div>
               </div>
             </div>
             <!-- Simple view: compact status list below diagram -->
@@ -1069,7 +1069,7 @@
   </div>
 
   <!-- Global Tooltip -->
-  <div id="tooltip"></div>
+  <div id="tooltip" role="tooltip"></div>
 
   <!-- Screen reader live region for dynamic status announcements (EAA / WCAG 4.1.3) -->
   <div id="sr-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
