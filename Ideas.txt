@@ -1,0 +1,26 @@
+1. the top row tiles are too large for what they show, at least the first two (WAN status and device identity).  There's lots of wasted space.
+2. I like the active alarms and recent events, but again, they take up a lot of space.  I'd love to hear ideas on optimizing
+3. The connection history: insert fake data so that we are covering all 6 months.  Make the graph more like the QoE graphs we built in the Topology project (C:\Users\Admin\Documents\Claude Work\Topology GUI).  Just the general look.  Of course the vertical axis wont change in this bar style graph.
+4. WAN performance tile: elements are spaced quite far apart in 1080 resolution and text is generally too small.  the bufferbloat data should be unified (including latency under load)
+5. SYSTEM PERFORMANCE - I like this section.  However, the alerts look a little weird.  Maybe there needs to be a small line separating each item/alert?  These are meant to be alerts to what is affecting the score for the negative, right?
+5. Connected devices - I think that's something that could be relocated to top row tiles.  For the airtime utilization, make the graphs a bit thicker and be sure to use separate colors to indicate Tx, Rx, Other, and Interference (just  like mockup_v01.png).
+6. speedtest history - speedtests typically run at least once a day.  Let's show a daily history here.
+
+
+
+I feel like system QOE is too important to be placed that low.  Probably belongs on header or right below it.  More important that Events and Alarms IMO
+Adam Fox  [4:28 AM]
+I would represent speedtest as a bar graph.   with pct_utilization on y-axis.  Maybe add ability to toggle between pct_util and raw speeds (for BABs with no service_rate configured).    mouseover on the bar to see details of the test: server, latency, bloat
+[4:28 AM]interesting idea to color code the different causes of internet downtime, but I don’t think it’s worth the visual noise.  mouseover to get downtime cause is better
+[4:31 AM]that said, I like where you are going with this
+[4:32 AM]The Event and Alarm widgets should have mouseovers with summary info and should be links to the Event and Alarms pages
+
+I would like to have at least 1 speedtest result saved on the device at all times.  (Among other things, it would be nice for the Dashboard to be able to count on this..)  We persist the last 100 results on flash so this is typically only an issue after factory reset.  Since we can’t detect that we booted in factory default state (which is SUPER LAME), my idea is to check for a saved speedtest result 5(?) mins after boot.  If missing, run WAN speedtest.
+
+add client count by band to the airtime bar?
+
+Widgets:
+
+VPN Status (WireGuard + Tailscale tunnel state and peer count
+PoE/PSE port status (per-port power delivery, wattage, and fault state)
+LAN port status (connection state, connected host(s))

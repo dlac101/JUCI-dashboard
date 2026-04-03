@@ -5662,7 +5662,7 @@ body:not([data-view="basic"]) .pp-pipeline {
 }
 
 /* =============================================================================
-   SpeedWave Page Styles (integrated from standalone SpeedWave)
+   NetPulse Page Styles (integrated from standalone NetPulse)
    ============================================================================= */
 
 /* ===== Speedtest Layout ===== */
@@ -7320,5 +7320,419 @@ body:not([data-view="basic"]) .pp-pipeline {
   margin-right: 4px;
 }
 
-/* SpeedWave: last test time in page header */
+/* NetPulse: last test time in page header */
 .st-last-test-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+/* ================================================================
+   Port Status Card
+   ================================================================ */
+
+/* Model badge (reuses wan-interface-badge visual pattern) */
+.port-model-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  color: var(--accent-cyan);
+  background: rgba(0, 210, 190, 0.12);
+  border: 1px solid rgba(0, 210, 190, 0.25);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* --- Simple view: compact port list --- */
+.port-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+.port-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+}
+.port-list-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 90px;
+}
+.port-list-type {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.port-list-device {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+/* Scrollable body wrapper (same pattern as events-list, alarm-list) */
+.port-card-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 2px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Top row: SVG diagram left, event log right — each spans 2 card widths */
+.port-top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  align-items: stretch;
+}
+.port-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.port-svg-wrap svg {
+  width: 100%;
+  height: auto;
+  max-height: 65px;
+}
+
+/* Port event log (right side) */
+.port-events {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.port-events-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+.port-events-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: 58px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.port-event-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 0;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.port-event-row:last-child {
+  border-bottom: none;
+}
+.port-event-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.port-event-dot.up { background: var(--accent-green); }
+.port-event-dot.down { background: var(--accent-red); }
+.port-event-time {
+  color: var(--text-muted);
+  min-width: 42px;
+}
+.port-event-port {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.port-event-state {
+  color: var(--text-secondary);
+}
+
+/* Port tooltip: 4-column table (Infrastructure mode pattern) */
+.ptt-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.ptt-type {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  margin-left: 6px;
+}
+.ptt-tbl {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 11px;
+}
+.ptt-tbl tr + tr {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.ptt-lbl {
+  padding: 3px 6px 3px 0;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.ptt-lbl + .ptt-val + .ptt-lbl {
+  padding-left: 14px;
+}
+.ptt-val {
+  padding: 3px 0;
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.ptt-meters {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  gap: 0;
+}
+.ptt-meter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+.ptt-meter-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  white-space: nowrap;
+  width: 32px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.ptt-meter-bar {
+  flex: 1;
+  height: 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.ptt-meter-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+.ptt-meter-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-family: var(--font-mono);
+}
+/* SVG port focus ring for keyboard nav (WCAG 2.4.7) */
+.port-svg-wrap [data-port-id]:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.port-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.port-detail-item {
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  cursor: default;
+}
+.port-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.port-detail-name {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+.port-type-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: var(--accent-cyan);
+  background: rgba(0, 210, 190, 0.10);
+  border: 1px solid rgba(0, 210, 190, 0.20);
+  margin-left: auto;
+}
+.port-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 0;
+}
+.port-dk {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+.port-dv {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Last-connected device label (port down state) */
+.port-last-device {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* FXS hook state badge */
+.fxs-hook-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.fxs-hook-badge.onhook {
+  color: var(--accent-green);
+  background: rgba(0, 210, 100, 0.12);
+}
+.fxs-hook-badge.offhook {
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+/* LTE signal strength bars */
+.lte-signal-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  vertical-align: middle;
+}
+.lte-bar {
+  width: 4px;
+  background: var(--border-bright);
+  border-radius: 1px;
+}
+.lte-bar:nth-child(1) { height: 4px; }
+.lte-bar:nth-child(2) { height: 7px; }
+.lte-bar:nth-child(3) { height: 10px; }
+.lte-bar:nth-child(4) { height: 14px; }
+.lte-bar.active {
+  background: var(--accent-amber);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .port-model-badge {
+  color: var(--accent-cyan);
+  background: rgba(14, 165, 201, 0.08);
+  border-color: rgba(14, 165, 201, 0.20);
+}
+[data-theme="light"] .port-type-badge {
+  color: var(--accent-cyan);
+  background: rgba(14, 165, 201, 0.06);
+  border-color: rgba(14, 165, 201, 0.15);
+}
+[data-theme="light"] .port-detail-item {
+  background: var(--bg-input);
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+[data-theme="light"] .port-list-item {
+  background: var(--bg-input);
+}
+
+/* ================================================================
+   EAA / WCAG 2.1 AA — Accessibility Utilities
+   ================================================================ */
+
+/* Screen-reader-only content (visually hidden, announced by AT) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip-to-content link (visible on focus only) */
+.skip-link {
+  position: absolute;
+  top: -50px;
+  left: 16px;
+  background: var(--accent-cyan);
+  color: #0b0f19;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  z-index: 10000;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
+/* Keyboard focus indicators (WCAG 2.4.7) */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}

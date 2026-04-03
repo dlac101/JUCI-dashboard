@@ -1,5 +1,5 @@
 /* =============================================================================
-   SmartOS SpeedWave Page - Logic, Mock Data & Rendering
+   SmartOS NetPulse Page - Logic, Mock Data & Rendering
    Integrated into SmartOS Dashboard shell
    ============================================================================= */
 
@@ -38,7 +38,7 @@ function swGradeTint(g) {
   return g === 'A' ? 'rgba(16,185,129,0.12)' : g === 'B' ? 'rgba(14,165,201,0.12)' : g === 'C' ? 'rgba(217,119,6,0.12)' : 'rgba(220,38,38,0.12)';
 }
 
-/* Grade tooltip text - matches SmartOS srg-speedwave.js textGrade array */
+/* Grade tooltip text - matches SmartOS srg-netpulse.js textGrade array */
 const GRADE_INFO = {
   A: { label: 'Excellent', text: 'Your latency under load is excellent.' },
   B: { label: 'Good',      text: 'Your latency under load is good.' },
@@ -1627,12 +1627,12 @@ function swInit() {
   initHistoryScroll();
 }
 
-// swInit() is called lazily by dashboard navigateTo('speedwave')
+// swInit() is called lazily by dashboard navigateTo('netpulse')
 
-// Debounced resize handler (only runs when speedwave page is visible)
+// Debounced resize handler (only runs when netpulse page is visible)
 let _swResizeTimer = null;
 window.addEventListener('resize', () => {
-  const swPage = document.getElementById('page-speedwave');
+  const swPage = document.getElementById('page-netpulse');
   if (swPage && swPage.style.display === 'none') return;
   if (_swResizeTimer) cancelAnimationFrame(_swResizeTimer);
   _swResizeTimer = requestAnimationFrame(() => {
@@ -1791,10 +1791,10 @@ function saveShaperConfig() {
   }
 }
 
-// Deep link: if URL hash is #speedwave, navigate after full init
-if (window.location.hash === '#speedwave') {
+// Deep link: if URL hash is #netpulse, navigate after full init
+if (window.location.hash === '#netpulse') {
   window.addEventListener('load', () => {
     currentPage = null;
-    navigateTo('speedwave');
+    navigateTo('netpulse');
   });
 }

@@ -33,10 +33,10 @@ const MOCK = {
   },
 
   device: {
-    model: 'SDG-8733v',
+    model: 'SDG-8734v',
     mac: 'A4:6B:B6:94:C0:12',
     serial: 'SDG8733V-0000123456',
-    firmware: '5.3.4.1234',
+    firmware: '26.3.2.101',
     cdt: 'Adtran',
     cdt_version: 'v1.8.5',
     sys_uptime_secs: 1209600,  // 14 days
@@ -228,7 +228,7 @@ const MOCK = {
       { from_epoch: 1769800000, to_epoch: 1769807200, secs_down: 7200, down_event: 'internet/down', down_event_data: { Reason: 'ISP peering issue, packet loss >90%' } },
       { from_epoch: 1770760260, to_epoch: 1770760332, secs_down: 72,   down_event: 'shutDown',      down_event_data: { Reason: 'Upgrade', ReasonDetail: 'Firmware 5.3.4.1230 applied' } },
       // Recent: Feb 25 – Mar 17 2026
-      { from_epoch: 1772014358, to_epoch: 1772014430, secs_down: 72,   down_event: 'shutDown',      down_event_data: { Reason: 'Upgrade', ReasonDetail: 'Firmware 5.3.4.1234 applied' } },
+      { from_epoch: 1772014358, to_epoch: 1772014430, secs_down: 72,   down_event: 'shutDown',      down_event_data: { Reason: 'Upgrade', ReasonDetail: 'Firmware 26.3.2.101 applied' } },
       { from_epoch: 1772639787, to_epoch: 1772639843, secs_down: 56,   down_event: 'shutDown',      down_event_data: { Reason: 'Upgrade', ReasonDetail: 'CDT config v1.8.5 applied' } },
       { from_epoch: 1772707474, to_epoch: 1772707529, secs_down: 55,   down_event: 'shutDown',      down_event_data: { Reason: 'Upgrade', ReasonDetail: 'CDT config v1.8.5 reapplied' } },
       { from_epoch: 1772887623, to_epoch: 1772902023, secs_down: 14400,down_event: 'powerDown',     down_event_data: { Reason: 'Power Lost', OfflineEstimate: '4 hours' } },
@@ -408,6 +408,72 @@ MOCK.mwan = {
   }
 };
 
+/* ===== Port Profiles (per-model I/O configuration) ===== */
+const MODEL_PORT_PROFILES = {
+  'SDG-8733v': {
+    label: 'SDG-8733v',
+    ports: [
+      { id: 'wan0', label: 'WAN',   type: '10GbE',   connector: 'rj45',  role: 'wan',       max_speed_mbps: 10000 },
+      { id: 'lan1', label: 'LAN 1', type: '10GbE',   connector: 'rj45',  role: 'lan',       max_speed_mbps: 10000 },
+      { id: 'lan2', label: 'LAN 2', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'lan3', label: 'LAN 3', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'lan4', label: 'LAN 4', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'fxs1', label: 'Tel 1', type: 'FXS',     connector: 'rj11',  role: 'fxs',       max_speed_mbps: 0 },
+      { id: 'fxs2', label: 'Tel 2', type: 'FXS',     connector: 'rj11',  role: 'fxs',       max_speed_mbps: 0 },
+      { id: 'usb0', label: 'USB',   type: 'USB 2.0', connector: 'usb-a', role: 'lte_modem', max_speed_mbps: 0 },
+    ]
+  },
+  'SDG-8734v': {
+    label: 'SDG-8734v',
+    ports: [
+      { id: 'wan0', label: 'WAN',   type: 'SFP+',    connector: 'sfp',   role: 'wan',       max_speed_mbps: 10000 },
+      { id: 'lan1', label: 'LAN 1', type: '10GbE',   connector: 'rj45',  role: 'lan',       max_speed_mbps: 10000 },
+      { id: 'lan2', label: 'LAN 2', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'lan3', label: 'LAN 3', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'lan4', label: 'LAN 4', type: 'GbE',     connector: 'rj45',  role: 'lan',       max_speed_mbps: 1000 },
+      { id: 'fxs1', label: 'Tel 1', type: 'FXS',     connector: 'rj11',  role: 'fxs',       max_speed_mbps: 0 },
+      { id: 'fxs2', label: 'Tel 2', type: 'FXS',     connector: 'rj11',  role: 'fxs',       max_speed_mbps: 0 },
+      { id: 'usb0', label: 'USB',   type: 'USB 2.0', connector: 'usb-a', role: 'lte_modem', max_speed_mbps: 0 },
+    ]
+  }
+};
+
+/* Runtime port state (all 8 ports, matches SDG-8733v profile) */
+MOCK.ports = [
+  { id: 'wan0', link_state: 'up', speed_mbps: 10000, duplex: 'full', media_type: 'XGSPON',
+    connected_device: { hostname: 'Consolidated Comm.', mac: '00:1A:2B:3C:4D:5E', ip: '198.51.100.43' }, poe: null },
+  { id: 'lan1', link_state: 'up', speed_mbps: 2500,  duplex: 'full',
+    connected_device: { hostname: 'Gaming-PC', mac: 'A4:83:E7:12:34:56', ip: '192.168.1.101' }, poe: null },
+  { id: 'lan2', link_state: 'up', speed_mbps: 100,   duplex: 'full',
+    connected_device: { hostname: 'IP-Phone',  mac: '00:0E:A6:EE:FF:03', ip: '192.168.1.150' }, poe: null },
+  { id: 'lan3', link_state: 'up', speed_mbps: 1000,  duplex: 'full',
+    connected_device: { hostname: 'Smart-TV',  mac: '2C:F0:5D:CC:DD:02', ip: '192.168.1.44' }, poe: null },
+  { id: 'lan4', link_state: 'up', speed_mbps: 1000,  duplex: 'full',
+    connected_device: { hostname: 'PS5',       mac: 'F8:46:1C:AA:BB:01', ip: '192.168.1.52' }, poe: null },
+  { id: 'fxs1', link_state: 'up', speed_mbps: 0, duplex: null, connected_device: null, poe: null,
+    fxs: { registered: true, hook_state: 'on-hook', extension: '5001' } },
+  { id: 'fxs2', link_state: 'up', speed_mbps: 0, duplex: null, connected_device: null, poe: null,
+    fxs: { registered: true, hook_state: 'off-hook', extension: '5002' } },
+  { id: 'usb0', link_state: 'up', speed_mbps: 0, duplex: null, connected_device: null, poe: null,
+    lte: { model: 'Inseego USB800', carrier: 'Verizon', access_tech: '4G LTE', signal_bars: 3, ip: '100.74.23.156' } },
+];
+
+/* Port event history (most recent first) */
+MOCK.portEvents = [
+  { epoch: Date.now()/1000 - 120,   port: 'LAN 3', state: 'up',   detail: 'Link up at 1 Gbps' },
+  { epoch: Date.now()/1000 - 1800,  port: 'LAN 3', state: 'down', detail: 'Link down' },
+  { epoch: Date.now()/1000 - 3600,  port: 'WAN',   state: 'up',   detail: 'Link up at 10 Gbps' },
+  { epoch: Date.now()/1000 - 3720,  port: 'WAN',   state: 'down', detail: 'Link down' },
+  { epoch: Date.now()/1000 - 7200,  port: 'LAN 2', state: 'up',   detail: 'Link up at 100 Mbps' },
+  { epoch: Date.now()/1000 - 14400, port: 'LAN 4', state: 'up',   detail: 'Link up at 1 Gbps' },
+  { epoch: Date.now()/1000 - 18000, port: 'LAN 1', state: 'up',   detail: 'Link up at 2.5 Gbps' },
+  { epoch: Date.now()/1000 - 21600, port: 'Tel 2',  state: 'up',   detail: 'Off-hook' },
+  { epoch: Date.now()/1000 - 25200, port: 'Tel 2',  state: 'up',   detail: 'On-hook' },
+  { epoch: Date.now()/1000 - 43200, port: 'USB',    state: 'up',   detail: 'LTE modem detected' },
+  { epoch: Date.now()/1000 - 86400, port: 'LAN 4', state: 'down', detail: 'Link down' },
+  { epoch: Date.now()/1000 - 86500, port: 'LAN 4', state: 'up',   detail: 'Link up at 1 Gbps' },
+];
+
 /* ===== State ===== */
 let currentHistorySpan = 365; // days
 const dismissedAlarms = new Set();
@@ -436,8 +502,9 @@ const LAYOUT_4COL = {
   'card-wanperf':    { col: 1, row: 4, span: 2 },
   'card-topflows':   { col: 3, row: 4, span: 1 },
   'card-tophosts':   { col: 4, row: 4, span: 1 },
-  'card-multiwan':   { col: 4, row: 5, span: 1 },
-  'card-placeholder':{ col: 1, row: 5, span: 2 },
+  'card-ports':      { col: 1, row: 5, span: 2 },
+  'card-multiwan':   { col: 3, row: 5, span: 1 },
+  'card-placeholder':{ col: 4, row: 5, span: 1 },
 };
 
 /* 2-column layout (md/lg: 768-1279px) */
@@ -455,6 +522,7 @@ const LAYOUT_2COL = {
   'card-tophosts':   { col: 2, row: 8, span: 1 },
   'card-multiwan':   { col: 1, row: 9, span: 1 },
   'card-placeholder':{ col: 2, row: 9, span: 1 },
+  'card-ports':      { col: 1, row: 10, span: 2 },
 };
 
 /* Basic view layout (2-col, 5 cards, fixed) */
@@ -465,7 +533,8 @@ const LAYOUT_BASIC = {
   'card-device':   { col: 3, row: 2, span: 1 },
   'card-airtime':  { col: 1, row: 3, span: 3 },
   'card-wanperf':  { col: 1, row: 4, span: 3 },
-  'card-history':  { col: 1, row: 5, span: 3 },
+  'card-ports':    { col: 1, row: 5, span: 3 },
+  'card-history':  { col: 1, row: 6, span: 3 },
 };
 
 /* DEFAULT_LAYOUT is the 4-col version (used for save/load) */
@@ -666,6 +735,14 @@ function h(tag, cls, content) {
   return `<${tag}${cls ? ` class="${cls}"` : ''}>${content}</${tag}>`;
 }
 
+/* ===== Screen Reader Announcements (EAA / WCAG 4.1.3) ===== */
+function announce(message) {
+  const box = document.getElementById('sr-announcements');
+  if (!box) return;
+  box.textContent = '';
+  requestAnimationFrame(() => { box.textContent = message; });
+}
+
 /* ===== Tooltip ===== */
 const tooltip = el('tooltip');
 let tooltipVisible = false;
@@ -711,7 +788,7 @@ function navigateTo(page) {
     ? document.getElementById('nav-statsview')
     : page === 'pathpulse'
     ? document.getElementById('nav-pathpulse')
-    : page === 'speedwave'
+    : page === 'netpulse'
     ? document.getElementById('nav-speedtest')
     : document.querySelector('.sidebar-nav .nav-link'); // first = Dashboard
   if (activeNav) activeNav.classList.add('active');
@@ -720,7 +797,7 @@ function navigateTo(page) {
   const dashGrid = document.getElementById('dashboard-grid');
   const svPage = document.getElementById('page-statsview');
   const ppPage = document.getElementById('page-pathpulse');
-  const swPage = document.getElementById('page-speedwave');
+  const swPage = document.getElementById('page-netpulse');
   const pageTitle = document.querySelector('.page-title');
 
   // Hide Simple/Advanced toggle on non-dashboard pages
@@ -752,10 +829,10 @@ function navigateTo(page) {
       ppInit();
       window._ppInitialized = true;
     }
-  } else if (page === 'speedwave') {
+  } else if (page === 'netpulse') {
     if (swPage) swPage.style.display = '';
-    if (pageTitle) pageTitle.textContent = 'SpeedWave';
-    // Initialize SpeedWave if available
+    if (pageTitle) pageTitle.textContent = 'NetPulse';
+    // Initialize NetPulse if available
     if (typeof swInit === 'function' && !window._swInitialized) {
       swInit();
       window._swInitialized = true;
@@ -780,8 +857,8 @@ document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
       navigateTo('statsview');
     } else if (text === 'PathPulse') {
       navigateTo('pathpulse');
-    } else if (text === 'SpeedWave') {
-      navigateTo('speedwave');
+    } else if (text === 'NetPulse') {
+      navigateTo('netpulse');
     } else if (text === 'Dashboard') {
       navigateTo('dashboard');
     }
@@ -799,6 +876,10 @@ el('sidebarToggle').addEventListener('click', function() {
     /* Desktop: toggle collapsed sidebar */
     document.body.classList.toggle('sidebar-collapsed');
   }
+  /* EAA: reflect expanded/collapsed state for screen readers */
+  const expanded = !document.body.classList.contains('sidebar-collapsed') &&
+                   (getGridMode() >= 4 || document.body.classList.contains('sidebar-open'));
+  this.setAttribute('aria-expanded', String(expanded));
 });
 
 /* Close sidebar when tapping outside it (mobile) */
@@ -833,6 +914,8 @@ function renderWAN() {
   const state = isUp ? 'up' : 'down';
 
   el('wan-dot').className = `state-dot ${state}`;
+  const wanDotSr = el('wan-dot-sr');
+  if (wanDotSr) wanDotSr.textContent = isUp ? 'Online' : 'Offline';
   el('wan-state-text').className = `state-badge ${state}`;
   el('wan-state-text').textContent = isUp ? 'UP' : 'DOWN';
   const mediaLabel = w.media_type || w.interface;
@@ -1571,6 +1654,10 @@ function drawNeedleGauge(canvasId, value, warnThreshold, opts) {
   // Color the HTML label below the canvas to match
   const label = canvas.parentElement.querySelector('.gauge-label');
   if (label) label.style.color = alertColor === '#ffffff' ? '' : alertColor;
+
+  // EAA: update canvas aria-label with live value for screen readers
+  const labelText = label ? label.textContent.trim() : canvasId;
+  canvas.setAttribute('aria-label', labelText + ': ' + displayVal);
 }
 
 function renderWANPerf() {
@@ -2317,6 +2404,432 @@ function renderMWAN() {
   }
 }
 
+/* ===== Port Status Card ===== */
+
+function formatPortSpeed(mbps) {
+  if (mbps >= 1000) return (mbps / 1000) + ' Gbps';
+  return mbps + ' Mbps';
+}
+
+/* SVG rear-panel diagram (per-model, distinct connector shapes) */
+
+/* Connector shape dimensions (proportional to real mm at ~3px/mm)
+   RJ-45:  11.7 x 8.3 mm  -> 35 x 25 px  (ratio 1.41:1)
+   RJ-11:   9.7 x 6.6 mm  -> 29 x 20 px  (ratio 1.46:1)
+   USB-A:  13.1 x 5.5 mm  -> 39 x 17 px  (ratio 2.38:1)
+   SFP+:   14.0 x 9.0 mm  -> 42 x 27 px  (ratio 1.56:1)
+*/
+const PORT_SHAPES = {
+  'rj45':  { w: 35, h: 25 },
+  'rj11':  { w: 29, h: 20 },
+  'usb-a': { w: 39, h: 17 },
+  'sfp':   { w: 42, h: 27 },
+  'usb-c': { w: 25, h: 8 },
+};
+
+/* Draw a single connector shape, returns SVG markup */
+function svgPortShape(connector, px, py, fillColor, portId, ariaLabel) {
+  const s = PORT_SHAPES[connector] || PORT_SHAPES['rj45'];
+  const common = `data-port-id="${portId}" tabindex="0" role="button" aria-label="${ariaLabel}"`;
+  const stroke = 'var(--border-bright)';
+  let out = `<g ${common}>`;
+
+  if (connector === 'rj45') {
+    // RJ-45: rectangle with latch tab at top
+    out += `<rect x="${px}" y="${py}" width="${s.w}" height="${s.h}" rx="2" ry="2"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="1.2"/>`;
+    const tabW = 10, tabH = 4;
+    out += `<rect x="${px + s.w/2 - tabW/2}" y="${py - tabH + 1}" width="${tabW}" height="${tabH}" rx="1"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="0.8"/>`;
+
+  } else if (connector === 'rj11') {
+    // RJ-11: narrower rectangle with latch tab at top
+    out += `<rect x="${px}" y="${py}" width="${s.w}" height="${s.h}" rx="2" ry="2"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="1.2"/>`;
+    const tabW = 8, tabH = 3;
+    out += `<rect x="${px + s.w/2 - tabW/2}" y="${py - tabH + 1}" width="${tabW}" height="${tabH}" rx="1"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="0.8"/>`;
+
+  } else if (connector === 'usb-a') {
+    // USB Type-A: wide flat rectangle
+    out += `<rect x="${px}" y="${py}" width="${s.w}" height="${s.h}" rx="1.5" ry="1.5"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="1.2"/>`;
+
+  } else if (connector === 'sfp') {
+    // SFP+ cage: rectangle with bail latch handle at bottom
+    out += `<rect x="${px}" y="${py}" width="${s.w}" height="${s.h}" rx="2" ry="2"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="1.2"/>`;
+    const bailW = 14, bailH = 5;
+    out += `<rect x="${px + s.w/2 - bailW/2}" y="${py + s.h - 1}" width="${bailW}" height="${bailH}" rx="1.5"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="0.8"/>`;
+
+  } else if (connector === 'usb-c') {
+    // USB Type-C: slim pill shape
+    out += `<rect x="${px}" y="${py}" width="${s.w}" height="${s.h}" rx="4" ry="4"
+      fill="${fillColor}" stroke="${stroke}" stroke-width="1"/>`;
+  }
+
+  out += '</g>';
+  return out;
+}
+
+function svgPortDiagram(modelKey, portStates, profile) {
+  const ports = profile.ports;
+
+  // Group ports by connector type for visual clustering
+  const groups = [];
+  let currentGroup = null;
+  ports.forEach(prof => {
+    if (!currentGroup || currentGroup.connector !== prof.connector) {
+      currentGroup = { connector: prof.connector, ports: [] };
+      groups.push(currentGroup);
+    }
+    currentGroup.ports.push(prof);
+  });
+
+  // Calculate total width: sum of port widths + intra-group gaps + inter-group gaps
+  const intraGap = 6;    // gap between ports within a group
+  const interGap = 16;   // gap between groups (with separator)
+  const bodyPadX = 14;   // padding inside device body
+  let totalPortsW = 0;
+  groups.forEach((g, gi) => {
+    g.ports.forEach((p, pi) => {
+      totalPortsW += PORT_SHAPES[p.connector].w;
+      if (pi < g.ports.length - 1) totalPortsW += intraGap;
+    });
+    if (gi < groups.length - 1) totalPortsW += interGap;
+  });
+
+  const bodyW = totalPortsW + bodyPadX * 2;
+  const w = bodyW + 20;
+  // Body height: port shapes sit in the upper zone, labels in the lower zone inside the body
+  const maxPortH = Math.max(...ports.map(p => PORT_SHAPES[p.connector].h));
+  const labelZone = 12;  // space for label text inside body
+  const portPadY = 6;    // padding above ports
+  const bodyH = portPadY + maxPortH + 4 + labelZone + 4;
+  const h = bodyH + 14;  // minimal margin around body
+  const bodyX = 7, bodyY = 7;
+
+  let svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:80px;">`;
+
+  // Device body (rear panel silhouette)
+  svg += `<rect x="${bodyX}" y="${bodyY}" width="${bodyW}" height="${bodyH}" rx="5" ry="5"
+    fill="var(--bg-input)" stroke="var(--border-light)" stroke-width="1.2"/>`;
+
+  // Place ports group by group
+  let curX = bodyX + bodyPadX;
+  groups.forEach((g, gi) => {
+    g.ports.forEach((prof, pi) => {
+      const s = PORT_SHAPES[prof.connector];
+      const ps = portStates.find(p => p.id === prof.id);
+      const state = ps ? ps.link_state : 'down';
+      const isUp = state === 'up';
+
+      // Port fill color: simple green/red for all ports
+      const fillColor = isUp ? 'var(--accent-green)' : 'var(--accent-red)';
+
+      // Position port in upper zone of body, vertically centered within the port area
+      const portAreaTop = bodyY + portPadY;
+      const py = portAreaTop + (maxPortH - s.h) / 2;
+
+      // Build aria label
+      let ariaDesc = prof.label + ': ' + (isUp ? 'connected' : 'disconnected');
+      if (isUp && ps && ps.speed_mbps) ariaDesc += ', ' + formatPortSpeed(ps.speed_mbps);
+      if (ps && ps.fxs) ariaDesc += ', ' + (ps.fxs.registered ? 'registered' : 'unregistered');
+      if (ps && ps.lte) ariaDesc += ', ' + ps.lte.carrier + ' ' + ps.lte.access_tech;
+
+      svg += svgPortShape(prof.connector, curX, py, fillColor, prof.id, ariaDesc);
+
+      // Status glyph inside the shape (WCAG 1.4.1) — clean SVG paths, no font dependency
+      const glyphX = curX + s.w / 2;
+      const glyphY = py + s.h / 2;
+      const hs = Math.min(s.h - 4, 11) / 2;
+      const sw = Math.max(1.2, hs * 0.28);
+      if (isUp) {
+        const pts = `${glyphX - hs*0.50},${glyphY} ${glyphX - hs*0.08},${glyphY + hs*0.52} ${glyphX + hs*0.52},${glyphY - hs*0.46}`;
+        svg += `<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" pointer-events="none" aria-hidden="true"/>`;
+      } else {
+        svg += `<line x1="${glyphX - hs*0.46}" y1="${glyphY - hs*0.46}" x2="${glyphX + hs*0.46}" y2="${glyphY + hs*0.46}" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" pointer-events="none" aria-hidden="true"/>`;
+        svg += `<line x1="${glyphX + hs*0.46}" y1="${glyphY - hs*0.46}" x2="${glyphX - hs*0.46}" y2="${glyphY + hs*0.46}" stroke="#fff" stroke-width="${sw}" stroke-linecap="round" pointer-events="none" aria-hidden="true"/>`;
+      }
+
+      // Port label INSIDE the body, below the port shapes
+      const labelY = bodyY + portPadY + maxPortH + 4 + labelZone / 2 + 1;
+      svg += `<text x="${curX + s.w / 2}" y="${labelY}" text-anchor="middle" dominant-baseline="central"
+        font-size="7.5" font-family="'Poppins', sans-serif" font-weight="600" letter-spacing="0.2"
+        fill="var(--text-primary)" pointer-events="none">${prof.label}</text>`;
+
+      curX += s.w + intraGap;
+    });
+
+    // Inter-group separator (thin vertical line)
+    if (gi < groups.length - 1) {
+      curX -= intraGap;
+      const sepX = curX + interGap / 2;
+      svg += `<line x1="${sepX}" y1="${bodyY + 6}" x2="${sepX}" y2="${bodyY + bodyH - 4}"
+        stroke="var(--border-light)" stroke-width="0.7" stroke-dasharray="2,2"/>`;
+      curX += interGap;
+    }
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+/* Render port status (both Simple and Advanced views) */
+function renderPortStatus() {
+  const model = MOCK.device.model;
+  const profile = MODEL_PORT_PROFILES[model] || MODEL_PORT_PROFILES['SDG-8733v'];
+  const ports = MOCK.ports;
+
+  // Model badge
+  const badge = el('port-model-badge');
+  if (badge) badge.textContent = profile.label;
+
+  // --- Simple view: compact list ---
+  const listEl = el('port-list');
+  if (listEl) {
+    listEl.innerHTML = ports.map(p => {
+      const prof = profile.ports.find(pp => pp.id === p.id);
+      if (!prof) return '';
+      const state = p.link_state;
+      const isUp = state === 'up';
+
+      // Role-specific simple view content
+      let stateLabel, rightInfo = '';
+      if (prof.role === 'fxs') {
+        stateLabel = p.fxs && p.fxs.registered ? 'REGISTERED' : 'UNREGISTERED';
+        rightInfo = p.fxs ? p.fxs.extension : '';
+      } else if (prof.role === 'lte_modem') {
+        stateLabel = isUp ? 'CONNECTED' : 'EMPTY';
+        rightInfo = p.lte ? p.lte.model : '';
+      } else {
+        stateLabel = isUp ? 'UP' : 'DOWN';
+        rightInfo = p.connected_device ? p.connected_device.hostname : '';
+      }
+
+      const listMediaHtml = p.media_type
+        ? `<span class="wan-interface-badge media-${p.media_type.toLowerCase().replace(/\./g,'').replace(/\s/g,'')}">${p.media_type}</span>`
+        : '';
+
+      return `<div class="port-list-item" role="listitem">
+        <div class="state-dot ${state}"><span class="sr-only">${isUp ? 'Online' : 'Offline'}</span></div>
+        <span class="port-list-label">${prof.label}</span>
+        ${listMediaHtml || `<span class="port-list-type">${prof.type}</span>`}
+        <span class="state-badge ${state}">${stateLabel}</span>
+        ${rightInfo ? `<span class="port-list-device">${rightInfo}</span>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // --- Advanced view: SVG diagram + detail grid ---
+  const svgWrap = el('port-svg-wrap');
+  if (svgWrap) svgWrap.innerHTML = svgPortDiagram(model, ports, profile);
+
+  const detailEl = el('port-detail-grid');
+  if (detailEl) {
+    detailEl.innerHTML = ports.map(p => {
+      const prof = profile.ports.find(pp => pp.id === p.id);
+      if (!prof) return '';
+      const state = p.link_state;
+      const isUp = state === 'up';
+
+      // --- FXS telephony card ---
+      if (prof.role === 'fxs') {
+        const fxs = p.fxs || {};
+        const regState = fxs.registered ? 'Registered' : 'Unregistered';
+        const hookClass = fxs.hook_state === 'off-hook' ? 'offhook' : 'onhook';
+        const hookLabel = fxs.hook_state === 'off-hook' ? 'Off-hook' : 'On-hook';
+        return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+          <div class="port-detail-header">
+            <div class="state-dot ${fxs.registered ? 'up' : 'down'}"><span class="sr-only">${regState}</span></div>
+            <span class="port-detail-name">${prof.label}</span>
+            <span class="state-badge ${fxs.registered ? 'up' : 'down'}">${regState.toUpperCase()}</span>
+          </div>
+          <div class="port-detail-row"><span class="port-dk">Status</span><span class="port-dv"><span class="fxs-hook-badge ${hookClass}">${hookLabel}</span></span></div>
+          <div class="port-detail-row"><span class="port-dk">Ext</span><span class="port-dv">${fxs.extension || '\u2014'}</span></div>
+        </div>`;
+      }
+
+      // --- LTE modem card ---
+      if (prof.role === 'lte_modem') {
+        const lte = p.lte;
+        if (!isUp || !lte) {
+          return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+            <div class="port-detail-header">
+              <div class="state-dot down"><span class="sr-only">Empty</span></div>
+              <span class="port-detail-name">${prof.label}</span>
+              <span class="state-badge down">EMPTY</span>
+            </div>
+            <div class="port-detail-row"><span class="port-dk">Status</span><span class="port-dv">No modem</span></div>
+          </div>`;
+        }
+        const bars = lte.signal_bars || 0;
+        const signalHtml = '<span class="lte-signal-bars">' +
+          [1,2,3,4].map(i => `<span class="lte-bar${i <= bars ? ' active' : ''}"></span>`).join('') +
+          '</span>';
+        return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+          <div class="port-detail-header">
+            <div class="state-dot up"><span class="sr-only">Connected</span></div>
+            <span class="port-detail-name">${prof.label}</span>
+            <span class="state-badge up">CONNECTED</span>
+          </div>
+          <div class="port-detail-row"><span class="port-dk">Carrier</span><span class="port-dv">${lte.carrier} ${signalHtml}</span></div>
+          <div class="port-detail-row"><span class="port-dk">Tech</span><span class="port-dv">${lte.access_tech}</span></div>
+        </div>`;
+      }
+
+      // --- Ethernet (LAN/WAN) card ---
+      const speedLabel = isUp ? formatPortSpeed(p.speed_mbps) : '\u2014';
+      const deviceHtml = p.connected_device
+        ? (isUp
+            ? `<span>${p.connected_device.hostname}</span>`
+            : `<span class="port-last-device">Last: ${p.connected_device.hostname}</span>`)
+        : '\u2014';
+      const poeHtml = p.poe
+        ? `<div class="port-detail-row"><span class="port-dk">PoE</span><span class="port-dv">${p.poe.watts}W</span></div>`
+        : '';
+      const mediaHtml = p.media_type
+        ? `<span class="wan-interface-badge media-${p.media_type.toLowerCase().replace(/\./g,'').replace(/\s/g,'')}">${p.media_type}</span>`
+        : '';
+
+      return `<div class="port-detail-item" data-port-id="${prof.id}" role="listitem">
+        <div class="port-detail-header">
+          <div class="state-dot ${state}"><span class="sr-only">${isUp ? 'Online' : 'Offline'}</span></div>
+          <span class="port-detail-name">${prof.label}</span>
+          ${mediaHtml}
+          <span class="state-badge ${state}">${isUp ? 'UP' : 'DOWN'}</span>
+        </div>
+        <div class="port-detail-row"><span class="port-dk">Speed</span><span class="port-dv">${speedLabel}</span></div>
+        <div class="port-detail-row"><span class="port-dk">Device</span><span class="port-dv">${deviceHtml}</span></div>
+        ${poeHtml}
+      </div>`;
+    }).join('');
+  }
+
+  // Tooltip handlers for SVG port shapes AND detail cards (MAC/IP in tooltip)
+  /* 4-column table tooltip helpers (Infrastructure mode style) */
+  const r1 = (l, v) => `<tr><td class="ptt-lbl">${l}</td><td class="ptt-val" colspan="3">${v}</td></tr>`;
+  const r2 = (l1, v1, l2, v2) => `<tr><td class="ptt-lbl">${l1}</td><td class="ptt-val">${v1}</td><td class="ptt-lbl">${l2}</td><td class="ptt-val">${v2}</td></tr>`;
+
+  function bindPortTooltip(elem, p, prof) {
+    const handler = () => {
+      const isUp = p.link_state === 'up';
+      let html = `<div class="ptt-title">${prof.label} <span class="ptt-type">${prof.type}</span></div>`;
+      html += '<table class="ptt-tbl">';
+
+      if (prof.role === 'fxs' && p.fxs) {
+        html += r2('State', p.fxs.registered ? 'Registered' : 'Unregistered',
+                    'Status', p.fxs.hook_state);
+        html += r1('Extension', p.fxs.extension || '\u2014');
+
+      } else if (prof.role === 'lte_modem' && p.lte) {
+        html += r1('Type', prof.type);
+        html += r2('Modem', p.lte.model, 'Carrier', p.lte.carrier);
+        html += r2('Tech', p.lte.access_tech, 'Signal', p.lte.signal_bars + '/4 bars');
+        if (p.lte.ip) html += r1('IP', p.lte.ip);
+
+      } else {
+        // Ethernet (LAN/WAN)
+        html += r1('Type', prof.type);
+        html += r2('State', isUp ? 'UP' : 'DOWN', 'Speed', isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014');
+        if (isUp && p.duplex) html += r1('Duplex', p.duplex === 'full' ? 'Full' : 'Half');
+        if (p.connected_device) {
+          html += r2('Device', p.connected_device.hostname, 'MAC', p.connected_device.mac);
+          if (p.connected_device.ip) html += r1('IP', p.connected_device.ip);
+        }
+      }
+
+      html += '</table>';
+      showTooltip(html);
+    };
+    elem.addEventListener('mouseenter', handler);
+    elem.addEventListener('focus', handler);
+    elem.addEventListener('mouseleave', hideTooltip);
+    elem.addEventListener('blur', hideTooltip);
+  }
+
+  // Bind tooltips on SVG port shapes
+  if (svgWrap) {
+    svgWrap.querySelectorAll('[data-port-id]').forEach(group => {
+      const pid = group.getAttribute('data-port-id');
+      const p = ports.find(pp => pp.id === pid);
+      const prof = profile.ports.find(pp => pp.id === pid);
+      if (p && prof) bindPortTooltip(group, p, prof);
+    });
+  }
+
+  // Bind tooltips on detail cards
+  if (detailEl) {
+    detailEl.querySelectorAll('[data-port-id]').forEach(card => {
+      const pid = card.getAttribute('data-port-id');
+      const p = ports.find(pp => pp.id === pid);
+      const prof = profile.ports.find(pp => pp.id === pid);
+      if (p && prof) bindPortTooltip(card, p, prof);
+    });
+  }
+
+  // --- Port event history log ---
+  const evList = el('port-events-list');
+  if (evList) {
+    evList.innerHTML = MOCK.portEvents.map(ev => {
+      const ago = formatTimeAgo(ev.epoch);
+      return `<div class="port-event-row">
+        <div class="port-event-dot ${ev.state}"></div>
+        <span class="port-event-time">${ago}</span>
+        <span class="port-event-port">${ev.port}</span>
+        <span class="port-event-state">${ev.detail}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+/* Format epoch to relative time string */
+function formatTimeAgo(epoch) {
+  const secs = Math.floor(Date.now() / 1000 - epoch);
+  if (secs < 60)   return secs + 's ago';
+  if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
+  if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+  return Math.floor(secs / 86400) + 'd ago';
+}
+
+/* Port state drift animation (mock data) */
+(function initPortAnimation() {
+  setInterval(function() {
+    const profile = MODEL_PORT_PROFILES[MOCK.device.model];
+    if (!profile) return;
+    let changed = false;
+    MOCK.ports.forEach(function(p) {
+      const prof = profile.ports.find(pp => pp.id === p.id);
+      if (!prof) return;
+
+      // FXS: toggle hook state (5% chance)
+      if (prof.role === 'fxs' && p.fxs && Math.random() < 0.05) {
+        p.fxs.hook_state = p.fxs.hook_state === 'on-hook' ? 'off-hook' : 'on-hook';
+        MOCK.portEvents.unshift({ epoch: Date.now()/1000, port: prof.label, state: 'up', detail: p.fxs.hook_state === 'off-hook' ? 'Off-hook' : 'On-hook' });
+        changed = true;
+      }
+      // LTE modem: drift signal bars (8% chance)
+      else if (prof.role === 'lte_modem' && p.lte && Math.random() < 0.08) {
+        p.lte.signal_bars = Math.max(1, Math.min(4, p.lte.signal_bars + (Math.random() < 0.5 ? 1 : -1)));
+        changed = true;
+      }
+      // Ethernet: toggle link state (2% chance)
+      else if ((prof.role === 'lan' || prof.role === 'wan') && Math.random() < 0.02) {
+        const wasUp = p.link_state === 'up';
+        p.link_state = wasUp ? 'down' : 'up';
+        if (!wasUp) p.speed_mbps = prof.max_speed_mbps;
+        const evDetail = p.link_state === 'up' ? 'Link up at ' + formatPortSpeed(p.speed_mbps) : 'Link down';
+        MOCK.portEvents.unshift({ epoch: Date.now()/1000, port: prof.label, state: p.link_state, detail: evDetail });
+        changed = true;
+        const announceEl = el('port-status-announce');
+        if (announceEl) announceEl.textContent = prof.label + ' port is now ' + p.link_state;
+      }
+    });
+    if (changed) renderPortStatus();
+  }, 8000);
+})();
+
 /* ===== Speedtest History Card ===== */
 let speedtestMode = 'raw'; // 'pct' or 'raw'
 
@@ -2837,6 +3350,7 @@ function init() {
   renderTopFlows();
   renderTopHosts();
   renderMWAN();
+  renderPortStatus();
   // Canvas needs layout to be done first
   requestAnimationFrame(() => initThroughputCanvas());
   // Deep link: check URL hash for page routing (handled in each page's script)

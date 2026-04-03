@@ -13,8 +13,11 @@
 </head>
 <body>
 
+  <!-- Skip navigation (EAA / WCAG 2.4.1) -->
+  <a href="#dashboard-grid" class="skip-link">Skip to main content</a>
+
   <!-- ===== Sidebar ===== -->
-  <nav class="sidebar" id="sidebar">
+  <nav class="sidebar" id="sidebar" aria-label="Main navigation">
     <div class="sidebar-header">
       <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 586 149.02" aria-label="Adtran">
         <path d="M158.80,120.00 C165.19,127.09 173.58,130.63 183.95,130.63 C194.33,130.63 202.71,127.09 209.11,120.00 C215.49,112.92 218.69,104.18 218.69,93.81 C218.69,83.68 215.49,75.08 209.11,67.99 C202.71,60.90 194.33,57.36 183.95,57.36 C173.58,57.36 165.19,60.90 158.80,67.99 C152.41,75.08 149.22,83.68 149.22,93.81 C149.22,104.18 152.41,112.92 158.80,120.00 L229.20,1.76 C234.28,1.76 238.40,5.88 238.40,10.97 L238.32,137.08 C238.32,142.27 234.11,146.48 228.92,146.48 C223.73,146.48 219.52,142.27 219.52,137.08 L219.52,133.21 C208.14,143.71 198.10,149.02 183.09,149.02 C167.82,149.02 155.19,143.70 145.20,133.06 C135.21,122.42 130.22,109.34 130.22,93.80 C130.22,78.53 135.21,65.57 145.20,54.93 C155.19,44.29 167.69,38.97 182.70,38.97 C197.71,38.97 207.98,44.03 219.52,54.65 L219.60,10.97 C219.60,5.88 223.72,1.76 228.80,1.76 Z" fill="#FFFFFF"/>
@@ -26,8 +29,8 @@
         <path d="M130.38,132.96 L75.64,7.84 C72.21,0.00 61.09,0.02 57.69,7.87 L29.86,72.16 C25.90,81.95 32.21,89.83 42.77,89.83 L43.98,89.83 L66.70,35.84 L110.93,140.21 C112.55,143.99 116.55,146.48 121.00,146.48 L121.06,146.48 C128.71,146.48 133.23,139.43 130.38,132.96 Z" fill="#FFFFFF"/>
         <path d="M80.16,99.97 C80.16,107.45 74.10,113.52 66.62,113.52 C59.14,113.52 53.08,107.45 53.08,99.97 C53.08,92.50 59.14,86.43 66.62,86.43 C74.10,86.43 80.16,92.50 80.16,99.97 Z" fill="#FFFFFF"/>
       </svg>
-      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
-        <i class="fa-solid fa-bars"></i>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar" aria-label="Toggle sidebar" aria-expanded="true">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
       </button>
     </div>
 
@@ -69,13 +72,13 @@
       <li>
         <a class="nav-link" href="#">
           <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
-          <span class="nav-label">Flows</span>
+          <span class="nav-label">FlowSight</span>
         </a>
       </li>
       <li>
         <a class="nav-link" href="#" id="nav-speedtest">
           <span class="nav-icon"><i class="fa-solid fa-bolt"></i></span>
-          <span class="nav-label">SpeedWave</span>
+          <span class="nav-label">NetPulse</span>
         </a>
       </li>
       <li>
@@ -123,7 +126,7 @@
   <div class="main-wrapper">
 
     <!-- Top Bar -->
-    <header class="top-bar">
+    <header class="top-bar" role="banner">
       <div class="search-bar">
         <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
         <input type="text" class="search-input" placeholder="Search..." />
@@ -137,19 +140,19 @@
 
         <div class="topbar-divider"></div>
 
-        <button class="btn-topbar" id="btnCharts" title="Open Netdata charts">
-          <i class="fa-solid fa-chart-area"></i>
+        <button class="btn-topbar" id="btnCharts" title="Open Netdata charts" aria-label="Open Netdata charts">
+          <i class="fa-solid fa-chart-area" aria-hidden="true"></i>
           <span class="btn-label">Charts</span>
         </button>
-        <button class="btn-topbar" id="btnTopology" title="Intellifi topology view">
-          <i class="fa-solid fa-diagram-project"></i>
+        <button class="btn-topbar" id="btnTopology" title="Intellifi topology view" aria-label="Intellifi topology view">
+          <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
           <span class="btn-label">Topology</span>
         </button>
 
         <div class="topbar-divider"></div>
 
-        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">
-          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle light/dark theme">
+          <i class="fa-solid fa-moon" id="themeIcon" aria-hidden="true"></i>
         </button>
 
         <div class="topbar-divider"></div>
@@ -162,7 +165,7 @@
     </header>
 
     <!-- Page Content -->
-    <main class="page-content">
+    <main class="page-content" aria-label="Dashboard content">
 
       <!-- Page Header -->
       <div class="page-header">
@@ -173,10 +176,10 @@
       <div class="dashboard-grid" id="dashboard-grid">
 
         <!-- WAN Card -->
-        <div class="card" id="card-wan">
+        <div class="card" id="card-wan" role="region" aria-label="WAN Status">
           <div class="card-label wan-dual-header">
             <span class="wan-header-left">
-              <div class="state-dot up" id="wan-dot"></div>
+              <div class="state-dot up" id="wan-dot"><span class="sr-only" id="wan-dot-sr">Online</span></div>
               WAN Status
               <span class="state-badge up" id="wan-state-text">UP</span>
               <span class="wan-interface-badge" id="wan-iface">XGSPON</span>
@@ -255,7 +258,7 @@
         </div>
 
         <!-- Device Card -->
-        <div class="card" id="card-device">
+        <div class="card" id="card-device" role="region" aria-label="Device Info">
           <div class="card-label">
             Device Info
           </div>
@@ -270,19 +273,19 @@
               <div class="gauge-col-title">System Health</div>
               <div class="gauge-grid">
                 <div class="device-gauge-wrap">
-                  <canvas id="gauge-cpu"></canvas>
+                  <canvas id="gauge-cpu" role="img" aria-label="CPU usage gauge"></canvas>
                   <div class="gauge-label">CPU</div>
                 </div>
                 <div class="device-gauge-wrap">
-                  <canvas id="gauge-cputemp"></canvas>
+                  <canvas id="gauge-cputemp" role="img" aria-label="Temperature gauge"></canvas>
                   <div class="gauge-label">Temp</div>
                 </div>
                 <div class="device-gauge-wrap">
-                  <canvas id="gauge-flash"></canvas>
+                  <canvas id="gauge-flash" role="img" aria-label="Flash usage gauge"></canvas>
                   <div class="gauge-label">Flash</div>
                 </div>
                 <div class="device-gauge-wrap">
-                  <canvas id="gauge-mem"></canvas>
+                  <canvas id="gauge-mem" role="img" aria-label="RAM usage gauge"></canvas>
                   <div class="gauge-label">RAM</div>
                 </div>
               </div>
@@ -291,7 +294,7 @@
         </div>
 
         <!-- BB Score Card (simple view only) -->
-        <div class="card basic-only" id="card-bbscore">
+        <div class="card basic-only" id="card-bbscore" role="region" aria-label="Bufferbloat Score">
           <div class="card-label">Bufferbloat Score</div>
           <div class="bb-score-body">
             <div class="bb-score-pills">
@@ -302,7 +305,7 @@
         </div>
 
         <!-- Active Alarms Card -->
-        <div class="card tech-only" id="card-alarms">
+        <div class="card tech-only" id="card-alarms" role="region" aria-label="Active Alarms">
           <div class="card-label">
 
             Active Alarms
@@ -313,7 +316,7 @@
         </div>
 
         <!-- Recent Events Card -->
-        <div class="card tech-only" id="card-events">
+        <div class="card tech-only" id="card-events" role="region" aria-label="Recent Events">
           <div class="card-label">
 
             Recent Events
@@ -326,7 +329,7 @@
 
 
         <!-- Connection History -->
-        <div class="card" id="card-history">
+        <div class="card" id="card-history" role="region" aria-label="Connection History">
           <div class="history-header">
             <div class="history-header-left">
               <div class="card-label">
@@ -350,19 +353,19 @@
             </div>
           </div>
           <div class="timeline-legend">
-            <div class="legend-item"><div class="legend-swatch up"></div> Online</div>
-            <div class="legend-item"><div class="legend-swatch internet"></div> Internet Lost</div>
-            <div class="legend-item"><div class="legend-swatch power"></div> Power Loss</div>
-            <div class="legend-item"><div class="legend-swatch upgrade"></div> Upgrade / Reboot</div>
-            <div class="legend-item"><div class="legend-swatch grey"></div> Uncertain</div>
-            <div class="legend-item"><div class="legend-swatch nodata"></div> No Data</div>
+            <div class="legend-item"><div class="legend-swatch up" aria-hidden="true"></div> Online</div>
+            <div class="legend-item"><div class="legend-swatch internet" aria-hidden="true"></div> Internet Lost</div>
+            <div class="legend-item"><div class="legend-swatch power" aria-hidden="true"></div> Power Loss</div>
+            <div class="legend-item"><div class="legend-swatch upgrade" aria-hidden="true"></div> Upgrade / Reboot</div>
+            <div class="legend-item"><div class="legend-swatch grey" aria-hidden="true"></div> Uncertain</div>
+            <div class="legend-item"><div class="legend-swatch nodata" aria-hidden="true"></div> No Data</div>
           </div>
           <div class="history-stats tech-only" id="history-stats"></div>
           <div class="history-monthly tech-only" id="history-monthly"></div>
         </div>
 
         <!-- WiFi Airtime -->
-        <div class="card" id="card-airtime">
+        <div class="card" id="card-airtime" role="region" aria-label="WiFi Airtime">
           <div class="card-label">
 
             WiFi Airtime
@@ -372,14 +375,14 @@
         </div>
 
         <!-- WAN Throughput Card -->
-        <div class="card" id="card-wanperf">
+        <div class="card" id="card-wanperf" role="region" aria-label="WAN Throughput">
           <div class="card-label">
 
             WAN Throughput
           </div>
           <div class="wanperf-body">
             <div class="wanperf-canvas-col">
-              <canvas id="throughput-canvas"></canvas>
+              <canvas id="throughput-canvas" role="img" aria-label="WAN throughput chart"></canvas>
             </div>
             <div class="wanperf-live-vals">
               <div class="tp-item dl">
@@ -397,7 +400,7 @@
         </div>
 
         <!-- System Performance (QoE) Card -->
-        <div class="card" id="card-qoe" style="cursor: pointer;" onclick="navigateTo('diagnostics')">
+        <div class="card" id="card-qoe" role="region" aria-label="System Performance Score" style="cursor: pointer;" onclick="navigateTo('diagnostics')">
           <div class="card-label">
 
             System Performance Score
@@ -419,7 +422,7 @@
 
 
         <!-- Speedtest History -->
-        <div class="card tech-only" id="card-speedtest">
+        <div class="card tech-only" id="card-speedtest" role="region" aria-label="Speed Test History">
           <div class="card-label">
 
             Speed Test History
@@ -431,7 +434,7 @@
           <div class="sth-chart-wrap">
             <div class="sth-yaxis" id="sth-yaxis"></div>
             <div class="sth-scroll" id="sth-scroll">
-              <canvas id="speedtest-canvas"></canvas>
+              <canvas id="speedtest-canvas" role="img" aria-label="Speed test history chart"></canvas>
             </div>
             <div id="speedtest-tooltip" class="sth-tooltip" style="display:none;"></div>
           </div>
@@ -447,7 +450,7 @@
         </div>
 
         <!-- Top Active Flows Card -->
-        <div class="card tech-only" id="card-topflows">
+        <div class="card tech-only" id="card-topflows" role="region" aria-label="Top Active Flows">
           <div class="card-label">
             Top Active Flows
             <span class="flow-count-badge" id="topflows-count">0</span>
@@ -457,7 +460,7 @@
         </div>
 
         <!-- Top Bandwidth Hosts Card -->
-        <div class="card tech-only" id="card-tophosts">
+        <div class="card tech-only" id="card-tophosts" role="region" aria-label="Top Bandwidth Hosts">
           <div class="card-label">
             Top Bandwidth Hosts
             <span class="flow-count-badge" id="tophosts-count">0</span>
@@ -467,7 +470,7 @@
         </div>
 
         <!-- Multi-WAN / LTE Failover Card -->
-        <div class="card tech-only" id="card-multiwan">
+        <div class="card tech-only" id="card-multiwan" role="region" aria-label="WWAN Failover">
           <div class="card-label">
             <i class="fa-solid fa-shuffle" style="color:var(--accent-amber);margin-right:6px;font-size:11px;"></i>
             WWAN FAILOVER
@@ -493,8 +496,32 @@
           </div>
         </div>
 
+        <!-- Port Status -->
+        <div class="card" id="card-ports" role="region" aria-label="Port Status">
+          <div class="card-label" id="card-ports-label">
+            Port Status
+            <span class="port-model-badge" id="port-model-badge"></span>
+          </div>
+          <div class="port-card-body">
+            <!-- Top row: SVG diagram (left) + event log (right) -->
+            <div class="port-top-row">
+              <div class="port-svg-wrap" id="port-svg-wrap" role="img" aria-label="Rear panel port diagram"></div>
+              <div class="port-events tech-only">
+                <div class="port-events-label">Port Events</div>
+                <div class="port-events-list" id="port-events-list" role="log" aria-label="Port event history"></div>
+              </div>
+            </div>
+            <!-- Simple view: compact status list below diagram -->
+            <div class="port-list basic-only" id="port-list" role="list" aria-label="Port status summary"></div>
+            <!-- Advanced view: detail cards below diagram -->
+            <div class="port-detail-grid tech-only" id="port-detail-grid" role="list" aria-label="Port details"></div>
+          </div>
+          <!-- Screen reader live region for port state changes -->
+          <div class="sr-only" role="status" aria-live="polite" id="port-status-announce"></div>
+        </div>
+
         <!-- Placeholder Tile -->
-        <div class="card tech-only" id="card-placeholder">
+        <div class="card tech-only" id="card-placeholder" role="region" aria-label="Custom Tile">
           <div class="card-label">
 
             Custom Tile
@@ -751,8 +778,8 @@
         </div>
       </div><!-- /page-pathpulse -->
 
-      <!-- Page: SpeedWave -->
-      <div id="page-speedwave" class="page-panel" style="display:none">
+      <!-- Page: NetPulse -->
+      <div id="page-netpulse" class="page-panel" style="display:none">
         <div class="page-header-actions">
           <span class="st-last-test-time" id="st-last-time"></span>
         </div>
@@ -886,7 +913,7 @@
           <!-- Full History Chart -->
           <div class="card st-history-card" id="st-history-card-basic">
             <div class="card-label">
-              <span>SpeedWave History</span>
+              <span>NetPulse History</span>
               <div class="st-history-controls">
                 <div class="st-history-legend">
                   <span class="sth-legend-item dl"><span class="sth-legend-dot dl"></span> DL</span>
@@ -963,12 +990,12 @@
             </div>
           </div>
         </div>
-      </div><!-- /page-speedwave -->
+      </div><!-- /page-netpulse -->
 
     </main>
   </div><!-- /main-wrapper -->
 
-  <!-- SpeedWave Shaper Modal -->
+  <!-- NetPulse Shaper Modal -->
   <div class="shaper-overlay" id="shaper-overlay" style="display:none;" onclick="if(event.target===this)closeShaperModal();">
     <div class="shaper-modal">
       <div class="shaper-modal-header">
@@ -1044,6 +1071,9 @@
   <!-- Global Tooltip -->
   <div id="tooltip"></div>
 
+  <!-- Screen reader live region for dynamic status announcements (EAA / WCAG 4.1.3) -->
+  <div id="sr-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
   <!-- StatsView Chart Tooltip -->
   <div class="sv-chart-tooltip" id="sv-chart-tooltip"></div>
 
@@ -1082,6 +1112,6 @@
   <script src="statsview-data.js?v=1"></script>
   <script src="statsview.js?v=1"></script>
   <script src="pathpulse.js?v=2"></script>
-  <script src="speedwave.js?v=2"></script>
+  <script src="netpulse.js?v=2"></script>
 </body>
 </html>
