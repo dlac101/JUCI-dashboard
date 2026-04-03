@@ -441,7 +441,7 @@ const MODEL_PORT_PROFILES = {
 /* Runtime port state (all 8 ports, matches SDG-8733v profile) */
 MOCK.ports = [
   { id: 'wan0', link_state: 'up', speed_mbps: 10000, duplex: 'full', media_type: 'XGSPON',
-    connected_device: { hostname: 'Consolidated Comm.', mac: '00:1A:2B:3C:4D:5E', ip: '198.51.100.43' }, poe: null },
+    connected_device: { hostname: 'Consolidated Communications, Inc', mac: '00:1A:2B:3C:4D:5E', ip: '198.51.100.43' }, poe: null },
   { id: 'lan1', link_state: 'up', speed_mbps: 2500,  duplex: 'full',
     connected_device: { hostname: 'Gaming-PC', mac: 'A4:83:E7:12:34:56', ip: '192.168.1.101' }, poe: null },
   { id: 'lan2', link_state: 'up', speed_mbps: 100,   duplex: 'full',
@@ -2720,11 +2720,12 @@ function renderPortStatus() {
 
       if (prof.role === 'wan') {
         // WAN: quad first row (Type | State | Speed | Duplex) + ISP full-width + IP | MAC
-        const speed  = isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014';
-        const duplex = isUp && p.duplex ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
-        const dev    = p.connected_device;
+        const speed     = isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014';
+        const duplex    = isUp && p.duplex ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
+        const typeLabel = p.media_type ? `${prof.type} \u00b7 ${p.media_type}` : prof.type;
+        const dev       = p.connected_device;
         html += `<div class="ptt-wan-grid">
-          <div class="ptt-pair"><span class="ptt-lbl">Type</span><span class="ptt-pv">${prof.type}</span></div>
+          <div class="ptt-pair"><span class="ptt-lbl">Type</span><span class="ptt-pv">${typeLabel}</span></div>
           <div class="ptt-pair"><span class="ptt-lbl">State</span><span class="ptt-pv">${isUp ? 'UP' : 'DOWN'}</span></div>
           <div class="ptt-pair"><span class="ptt-lbl">Speed</span><span class="ptt-pv">${speed}</span></div>
           <div class="ptt-pair"><span class="ptt-lbl">Duplex</span><span class="ptt-pv">${duplex}</span></div>
