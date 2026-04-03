@@ -2731,14 +2731,14 @@ function renderPortStatus() {
         if (p.lte.ip) html += r1('IP', p.lte.ip);
 
       } else {
-        // Ethernet (LAN/WAN)
-        html += r1('Type', prof.type);
-        html += r2('State', isUp ? 'UP' : 'DOWN', 'Speed', isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014');
-        if (isUp && p.duplex) html += r1('Duplex', p.duplex === 'full' ? 'Full' : 'Half');
-        if (p.connected_device) {
-          html += r2('Device', p.connected_device.hostname, 'MAC', p.connected_device.mac);
-          if (p.connected_device.ip) html += r1('IP', p.connected_device.ip);
-        }
+        // Ethernet (LAN/WAN) — 4-row compact layout
+        const duplex = (isUp && p.duplex) ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
+        const speed  = (isUp && p.speed_mbps) ? formatPortSpeed(p.speed_mbps) : '\u2014';
+        const dev    = p.connected_device;
+        html += r2('Type',   prof.type,                     'State',  isUp ? 'UP' : 'DOWN');
+        html += r2('Speed',  speed,                         'Duplex', duplex);
+        html += r2('Device', dev ? dev.hostname : '\u2014', 'IP',     dev && dev.ip ? dev.ip : '\u2014');
+        html += r1('MAC',    dev ? dev.mac : '\u2014');
       }
 
       html += '</table>';
