@@ -7512,6 +7512,46 @@ body:not([data-view="basic"]) .pp-pipeline {
   font-family: var(--font-mono);
   font-size: 11px;
 }
+/* WAN tooltip: 4-item quad row (Type, State, Speed, Duplex) */
+.ptt-wan-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 6px;
+  padding: 3px 0 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 3px;
+}
+.ptt-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ptt-pair .ptt-lbl {
+  padding: 0;
+}
+.ptt-pv {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+/* ISP name: left-aligned immediately after label, hard truncation for very long names */
+.ptt-isp-val {
+  text-align: left;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* ISP name in detail card: truncate long names */
+.port-dv-isp {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .ptt-meters {
   margin-top: 6px;
   padding-top: 6px;

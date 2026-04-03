@@ -2702,7 +2702,7 @@ function renderPortStatus() {
           <span class="state-badge ${state}">${isUp ? 'UP' : 'DOWN'}</span>
         </div>
         <div class="port-detail-row"><span class="port-dk">Speed</span><span class="port-dv">${speedLabel}</span></div>
-        <div class="port-detail-row"><span class="port-dk">Device</span><span class="port-dv">${deviceHtml}</span></div>
+        <div class="port-detail-row"><span class="port-dk">${prof.role === 'wan' ? 'ISP' : 'Device'}</span><span class="port-dv${prof.role === 'wan' ? ' port-dv-isp' : ''}">${deviceHtml}</span></div>
         ${poeHtml}
       </div>`;
     }).join('');
@@ -2717,21 +2717,41 @@ function renderPortStatus() {
     const showHandler = () => {
       const isUp = p.link_state === 'up';
       let html = `<div class="ptt-title">${prof.label} <span class="ptt-type">${prof.type}</span></div>`;
-      html += '<table class="ptt-tbl">';
 
-      if (prof.role === 'fxs' && p.fxs) {
+      if (prof.role === 'wan') {
+        // WAN: quad first row (Type | State | Speed | Duplex) + ISP full-width + IP | MAC
+        const speed  = isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014';
+        const duplex = isUp && p.duplex ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
+        const dev    = p.connected_device;
+        html += `<div class="ptt-wan-grid">
+          <div class="ptt-pair"><span class="ptt-lbl">Type</span><span class="ptt-pv">${prof.type}</span></div>
+          <div class="ptt-pair"><span class="ptt-lbl">State</span><span class="ptt-pv">${isUp ? 'UP' : 'DOWN'}</span></div>
+          <div class="ptt-pair"><span class="ptt-lbl">Speed</span><span class="ptt-pv">${speed}</span></div>
+          <div class="ptt-pair"><span class="ptt-lbl">Duplex</span><span class="ptt-pv">${duplex}</span></div>
+        </div>`;
+        html += '<table class="ptt-tbl">';
+        html += `<tr><td class="ptt-lbl">ISP</td><td class="ptt-val ptt-isp-val" colspan="3">${dev ? dev.hostname : '\u2014'}</td></tr>`;
+        html += r2('IP', dev && dev.ip ? dev.ip : '\u2014', 'MAC', dev ? dev.mac : '\u2014');
+        html += '</table>';
+
+      } else if (prof.role === 'fxs' && p.fxs) {
+        html += '<table class="ptt-tbl">';
         html += r2('State', p.fxs.registered ? 'Registered' : 'Unregistered',
                     'Status', p.fxs.hook_state);
         html += r1('Extension', p.fxs.extension || '\u2014');
+        html += '</table>';
 
       } else if (prof.role === 'lte_modem' && p.lte) {
+        html += '<table class="ptt-tbl">';
         html += r1('Type', prof.type);
         html += r2('Modem', p.lte.model, 'Carrier', p.lte.carrier);
         html += r2('Tech', p.lte.access_tech, 'Signal', p.lte.signal_bars + '/4 bars');
         if (p.lte.ip) html += r1('IP', p.lte.ip);
+        html += '</table>';
 
       } else {
-        // Ethernet (LAN/WAN) — 4-row compact layout
+        // LAN Ethernet — 4-row compact layout
+        html += '<table class="ptt-tbl">';
         const duplex = (isUp && p.duplex) ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
         const speed  = (isUp && p.speed_mbps) ? formatPortSpeed(p.speed_mbps) : '\u2014';
         const dev    = p.connected_device;
@@ -2739,9 +2759,9 @@ function renderPortStatus() {
         html += r2('Speed',  speed,                         'Duplex', duplex);
         html += r2('Device', dev ? dev.hostname : '\u2014', 'IP',     dev && dev.ip ? dev.ip : '\u2014');
         html += r1('MAC',    dev ? dev.mac : '\u2014');
+        html += '</table>';
       }
 
-      html += '</table>';
       showTooltip(html);
       elem.setAttribute('aria-describedby', 'tooltip');
     };
