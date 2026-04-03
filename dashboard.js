@@ -2722,7 +2722,7 @@ function renderPortStatus() {
         // WAN: quad first row (Type | State | Speed | Duplex) + ISP full-width + IP | MAC
         const speed     = isUp && p.speed_mbps ? formatPortSpeed(p.speed_mbps) : '\u2014';
         const duplex    = isUp && p.duplex ? (p.duplex === 'full' ? 'Full' : 'Half') : '\u2014';
-        const typeLabel = p.media_type ? `${prof.type} \u00b7 ${p.media_type}` : prof.type;
+        const typeLabel = p.media_type || prof.type;
         const dev       = p.connected_device;
         html += `<div class="ptt-wan-grid">
           <div class="ptt-pair"><span class="ptt-lbl">Type</span><span class="ptt-pv">${typeLabel}</span></div>
