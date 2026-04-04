@@ -317,7 +317,7 @@
             <span style="margin-left: auto; font-size: 9px; cursor: pointer; color: var(--accent-cyan);" onclick="navigateTo('alarms')">View All &rarr;</span>
           </div>
           <div class="alarm-sev-row" id="alarm-sev-row"></div>
-          <div class="alarm-list" id="alarm-list"></div>
+          <div class="alarm-list" id="alarm-list" role="list"></div>
         </div>
 
         <!-- Recent Events Card -->
@@ -328,7 +328,7 @@
             <span style="margin-left: auto; font-size: 9px; cursor: pointer; color: var(--accent-cyan);" onclick="navigateTo('events')">View All &rarr;</span>
           </div>
           <div class="events-counts" id="events-counts"></div>
-          <div class="events-list" id="events-list"></div>
+          <div class="events-list" id="events-list" role="list" aria-live="polite"></div>
         </div>
 
 
@@ -464,7 +464,7 @@
             <span class="flow-count-badge" id="topflows-count">0</span>
             <span style="margin-left:auto;font-size:9px;cursor:pointer;color:var(--accent-cyan);" onclick="navigateTo('flows')">View All &rarr;</span>
           </div>
-          <div class="topflows-list" id="topflows-list"></div>
+          <div class="topflows-list" id="topflows-list" role="list"></div>
         </div>
 
         <!-- Top Bandwidth Hosts Card -->
@@ -474,7 +474,7 @@
             <span class="flow-count-badge" id="tophosts-count">0</span>
             <span style="margin-left:auto;font-size:9px;cursor:pointer;color:var(--accent-cyan);" onclick="navigateTo('devices')">View All &rarr;</span>
           </div>
-          <div class="topflows-list" id="tophosts-list"></div>
+          <div class="topflows-list" id="tophosts-list" role="list"></div>
         </div>
 
         <!-- Multi-WAN / LTE Failover Card -->
@@ -485,13 +485,13 @@
             <span class="mwan-policy-badge" id="mwan-policy-badge">STANDBY</span>
           </div>
           <div class="mwan-grid">
-            <div class="mwan-iface-panel" id="mwan-panel-wan"></div>
-            <div class="mwan-iface-panel" id="mwan-panel-wwan"></div>
+            <div class="mwan-iface-panel" id="mwan-panel-wan"  role="region" aria-label="WAN interface"></div>
+            <div class="mwan-iface-panel" id="mwan-panel-wwan" role="region" aria-label="WWAN interface"></div>
           </div>
           <hr class="mwan-divider">
           <div class="mwan-events-section">
             <div class="mwan-events-label">Failover Events</div>
-            <div class="mwan-events-list" id="mwan-events-list"></div>
+            <div class="mwan-events-list" id="mwan-events-list" role="list"></div>
           </div>
           <hr class="mwan-divider">
           <div class="mwan-usage-section">

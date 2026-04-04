@@ -1067,27 +1067,31 @@ function renderAlarms() {
 
   el('alarm-sev-row').innerHTML =
     `<div class="sev-pill">
-      <span class="sev-dot critical"></span>
-      <span class="sev-count critical">${counts.critical} crit</span>
+      <span class="sev-dot critical" aria-hidden="true"></span>
+      <span class="sev-count critical">${counts.critical} critical</span>
     </div>
     <div class="sev-pill">
-      <span class="sev-dot error"></span>
-      <span class="sev-count error">${counts.error} err</span>
+      <span class="sev-dot error" aria-hidden="true"></span>
+      <span class="sev-count error">${counts.error} error</span>
     </div>
     <div class="sev-pill">
-      <span class="sev-dot warn"></span>
-      <span class="sev-count warn">${counts.warn} warn</span>
+      <span class="sev-dot warn" aria-hidden="true"></span>
+      <span class="sev-count warn">${counts.warn} warning</span>
     </div>`;
 
   if (alarms.length === 0) {
     el('alarm-list').innerHTML =
-      `<div class="alarm-no-alarms"><i class="fa-solid fa-circle-check"></i> No active alarms</div>`;
+      `<div class="alarm-no-alarms"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> No active alarms</div>`;
   } else {
     el('alarm-list').innerHTML = alarms.map(a =>
-      `<div class="alarm-row sev-${a.severity}">
-        <span class="sev-dot ${a.severity}" style="flex-shrink:0"></span>
-        <span class="alarm-row-name" title="${a.info}">${a.value_string || a.name}</span>
-        <button class="btn-dismiss" onclick="dismissAlarm('${a.subjectMAC}')" title="Dismiss">&#x2715;</button>
+      `<div class="alarm-row sev-${a.severity}" role="listitem">
+        <span class="sev-dot ${a.severity}" aria-hidden="true"></span>
+        <span class="alarm-row-name"
+              aria-label="${a.severity} alarm: ${a.value_string || a.name}. ${a.info}"
+              title="${a.info}">${a.value_string || a.name}</span>
+        <button class="btn-dismiss"
+                aria-label="Dismiss alarm: ${a.value_string || a.name}"
+                onclick="dismissAlarm('${a.subjectMAC}')">&#x2715;</button>
       </div>`
     ).join('');
   }
@@ -1105,17 +1109,25 @@ function renderEvents() {
   all.forEach(e => { if (counts[e.Priority] !== undefined) counts[e.Priority]++; });
 
   el('events-counts').innerHTML =
-    `<div class="ev-count-badge critical"><i class="fa-solid fa-circle-xmark"></i> ${counts.critical}</div>
-     <div class="ev-count-badge warn"><i class="fa-solid fa-triangle-exclamation"></i> ${counts.warn}</div>`;
+    `<div class="ev-count-badge critical" aria-label="${counts.critical} critical events">
+       <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> ${counts.critical}
+     </div>
+     <div class="ev-count-badge warn" aria-label="${counts.warn} warning events">
+       <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${counts.warn}
+     </div>`;
 
   el('events-list').innerHTML = all.map(e =>
-    `<div class="event-row">
-      <div class="event-priority-bar ${e.Priority}"></div>
+    `<div class="event-row" role="listitem">
+      <div class="event-priority-bar ${e.Priority}" aria-hidden="true"></div>
       <div class="event-body">
-        <span class="event-text">${e.Topic_WhatHappened}</span>
+        <span class="event-text">
+          <span class="sr-only">${e.Priority}: </span>${e.Topic_WhatHappened}
+        </span>
         <span class="event-time">${formatEpochShort(e.Epoch)}</span>
       </div>
-      <button class="btn-ack" onclick="ackEvent(${e.Epoch})" title="Acknowledge">&#x2713;</button>
+      <button class="btn-ack"
+              aria-label="Acknowledge: ${e.Topic_WhatHappened.slice(0, 60)}"
+              onclick="ackEvent(${e.Epoch})">&#x2713;</button>
     </div>`
   ).join('');
 }
@@ -2120,7 +2132,7 @@ function renderFlowSparkline(dataPoints, color) {
   });
   const polyline = coords.join(' ');
   const fillPath = `M${coords[0]} L${polyline} L${w},${h} L0,${h} Z`;
-  return `<svg class="tf-sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+  return `<svg class="tf-sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <path d="${fillPath}" fill="${fill}" />
     <polyline points="${polyline}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" />
   </svg>`;
@@ -2136,15 +2148,16 @@ function renderTopFlows() {
   if (countEl) countEl.textContent = MOCK.flows.length;
 
   list.innerHTML = top.map(f => `
-    <div class="tf-row">
+    <div class="tf-row" role="listitem"
+         aria-label="${f.destination}: ${formatFlowRate(f.rx_bps)}, ${f.protocol}/${f.app_protocol} from ${f.source}">
       <div class="tf-header">
-        <span class="tf-dest" title="${f.destination}">${f.destination}</span>
+        <span class="tf-dest" title="${f.destination}" aria-hidden="true">${f.destination}</span>
         <div class="tf-rate-group">
-          <span class="tf-rate">${formatFlowRate(f.rx_bps)}</span>
+          <span class="tf-rate" aria-hidden="true">${formatFlowRate(f.rx_bps)}</span>
           ${renderFlowSparkline(f.rateHistory)}
         </div>
       </div>
-      <div class="tf-meta">
+      <div class="tf-meta" aria-hidden="true">
         <span class="tf-proto-badge ${f.protocol.toLowerCase()}">${f.protocol}</span>
         <span class="tf-app">${f.app_protocol}</span>
         <span class="tf-source">${f.source}</span>
@@ -2203,15 +2216,16 @@ function renderTopHosts() {
   if (countEl) countEl.textContent = Object.keys(hostMap).length;
 
   list.innerHTML = top.map(h => `
-    <div class="tf-row">
+    <div class="tf-row" role="listitem"
+         aria-label="${h.name}: ${formatFlowRate(h.rx_bps)}, ${h.flowCount} flow${h.flowCount !== 1 ? 's' : ''}">
       <div class="tf-header">
-        <span class="tf-dest tf-host-name" title="${h.name}">${h.name}</span>
+        <span class="tf-dest tf-host-name" title="${h.name}" aria-hidden="true">${h.name}</span>
         <div class="tf-rate-group">
-          <span class="tf-rate tf-host-rate">${formatFlowRate(h.rx_bps)}</span>
+          <span class="tf-rate tf-host-rate" aria-hidden="true">${formatFlowRate(h.rx_bps)}</span>
           ${renderFlowSparkline(h.rateHistory, 'var(--accent-green)')}
         </div>
       </div>
-      <div class="tf-meta">
+      <div class="tf-meta" aria-hidden="true">
         <span class="tf-flow-count">${h.flowCount} flow${h.flowCount !== 1 ? 's' : ''}</span>
       </div>
     </div>
@@ -2365,19 +2379,19 @@ function renderMWANIfacePanel(panelEl, iface, isActiveRouter) {
 
   panelEl.innerHTML = `
     <div class="mwan-iface-header">
-      <div class="mwan-state-dot ${stateCssClass}"></div>
+      <div class="mwan-state-dot ${stateCssClass}" aria-hidden="true"></div>
       <span class="mwan-iface-name">${iface.name}</span>
-      <div class="mwan-lat-group">
-        <span class="mwan-lat-val" style="color:${latColor}">${iface.latency_ms.toFixed(1)}ms</span>
+      <div class="mwan-lat-group" aria-label="Latency: ${iface.latency_ms.toFixed(1)} ms">
+        <span class="mwan-lat-val" style="color:${latColor}" aria-hidden="true">${iface.latency_ms.toFixed(1)}ms</span>
         ${renderFlowSparkline(iface.latencyHistory, latColor)}
       </div>
     </div>
     <div class="mwan-iface-row2">
       <span class="wan-interface-badge ${techClass}">${techLabel}</span>
       <span class="mwan-state-badge ${stateCssClass}">${stateLabel}</span>
-      <div class="mwan-metric-chip ${lossWarnClass}">
-        <span class="chip-label">loss</span>
-        <span class="chip-val">${iface.loss_pct}%</span>
+      <div class="mwan-metric-chip ${lossWarnClass}" aria-label="Packet loss: ${iface.loss_pct}%">
+        <span class="chip-label" aria-hidden="true">loss</span>
+        <span class="chip-val" aria-hidden="true">${iface.loss_pct}%</span>
       </div>
       <span class="mwan-uptime">${uptimeLabel}</span>
     </div>
@@ -2419,13 +2433,15 @@ function renderMWAN() {
       const dur  = formatMWANDuration(ev.duration_secs);
       const durHtml    = dur ? `<span class="mwan-event-dur">${dur}</span>` : '';
       const dialupHtml = ev.dialup_secs ? `<span class="mwan-event-dur">+${ev.dialup_secs}s</span>` : '';
+      const eventTypeLabel = ev.event_type.replace(/_/g, ' ');
       return `
-        <div class="mwan-event-row">
-          <span class="mwan-event-icon ${icon.cls}">${icon.tag}</span>
-          <span class="mwan-event-path">
+        <div class="mwan-event-row" role="listitem"
+             aria-label="${eventTypeLabel}: ${ev.probe_label}, ${formatMWANEventDate(ev.epoch)}${dur ? ', duration ' + dur : ''}">
+          <span class="mwan-event-icon ${icon.cls}" aria-hidden="true">${icon.tag}</span>
+          <span class="mwan-event-path" aria-hidden="true">
             <span class="ev-probe">${ev.probe_label}</span>
           </span>
-          <span class="mwan-event-ts">${formatMWANEventDate(ev.epoch)}</span>
+          <span class="mwan-event-ts" aria-hidden="true">${formatMWANEventDate(ev.epoch)}</span>
           ${durHtml}${dialupHtml}
         </div>
       `;
@@ -2443,6 +2459,14 @@ function renderMWAN() {
   const barWwan = el('mwan-bar-wwan');
   if (barWan)  barWan.style.width  = wanPct  + '%';
   if (barWwan) barWwan.style.width = wwanPct + '%';
+  const usageTrack = document.querySelector('.mwan-usage-bar-track');
+  if (usageTrack) {
+    const offlinePct = total > 0 ? (mw.usage_30d.offline_secs / total * 100).toFixed(1) : 0;
+    usageTrack.setAttribute('role', 'img');
+    usageTrack.setAttribute('aria-label',
+      `30-day WAN usage: WAN ${wanPct}% (${wanDays} days), LTE ${wwanPct}% (${wwanDays} days)` +
+      (mw.usage_30d.offline_secs > 0 ? `, Offline ${offlinePct}%` : ''));
+  }
 
   const legend = el('mwan-usage-legend');
   if (legend) {
