@@ -40,15 +40,28 @@
 - Mock ISP: "Consolidated Communications, Inc" (full name, fits at 237px)
 - Word summary doc: paused — LED compliance work takes priority
 
-### TODOs
+---
 
-**Next session — LED WebUI mirror (EAA C.5 hardware gap)**
-- [ ] Add `led_state` field to `MOCK.device` (use `'HUB_WAN_UP'` as default)
-- [ ] Define LED state map: 13 states → { label, pattern, cssClass }
-- [ ] Add LED indicator row to System Performance card (text label + animation, no color dependency)
-- [ ] CSS: LED blink animation classes matching MCU patterns (solid, pulse, blink)
-- [ ] Update EAA review: note C.5 partially addressed at hardware-interface level
-- [ ] Update `EAA_Improvement_Summary_Apr2026.md` with LED section
+## Session: Apr 3 2026 (continued)
+
+### Completed
+
+**LED State Indicator (EAA C.5 / A.1 / A.3 hardware gap mitigation)**
+- `led_state: 'HUB_WAN_UP'` added to `MOCK.device` in `dashboard.js`
+- `MOCK.led_state_map` defined: all 13 MCU states from LED spec, each with `{ label, pattern, cssClass }`
+- Device Info card: LED indicator row added (dot + text label); `role=status`, `aria-live=polite`, `aria-label` updated per state
+- CSS: `.led-solid`, `.led-pulse` (1.4s breathing), `.led-blink` (0.8s step-end); forced-colors support
+- `renderDevice()` updated to set dot class + label text + aria-label from state map on every render
+- EAA review `A.1`, `A.3`, `C.5` rows updated with mitigation evidence
+- `EAA_Improvement_Summary_Apr2026.md`: new LED section added, scope updated, C.5 extended, Section A note updated
+- Revision history updated in both EAA documents
+
+### Decisions Made
+- LED dot color: neutral `var(--accent-cyan)` — animation pattern only, text label carries state meaning
+- `led_state_map` lives in `MOCK` object (adjacent to device) — easy to swap to production ubus source
+- `SAT_POOR` gets `.led-blink` (distinct from `.led-pulse`) to match MCU's distinct Blink vs Pulse patterns
+
+### TODOs
 
 **Remaining WebUI EAA (after LED)**
 - [ ] Extend ARIA + shape coding to dashboard charts (throughput, airtime, QoE)
@@ -62,4 +75,4 @@
 - [ ] Support/Marketing: Accessibility statement on support pages
 
 **Word doc**
-- [ ] Generate Adtran Word version of `EAA_Improvement_Summary_Apr2026.md` (paused pending LED work)
+- [ ] Generate Adtran Word version of `EAA_Improvement_Summary_Apr2026.md` (LED section now included, ready to generate)

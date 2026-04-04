@@ -45,7 +45,30 @@ const MOCK = {
     flash_pct: 34,
     mem_pct: 61,
     last_upgrade_epoch: 1773219215,  // Mar 11 2026
-    connected_clients: 14
+    connected_clients: 14,
+    led_state: 'HUB_WAN_UP'
+  },
+
+  /* LED state map: 13 MCU states from System_LED_Next_Generation_MCU_only.md
+     label    = text displayed in UI (EAA C.5: no color dependency)
+     pattern  = MCU animation pattern name
+     cssClass = animation class on the indicator dot */
+  led_state_map: {
+    // color mirrors the physical LED color (secondary cue; text label is the EAA-compliant primary)
+    // Multi-color states: dominant perceived color used (Amber = Red+Green mix per spec)
+    'COLD_BOOT':    { label: 'Cold Boot',             pattern: 'Solid',  cssClass: 'led-solid', color: '#3b82f6' },  // Blue
+    'REBOOT':       { label: 'Rebooting',              pattern: 'Pulse',  cssClass: 'led-pulse', color: '#ef4444' },  // Red
+    'LINUX_BOOT':   { label: 'Linux Boot',             pattern: 'Pulse',  cssClass: 'led-pulse', color: '#00d264' },  // Green
+    'QUICK_START':  { label: 'Quick Start',            pattern: 'Pulse',  cssClass: 'led-pulse', color: '#00d2be' },  // Green+Blue = Cyan
+    'HUB_WAN_UP':   { label: 'Hub WAN Up',             pattern: 'Solid',  cssClass: 'led-solid', color: '#ffffff' },  // White
+    'HUB_WAN_DOWN': { label: 'Hub WAN Down',           pattern: 'Pulse',  cssClass: 'led-pulse', color: '#f59e0b' },  // Amber (Red+Green)
+    'WWAN_ACTIVE':  { label: 'WWAN Active',            pattern: 'Solid',  cssClass: 'led-solid', color: '#00d264' },  // Green
+    'SAT_SETUP':    { label: 'Satellite Setup',        pattern: 'Pulse',  cssClass: 'led-pulse', color: '#a855f7' },  // Blue+Red = Purple
+    'SAT_UP':       { label: 'Satellite Up',           pattern: 'Solid',  cssClass: 'led-solid', color: '#ffffff' },  // White
+    'SAT_FAIR':     { label: 'Satellite Fair Signal',  pattern: 'Pulse',  cssClass: 'led-pulse', color: '#fca5a5' },  // White+Red = Pink-white
+    'SAT_POOR':     { label: 'Satellite Poor Signal',  pattern: 'Blink',  cssClass: 'led-blink', color: '#f59e0b' },  // Amber (Red+Green)
+    'REVERTING':    { label: 'Reverting',              pattern: 'Pulse',  cssClass: 'led-pulse', color: '#ffffff' },  // White
+    'WPS':          { label: 'WPS Active',             pattern: 'Pulse',  cssClass: 'led-pulse', color: '#3b82f6' },  // Blue
   },
 
   alarms: [
@@ -962,6 +985,14 @@ function renderWAN() {
 function renderDevice() {
   const d = MOCK.device;
   el('device-model').textContent = d.model;
+
+  // LED state indicator (EAA C.5: text label, no color dependency)
+  const ledInfo = MOCK.led_state_map[d.led_state] || { label: d.led_state, pattern: '', cssClass: 'led-solid', color: 'var(--accent-cyan)' };
+  const dot = el('device-led-dot');
+  dot.className = 'device-led-dot ' + ledInfo.cssClass;
+  dot.style.background = ledInfo.color || 'var(--accent-cyan)';
+  el('device-led-label').textContent = ledInfo.label;
+  el('device-led-row').setAttribute('aria-label', 'System LED: ' + ledInfo.label);
 
   // Items with techOnly:true are hidden in basic view
   const rows = [

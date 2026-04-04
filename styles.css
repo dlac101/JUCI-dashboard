@@ -758,6 +758,62 @@ ul { list-style: none; }
   flex-direction: column;
   min-width: 0;
 }
+/* LED state indicator row */
+.device-led-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.device-led-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  flex-shrink: 0;
+}
+
+.device-led-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+}
+
+/* LED animations */
+@keyframes led-pulse-anim {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+@keyframes led-blink-anim {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.device-led-dot.led-solid {
+  animation: none;
+  opacity: 1;
+}
+
+.device-led-dot.led-pulse {
+  animation: led-pulse-anim 1.4s ease-in-out infinite;
+}
+
+.device-led-dot.led-blink {
+  animation: led-blink-anim 0.8s step-end infinite;
+}
+
+/* Forced-colors support */
+@media (forced-colors: active) {
+  .device-led-dot {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+}
+
 .device-gauges-col {
   display: flex;
   flex-direction: column;

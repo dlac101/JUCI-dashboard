@@ -3,7 +3,7 @@
 **Product:** SDG-8612 / SDG-8614
 **Directive:** EU 2019/882 (European Accessibility Act)
 **Date:** April 2026
-**Scope:** SmartOS WebUI — Port Status widget remediation
+**Scope:** SmartOS WebUI — Port Status widget remediation + LED state indicator
 
 ---
 
@@ -14,7 +14,7 @@
 | C.1 | Screen reader compatibility | CANNOT ASSESS | PARTIALLY MET |
 | C.2 | Multi-sensory UI feedback | LIKELY GAP | PARTIALLY MET |
 | C.3 | Keyboard-only operation | LIKELY MET | LIKELY MET (confirmed) |
-| C.5 | Non-color UI indicators | LIKELY GAP | PARTIALLY MET |
+| C.5 | Non-color UI indicators | LIKELY GAP | PARTIALLY MET (extended) |
 | C.7 | Visual clarity / High Contrast | PARTIALLY MET | PARTIALLY MET (extended) |
 | C.14 | Assistive technology APIs | CANNOT ASSESS | PARTIALLY MET |
 
@@ -44,6 +44,20 @@
 - State dots: filled circle (up) vs hollow ring (down) — shape differs independently of color
 - Event log dots: same filled/hollow pattern
 - Badge and tooltip text labels carry full meaning without color
+
+### Hardware LED State Mirror (C.5 / A.1 / A.3)
+
+The front-panel LED is a single 4-color component (R/G/B/W) controlled by the MCU. The LED spec defines 13 device states. Several states share the same animation pattern and differ only by color (e.g. Hub WAN Down and Satellite Poor Signal both use Pulse Red+Green). This makes them indistinguishable to users with color vision deficiency — an EAA A.1/A.3 hardware gap that cannot be closed without a product redesign.
+
+**WebUI mitigation implemented:**
+- `MOCK.device.led_state` field added; production source is the LED control script state machine
+- `LED_STATE_MAP` in `dashboard.js` maps all 13 states to `{ label, pattern, cssClass }`
+- Device Info card renders a labeled text indicator: dot (animated, neutral color) + state name in monospace text
+- Animation classes: `.led-solid` (static), `.led-pulse` (breathing, 1.4s), `.led-blink` (step-end, 0.8s) match MCU patterns
+- `role=status` + `aria-live=polite` on the row; `aria-label` updated with current state name on every render
+- No color dependency: the text label carries full meaning independently of the dot animation
+
+This does not close the hardware A.1/A.3 gap for users of the physical device, but it ensures any user accessing the WebUI can read the current LED state without relying on color or physical sight of the device.
 
 ### Multi-Sensory Feedback (C.2)
 - Tooltips fire on `mouseenter` and `focus`; dismissed on `mouseleave` and `blur`
@@ -104,4 +118,4 @@
 | F | Support services | PARTIALLY MET |
 | G | Packaging | CONFIRMED GAP |
 
-Sections A, B, E, and G require action by hardware, tech pubs, and marketing teams respectively. Section C is the only area where active remediation is underway.
+Sections B, E, and G require action by tech pubs, hardware, and marketing teams respectively. Section A hardware LED gap is partially mitigated at WebUI level (LED state text indicator). Section C is the primary area of active remediation.

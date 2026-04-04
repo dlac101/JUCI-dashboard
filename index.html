@@ -266,6 +266,11 @@
             <!-- Left: model + meta (Device Info) -->
             <div class="device-info-col">
               <div class="device-model" id="device-model">—</div>
+              <div class="device-led-row" id="device-led-row"
+                   role="status" aria-live="polite" aria-label="System LED state">
+                <span class="device-led-dot led-solid" id="device-led-dot" aria-hidden="true"></span>
+                <span class="device-led-label" id="device-led-label">—</span>
+              </div>
               <div class="device-meta-grid" id="device-meta"></div>
             </div>
             <!-- Right: 2x2 gauge cluster (System Health) -->
