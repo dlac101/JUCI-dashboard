@@ -405,7 +405,10 @@
         </div>
 
         <!-- System Performance (QoE) Card -->
-        <div class="card" id="card-qoe" role="region" aria-label="System Performance Score" style="cursor: pointer;" onclick="navigateTo('diagnostics')">
+        <div class="card" id="card-qoe" role="region" aria-label="System Performance Score" style="cursor: pointer;"
+             tabindex="0"
+             onclick="navigateTo('diagnostics')"
+             onkeydown="if(event.key==='Enter'||event.key===' '){navigateTo('diagnostics');event.preventDefault();}">
           <div class="card-label">
 
             System Performance Score

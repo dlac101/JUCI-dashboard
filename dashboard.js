@@ -792,6 +792,26 @@ function hideTooltip() {
   tooltipVisible = false;
 }
 
+/* Position tooltip anchored below elem — used for keyboard/focus-triggered tooltips.
+   mousemove listener takes over immediately if the mouse is also active. */
+function showTooltipNearEl(html, elem) {
+  tooltip.innerHTML = html;
+  tooltip.style.display = 'block';
+  tooltipVisible = true;
+  const r   = elem.getBoundingClientRect();
+  const tw  = tooltip.offsetWidth  || 200;
+  const th  = tooltip.offsetHeight || 80;
+  const vw  = window.innerWidth;
+  const vh  = window.innerHeight;
+  let x = r.left + r.width / 2 - tw / 2;
+  let y = r.bottom + 8;
+  if (x + tw > vw - 8) x = vw - tw - 8;
+  if (x < 8) x = 8;
+  if (y + th > vh - 8) y = r.top - th - 8;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+
 function ttRow(key, val) {
   return `<div class="tt-row"><span class="tt-key">${key}</span><span class="tt-val">${val}</span></div>`;
 }
@@ -1723,10 +1743,14 @@ function renderQoE() {
     return `<div class="qoe-pill ${c}" data-factors="${factorJson}"
               data-cat="${catNames[key] || key}"
               data-score="${cat.score}"
-              onmouseenter="showQoEPillTooltip(this, event)"
-              onmouseleave="hideTooltip()">
-              <span class="qoe-pill-name">${catNames[key] || key}</span>
-              <span class="qoe-pill-score">${cat.score.toFixed(0)}</span>
+              tabindex="0" role="img"
+              aria-label="${catNames[key] || key} score: ${cat.score.toFixed(0)} out of 100"
+              onmouseenter="showQoEPillTooltip(this)"
+              onmouseleave="hideTooltip()"
+              onfocus="showQoEPillTooltip(this)"
+              onblur="hideTooltip()">
+              <span class="qoe-pill-name" aria-hidden="true">${catNames[key] || key}</span>
+              <span class="qoe-pill-score" aria-hidden="true">${cat.score.toFixed(0)}</span>
             </div>`;
   }).join('');
 
@@ -1820,7 +1844,7 @@ function showQoEPillTooltip(pill) {
   const cat   = pill.dataset.cat;
   const score = parseFloat(pill.dataset.score);
   const factors = JSON.parse(decodeURIComponent(pill.dataset.factors));
-  let html = `<div class="tt-title">${cat} — ${score.toFixed(0)} / 100</div>`;
+  let html = `<div class="tt-title">${cat}: ${score.toFixed(0)} / 100</div>`;
   if (factors.length === 0) {
     html += `<div class="tt-note" style="color:var(--accent-green)">&#x2713; No issues</div>`;
   } else {
@@ -1830,7 +1854,7 @@ function showQoEPillTooltip(pill) {
       `<div style="font-size:10px; color:var(--text-muted); margin-top:2px;">${f.detail}</div>`
     ).join('');
   }
-  showTooltip(html);
+  showTooltipNearEl(html, pill);
 }
 
 /* ===== Devices + Airtime Card ===== */
@@ -1874,8 +1898,12 @@ function renderAirtimeBars(animate) {
         <span class="airtime-band-pct"><span class="airtime-client-count">${clLabel}</span> &middot; ${animate ? '0% in use' : inUse + '% in use'}</span>
       </div>
       <div class="airtime-track"
-           onmouseenter="showAirtimeTooltip(event, ${idx})"
-           onmouseleave="hideTooltip()">
+           tabindex="0" role="img"
+           aria-label="${r.band} ch ${r.channel}: ${inUse}% in use. Tx ${r.tx}%, Rx ${r.rx}%, WiFi Int ${r.wifi_int}%, Non-WiFi ${r.non_wifi_int}%, Available ${r.available}%"
+           onmouseenter="showAirtimeTooltip(this, ${idx})"
+           onmouseleave="hideTooltip()"
+           onfocus="showAirtimeTooltip(this, ${idx})"
+           onblur="hideTooltip()">
         <div class="airtime-stacked">
           <div class="airtime-seg airtime-tx" style="width:${animate ? 0 : r.tx}%" data-target="${r.tx}"></div>
           <div class="airtime-seg airtime-rx" style="width:${animate ? 0 : r.rx}%" data-target="${r.rx}"></div>
@@ -1953,18 +1981,19 @@ function renderDevices() {
   }, 5000);
 }
 
-function showAirtimeTooltip(event, idx) {
+function showAirtimeTooltip(elem, idx) {
   const radio = MOCK.airtime.airtime_utilization[idx];
   const inUse = radio.tx + radio.rx;
-  showTooltip(
-    `<div class="tt-title">${radio.band} &mdash; ch ${radio.channel}</div>` +
+  showTooltipNearEl(
+    `<div class="tt-title">${radio.band}: ch ${radio.channel}</div>` +
     ttRow('Transmit (Tx)', radio.tx + '%') +
     ttRow('Receive (Rx)', radio.rx + '%') +
     ttRow('WiFi Interference', radio.wifi_int + '%') +
     ttRow('Non-WiFi Int.', radio.non_wifi_int + '%') +
     ttRow('Available', radio.available + '%') +
     `<hr class="tt-divider">` +
-    ttRow('Total in use', inUse + '%')
+    ttRow('Total in use', inUse + '%'),
+    elem
   );
 }
 
@@ -3376,6 +3405,9 @@ function drawThroughput(timestamp) {
   const ulEl = el('throughput-ul-val');   if (ulEl) ulEl.textContent = ulFmt.val;
   const dlUnitEl = el('throughput-dl-unit'); if (dlUnitEl) dlUnitEl.textContent = dlFmt.unit;
   const ulUnitEl = el('throughput-ul-unit'); if (ulUnitEl) ulUnitEl.textContent = ulFmt.unit;
+  // Update canvas aria-label with live values (EAA C.1)
+  if (canvas) canvas.setAttribute('aria-label',
+    `WAN Throughput: Download ${dlFmt.val} ${dlFmt.unit}, Upload ${ulFmt.val} ${ulFmt.unit}`);
 }
 
 function initThroughputCanvas() {
