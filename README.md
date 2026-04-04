@@ -12,7 +12,8 @@ This dashboard provides real-time visibility into router health, WAN connectivit
 - **System Performance Score** -- Composite QoE score (0-100) with per-subsystem pill badges (WAN, System, WiFi, LAN, Mesh) and per-device issue list. Simple view adds inline "Last Speed Test" section with horizontal bar graphs showing download/upload as a percentage of ISP service rate
 - **WAN Status + Bufferbloat Score** -- Dual-panel card with WAN metadata (IP, gateway, DNS, MTU, link speed, uptime) and live bufferbloat grade with latency metrics
 - **Bufferbloat Score** -- Standalone Simple-view card (`card-bbscore`) showing download and upload bufferbloat grade pills (A/B/C/D/F) with color coding
-- **Device Info + System Health** -- Split card: device identity (model, MAC, serial, firmware, CDT) alongside a 2x2 Boeing-inspired needle gauge cluster (CPU, Temp, Flash, RAM) with animated excursions
+- **Port Status** -- SVG port diagram (per-model profiles: SDG-8612, SDG-8614, SDG-8734v) with per-port state dots (filled/hollow shape coding independent of color), click/focus detail cards, WAN tooltip with media type/speed/duplex/ISP/IP/MAC, and event log with live ARIA region. Keyboard accessible: all ports and cards reachable via Tab with focus-visible outlines.
+- **Device Info + System Health** -- Split card: device identity (model, MAC, serial, firmware, CDT) alongside a 2x2 Boeing-inspired needle gauge cluster (CPU, Temp, Flash, RAM) with animated excursions. LED State row mirrors all 13 front-panel MCU LED states as labeled text (dot + animation class + state name) for EAA A.1/A.3 compliance.
 - **Connection History** -- Interactive timeline bar (7d/30d/1yr) with grab-to-scroll, alternating month shading, uptime stats, and monthly uptime pill badges
 - **WAN Throughput** -- Real-time canvas graph with smooth Y-axis lerp scaling and bursty mock traffic patterns
 - **Speed Test History** -- Bar chart with DL/UL grouped bars, % utilization toggle, grab-to-scroll, mouseover detail tooltips, and dotted service-rate reference lines (cyan for DL, green for UL)
@@ -95,6 +96,39 @@ The WWAN Failover widget shows a carrier/ISP label beneath each interface panel 
 
 **Recommendation:** Use CDT for WAN (if available), modem manager for WWAN, and fall back to rDNS with domain extraction. Never display a raw rDNS hostname without parsing — it will confuse end users.
 
+## Accessibility (EAA EU 2019/882 / EN 301 549 / WCAG 2.1 AA)
+
+The WebUI is under active EAA compliance remediation for the SDG-8612/8614 product family. Reference documents: `EAA_Compliance_Review_SDG-8612.md` and `EAA_Improvement_Summary_Apr2026.docx`.
+
+### Current status (Apr 2026)
+
+| Section | Area | Status |
+|---------|------|--------|
+| A | On-device LED indicators | WebUI partial mitigation (text mirror of 13 LED states) |
+| B | Documentation | Confirmed gap (Tech Pubs action required) |
+| C | Software / UI | Partially met (active remediation) |
+| D | Physical hardware | Met |
+| E | Hearing technology / RF | Confirmed gap (EN 301 489-17 testing required) |
+| F | Support services | Partially met |
+| G | Packaging | Confirmed gap |
+
+### WebUI accessibility features implemented
+
+- **ARIA:** Full dashboard audit complete. All interactive elements use `role`, `aria-label`, `aria-live`, and `aria-describedby` per widget type (port shapes, detail cards, event log, tooltip, alarms, events, flows, hosts, MWAN panels, QoE pills, airtime bars, throughput canvas).
+- **Keyboard navigation:** All Port Status ports and cards reachable via Tab. QoE pills and airtime bars expose keyboard-triggered tooltips via `showTooltipNearEl`.
+- **Focus visibility:** `:focus-visible` outline + glow on all interactive cards and buttons; `filter: drop-shadow` on SVG port shapes.
+- **Non-color indicators:** Port state dots use filled circle (up) vs hollow ring (down). LED state text label carries full meaning independently of dot color or animation.
+- **High Contrast Mode:** `@media (forced-colors: active)` block covers dots, focus rings, badges, LTE bars, and tooltip.
+- **Contrast (WCAG 1.4.3 / 1.4.11):** Full programmatic audit completed. All normal-text pairs pass 4.5:1 in both dark and light themes. All large-text elements pass 3:1. Interactive component borders use `--border-ui: #5a6e82` (min 3.23:1). Checkboxes and radios use `accent-color` plus `outline: --border-ui`.
+- **LED state mirror (EAA A.1/A.3):** Device Info card displays current MCU LED state as labeled text indicator, mitigating the hardware gap where physical LED states differ only by color.
+
+### Remaining WebUI gaps
+- Chart shape/pattern alternatives for throughput, airtime, and QoE (C.2/C.5)
+- WCAG 1.4.10 reflow at 320px viewport
+- Formal AT compatibility testing (NVDA, JAWS)
+
+---
+
 ## Quick Start
 
 Serve the directory with any static HTTP server:
@@ -112,16 +146,20 @@ npx serve -p 8080
 ## File Structure
 
 ```
-index.html              Main dashboard page
-dashboard.js            All widget logic, mock data, animations, drag-and-drop
-styles.css              Complete stylesheet with dark theme and responsive breakpoints
-gauge-test.html         Standalone needle gauge test page (Boeing-inspired frown gauges)
-mockup-bufferbloat.html Bufferbloat layout comparison mockup
-flowstatd.md            Flow statistics daemon API reference
-flowstatd-modules.md    Detailed flowstatd module documentation
-classifi.md             DPI classification daemon documentation
-SOS_Dashboard2.0_Integration_Guide.md
-                        Full JUCI integration guide for all 12 widgets
+index.html                              Main dashboard page
+dashboard.js                            All widget logic, mock data, animations, drag-and-drop
+styles.css                              Complete stylesheet with dark/light themes and responsive breakpoints
+gauge-test.html                         Standalone needle gauge test page (Boeing-inspired frown gauges)
+mockup-bufferbloat.html                 Bufferbloat layout comparison mockup
+flowstatd.md                            Flow statistics daemon API reference
+flowstatd-modules.md                    Detailed flowstatd module documentation
+classifi.md                             DPI classification daemon documentation
+SOS_Dashboard2.0_Integration_Guide.md  Full JUCI integration guide for all 12 widgets
+EAA_Compliance_Review_SDG-8612.md      EAA EU 2019/882 compliance assessment (all sections A-G)
+EAA_Improvement_Summary_Apr2026.md     Engineering improvement summary with before/after status
+EAA_Improvement_Summary_Apr2026.docx   Adtran-formatted Word version of the improvement summary
+progress.md                             Session-by-session development log and open TODOs
+session_handoff.md                      Next-session context: goal, files, constraints, ordered steps
 ```
 
 ## Design Principles
