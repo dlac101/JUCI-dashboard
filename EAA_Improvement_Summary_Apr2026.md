@@ -3,7 +3,7 @@
 **Product:** SDG-8612 / SDG-8614
 **Directive:** EU 2019/882 (European Accessibility Act)
 **Date:** April 2026
-**Scope:** SmartOS WebUI — Port Status widget remediation + LED state indicator
+**Scope:** SmartOS WebUI — Port Status widget remediation + LED state indicator + full dashboard ARIA audit + WCAG contrast audit
 
 ---
 
@@ -14,6 +14,7 @@
 | C.1 | Screen reader compatibility | CANNOT ASSESS | PARTIALLY MET |
 | C.2 | Multi-sensory UI feedback | LIKELY GAP | PARTIALLY MET |
 | C.3 | Keyboard-only operation | LIKELY MET | LIKELY MET (confirmed) |
+| C.4 | WCAG contrast and magnification | CANNOT ASSESS | PARTIALLY MET |
 | C.5 | Non-color UI indicators | LIKELY GAP | PARTIALLY MET (extended) |
 | C.7 | Visual clarity / High Contrast | PARTIALLY MET | PARTIALLY MET (extended) |
 | C.14 | Assistive technology APIs | CANNOT ASSESS | PARTIALLY MET |
@@ -59,6 +60,41 @@ The front-panel LED is a single 4-color component (R/G/B/W) controlled by the MC
 
 This does not close the hardware A.1/A.3 gap for users of the physical device, but it ensures any user accessing the WebUI can read the current LED state without relying on color or physical sight of the device.
 
+### Full Dashboard ARIA Audit (C.1, C.14)
+
+A second pass extended ARIA coverage from Port Status to every remaining dashboard card:
+
+- **Alarms:** severity dot `aria-hidden`; alarm row `role=listitem` + `aria-label` (severity + name); dismiss button `aria-label`
+- **Events:** event row `role=listitem` + `aria-label`; priority bar `aria-hidden` + `.sr-only` severity text; count badges labeled; acknowledge button `aria-label`; events list `aria-live=polite`
+- **Top Flows / Top Hosts:** each row `role=listitem` + `aria-label` (full plaintext summary); decorative cell content `aria-hidden`
+- **MWAN:** WAN and WWAN panels `role=region` with `aria-label`; state dot `aria-hidden`; latency and loss chips labeled; MWAN event rows `role=listitem` + `aria-label`; FA icons `aria-hidden`; usage bar `role=img` + `aria-label`
+- **QoE pills:** `tabindex=0`, `role=img`, `aria-label` (metric + value + rating); focus triggers `showTooltipNearEl` keyboard-accessible tooltip
+- **Airtime bars:** `tabindex=0`, `role=img`, `aria-label` (band + per-client breakdown); focus triggers `showTooltipNearEl`
+- **Throughput chart:** live canvas `aria-label` updated with current DL/UL values on every redraw
+- **Flow sparklines:** SVG `aria-hidden=true focusable=false` (decorative)
+
+### WCAG Contrast Audit (C.4)
+
+A formal WCAG 2.1 AA (4.5:1 normal text) audit was run programmatically in-browser across both dark and light themes. All failing color pairs were identified and remediated:
+
+**Dark theme fixes:**
+- `--text-muted` raised from #6b7280 to #808898: 4.77:1 on card bg (#151c2c), 5.37:1 on sidebar bg (#0b0f19)
+- Scoped `#tooltip { --text-muted: #9ca3af }` override: 5.83:1 on tooltip bg (#1e2740)
+- `.nav-section-label` raised from #4b5563 to #7a8a9a: 5.01:1 on sidebar
+- `.nav-sublink` raised from #6b7280 to #808898: 5.37:1 on sidebar
+
+**Light theme fixes:**
+- `--text-muted` raised from #9ca3af to #5a6a7e: 5.53:1 on white
+- All six accent colors overridden with darker variants (previously 1.92-2.15:1, now all pass):
+  - Cyan #00C8E6 -> #0e7490: 5.36:1
+  - Green #34d399 -> #15803d: 5.02:1
+  - Amber #f59e0b -> #b45309: 5.02:1
+  - Red #ef4444 -> #dc2626: 4.83:1
+  - Blue #3b82f6 -> #2563eb: 5.17:1
+  - Purple #a78bfa -> #7c3aed: 5.70:1
+
+No color dependency was introduced: all overrides are scoped to `[data-theme="light"]`, leaving the dark theme palette unchanged.
+
 ### Multi-Sensory Feedback (C.2)
 - Tooltips fire on `mouseenter` and `focus`; dismissed on `mouseleave` and `blur`
 - WAN tooltip: structured data (media type, state, speed, duplex, ISP, IP, MAC) on focus
@@ -77,9 +113,9 @@ This does not close the hardware A.1/A.3 gap for users of the physical device, b
 
 | Priority | Item | Refs | Action |
 |----------|------|------|--------|
-| HIGH | Dashboard chart indicators | C.2, C.5 | Add shape/pattern alternatives to throughput, airtime, and QoE charts — currently color-primary only |
-| HIGH | Remaining dashboard cards | C.1, C.14 | ARIA audit and remediation: QoE score, WAN status, speed test history, events, alarms, flows, hosts, WWAN failover |
-| HIGH | Contrast audit | C.4 | Formal WCAG 4.5:1 audit of all text/background combinations in dark and light themes |
+| HIGH | Dashboard chart indicators | C.2, C.5 | Add shape/pattern alternatives to throughput, airtime, and QoE charts — currently color-primary only (keyboard tooltips added; visual shape coding outstanding) |
+| MEDIUM | Large-text and UI-component contrast | C.4 | Verify 3:1 for large text and UI controls; verify text scaling to 200% does not break layout |
+| MEDIUM | AT compatibility testing | C.1, C.14 | Formal screen reader testing with NVDA and JAWS; publish AT compatibility list (B.7) |
 
 ### Documentation / Tech Pubs
 

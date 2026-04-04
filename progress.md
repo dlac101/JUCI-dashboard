@@ -61,12 +61,42 @@
 - `led_state_map` lives in `MOCK` object (adjacent to device) — easy to swap to production ubus source
 - `SAT_POOR` gets `.led-blink` (distinct from `.led-pulse`) to match MCU's distinct Blink vs Pulse patterns
 
+---
+
+## Session: Apr 3 2026 (continued 2)
+
+### Completed
+
+**Full Dashboard ARIA Audit (EAA C.1 / C.14)**
+- Alarms: sev-dot `aria-hidden`, alarm-row `role=listitem`+`aria-label`, btn-dismiss `aria-label`
+- Events: event-row `role=listitem`+`aria-label`, priority bar `aria-hidden`+`.sr-only` severity, count badges labeled, btn-ack `aria-label`, events-list `aria-live=polite`
+- Top Flows / Top Hosts: row `role=listitem`+`aria-label` (full plaintext summary), decorative children `aria-hidden`
+- MWAN: panels `role=region`+`aria-label`, state-dot `aria-hidden`, latency+loss `aria-label`, event-row `role=listitem`+`aria-label`, FA icons `aria-hidden`, usage bar `role=img`+`aria-label`
+- QoE pills: `tabindex=0`, `role=img`, `aria-label`, focus triggers `showTooltipNearEl` keyboard tooltip
+- Airtime bars: `tabindex=0`, `role=img`, `aria-label`, focus triggers `showTooltipNearEl`
+- Throughput canvas: `aria-label` updated live with DL/UL values
+- Flow sparklines: `aria-hidden=true focusable=false` (decorative)
+- `index.html`: alarm-list, events-list, topflows-list, tophosts-list all `role=list`; mwan panels `role=region`
+- `showTooltipNearEl(html, elem)`: new helper anchors tooltip below element for keyboard users
+
+**WCAG 4.5:1 Contrast Audit (EAA C.4)**
+- Programmatic audit in browser across dark + light themes; all failing pairs identified and remediated
+- Dark theme: `--text-muted` #6b7280 -> #808898 (4.77:1 card, 5.37:1 sidebar); scoped tooltip override #9ca3af (5.83:1); nav-section-label -> #7a8a9a (5.01:1); nav-sublink -> #808898 (5.37:1)
+- Light theme: `--text-muted` -> #5a6a7e (5.53:1); all 6 accent colors darkened (4.83-5.70:1 on white)
+- EAA review C.4: CANNOT ASSESS -> PARTIALLY MET
+- EAA docs updated with C.4 section in both review and improvement summary
+
+### Decisions Made
+- Light theme accent overrides scoped to `[data-theme="light"]` — dark theme palette unchanged
+- `showTooltipNearEl` fallback: mouse movement takes over tooltip position once mouse becomes active
+- C.4 remaining work: large-text (3:1) and UI-component contrast; 200% magnification layout check; AT testing
+
 ### TODOs
 
-**Remaining WebUI EAA (after LED)**
-- [ ] Extend ARIA + shape coding to dashboard charts (throughput, airtime, QoE)
-- [ ] ARIA audit for remaining dashboard cards
-- [ ] Formal 4.5:1 contrast audit
+**Remaining WebUI EAA**
+- [ ] Visual shape/pattern coding for throughput, airtime, QoE charts (color-primary indicator gap C.2/C.5)
+- [ ] Large-text and UI-component contrast (C.4 — medium priority)
+- [ ] Formal AT testing with NVDA/JAWS (C.1/C.14)
 
 **Non-WebUI (other teams)**
 - [ ] Tech pubs: HC mode activation guide, accessibility features section, AT compatibility list

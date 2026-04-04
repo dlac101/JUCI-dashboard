@@ -65,10 +65,10 @@ Quick Start Guide Issue C (Oct 2025, 6SDG861214-13C); SmartOS User Guide Issue A
 
 | Ref | Requirement | Evidence / Finding | Status | Comments |
 |----|-------------|-------------------|--------|----------|
-| C.1 | Screen reader compatibility | ARIA implemented in Port Status widget: `role=button` on SVG port shapes, `role=listitem` on detail cards, `role=log`+`aria-live=polite` on event log, `role=tooltip`+`aria-describedby` on tooltip; canvas `aria-label` updated live. Full dashboard audit pending. | **PARTIALLY MET** | Remaining dashboard cards not yet audited |
+| C.1 | Screen reader compatibility | ARIA implemented across full dashboard: Port Status (SVG `role=button`, detail cards `role=listitem`, event log `role=log`+`aria-live`, tooltip `role=tooltip`+`aria-describedby`, canvas `aria-label` live); Alarms (row `role=listitem`, severity sr-only, dismiss btn `aria-label`); Events (row `role=listitem`, priority bar `aria-hidden`+sr-only label, ack btn `aria-label`, live region); Top Flows and Top Hosts (row `role=listitem`+`aria-label`, decorative children `aria-hidden`); MWAN (panels `role=region`, state-dot `aria-hidden`, latency/loss `aria-label`, events `role=listitem`); QoE pills and airtime bars (keyboard-accessible via `tabindex`, `aria-label`, focus-triggered tooltips). | **PARTIALLY MET** | Screen reader testing with NVDA/JAWS not yet performed; testing list (B.7) outstanding. |
 | C.2 | Multi‑sensory UI feedback | Port Status tooltips fire on focus and hover, providing text alternatives to all visual indicators in that widget. Color‑coded charts in other cards not yet remediated. | **PARTIALLY MET** | Extend to remaining dashboard charts |
 | C.3 | No speech‑only operation | Keyboard navigation validated: all Port Status interactive elements reachable via Tab; focus order matches visual order | **LIKELY MET** | |
-| C.4 | WCAG contrast & magnification | No data or screenshots | **CANNOT ASSESS** | Engineering |
+| C.4 | WCAG contrast & magnification | Formal WCAG 4.5:1 audit completed Apr 2026. Failures identified and remediated: dark theme `--text-muted` (#6b7280, failed on card/sidebar) replaced with #808898 (4.77:1 on card, 5.37:1 on sidebar); scoped tooltip override #9ca3af (5.83:1); nav-section-label and nav-sublink raised to #7a8a9a/#808898 (5.01-5.41:1). Light theme: `--text-muted` #9ca3af -> #5a6a7e (5.53:1 on white); all six accent colors overridden with darker variants (4.83-5.70:1 on white). Large-text and non-text elements not yet audited. | **PARTIALLY MET** | Normal text pairs audited and fixed. Large text (3:1), UI components, and magnification not yet verified. |
 | C.5 | Non‑color UI indicators | Port Status state dots: filled circle (up) vs hollow ring (down) — shape differs independently of color. Event log dots same pattern. Badge text labels carry meaning without color. Device Info card: all 13 hardware LED states mirrored as labeled text indicator (Apr 2026) — addresses hardware A.1/A.3 gap at WebUI level. Dashboard charts (throughput, airtime) remain color‑primary. | **PARTIALLY MET** | Extend shape/pattern coding to remaining charts |
 | C.6 | Audio alerts alternatives | No audio output | **N/A** | |
 | C.7 | Visual clarity options | Dark mode toggle available. `@media (forced-colors: active)` implemented: covers state dots, focus rings, badges, LTE bars, tooltip. Relies on OS‑level HC mode; no custom in‑app HC toggle. | **PARTIALLY MET** | Tech pubs to document HC mode activation (B.5/B.6) |
@@ -78,7 +78,7 @@ Quick Start Guide Issue C (Oct 2025, 6SDG861214-13C); SmartOS User Guide Issue A
 | C.11 | No seizure‑inducing flashing | No high‑frequency flashing described | **MET** | |
 | C.12 | Privacy with accessibility | No features documented | **CANNOT ASSESS** | |
 | C.13 | Non‑biometric login option | Password login available | **LIKELY MET** | |
-| C.14 | Assistive tech APIs | ARIA implemented in Port Status: SVG shapes linked to detail cards via `aria-describedby`; tooltip uses `role=tooltip`; live region uses standard DOM pattern. Remaining dashboard cards not yet assessed. | **PARTIALLY MET** | Full dashboard ARIA audit pending |
+| C.14 | Assistive tech APIs | Full dashboard ARIA audit complete (Apr 2026). All interactive elements across Port Status, Alarms, Events, Flows, Hosts, MWAN, QoE, and Airtime now use standard ARIA roles, live regions, and labeling patterns. AT API surface audited and remediated. Formal AT compatibility testing (NVDA, JAWS) outstanding. | **PARTIALLY MET** | AT compatibility testing (B.7) outstanding. |
 
 ---
 
@@ -133,7 +133,8 @@ Quick Start Guide Issue C (Oct 2025, 6SDG861214-13C); SmartOS User Guide Issue A
 | E.1 | Hardware | Commission EN 301 489‑17 hearing‑aid interference testing | **CRITICAL** |
 | B.5–B.7 | Documentation | Add Accessibility sections + assistive device list | **HIGH** |
 | B.1 / B.4 | Documentation | Produce WCAG/PDF‑UA compliant docs; add alt‑text | **HIGH** |
-| C.1–C.5 / C.14 | Software / UI | Port Status widget: ARIA, keyboard nav, focus rings, shape coding, forced‑colors — **complete**. Remaining: extend ARIA + shape coding to dashboard charts (throughput, airtime, QoE); formal 4.5:1 contrast audit | **HIGH (in progress)** |
+| C.1–C.5 / C.14 | Software / UI | Full dashboard ARIA audit **complete**: Port Status, Alarms, Events, Flows, Hosts, MWAN, QoE, Airtime all remediated. Contrast audit **complete**: normal-text pairs pass 4.5:1 in both themes. Remaining: shape/pattern coding for throughput/airtime/QoE charts; large-text and UI-component contrast; formal AT compatibility testing. | **HIGH (in progress)** |
+| C.4 | Software / UI | Large-text (3:1) and UI-component contrast audit; verify text scaling / magnification to 200% | **MEDIUM** |
 | F.1 | Support | Add accessibility statements to support pages | **MEDIUM** |
 
 ---
@@ -161,4 +162,5 @@ Next review: 12 months from review date or upon product revision.
 | Mar 2026 | Initial review | Baseline assessment against documents provided |
 | Apr 2026 | Software / UI team | C.1, C.2, C.3, C.5, C.7, C.14 updated: Port Status widget ARIA, keyboard nav, focus rings, shape‑coded indicators, `forced-colors` media query implemented. C.1/C.14: CANNOT ASSESS → PARTIALLY MET. C.2/C.5: LIKELY GAP → PARTIALLY MET. C.3: evidence strengthened. C.7: forced‑colors coverage added. Remediation action C.1–C.5/C.14 marked in progress. |
 | Apr 2026 | Software / UI team | A.1, A.3, C.5 updated: Device Info card LED state indicator implemented. All 13 MCU LED states mirrored as labeled text in WebUI (no color dependency). Partially addresses hardware A.1/A.3 gap at software layer. |
+| Apr 2026 | Software / UI team | C.1, C.14 updated: full dashboard ARIA audit complete (Alarms, Events, Flows, Hosts, MWAN, QoE, Airtime, charts). C.4 updated: CANNOT ASSESS -> PARTIALLY MET; formal normal-text contrast audit completed, all failing pairs remediated in dark and light themes. |
 
