@@ -91,11 +91,35 @@
 - `showTooltipNearEl` fallback: mouse movement takes over tooltip position once mouse becomes active
 - C.4 remaining work: large-text (3:1) and UI-component contrast; 200% magnification layout check; AT testing
 
+---
+
+## Session: Apr 4 2026
+
+### Completed
+
+**WCAG Large-Text 3:1 Scan (EAA C.4)**
+- 15 large-text elements scanned in dark theme — zero failures (all 7.54-19.15:1)
+- Light-theme scan produced false positives due to test-mode theme switching; user-confirmed correct visually
+
+**WCAG Non-Text Contrast 3:1 Audit (EAA C.4 / WCAG 1.4.11)**
+- Identified failures: inputs/selects with --border on dark bg (1.16:1), checkboxes (browser-default black, 1.18:1), buttons using --border on topbar/card bg
+- Added `--border-ui: #5a6e82` (3.23:1 on card, 3.64:1 on page, 3.49:1 on topbar)
+- Raised `--border-bright: #374151` -> `#6b7280` (3.52:1 on card, fixes btn-ack + badges)
+- Applied --border-ui to: shaper-input, shaper-select, sv-goto-input, sv-sort-select, btn-topbar, theme-toggle, st-advanced-toggle, sth-export-btn, shaper-btn-cancel
+- Global checkbox/radio: `accent-color: var(--accent-cyan)` + `outline: 1px solid var(--border-ui)` (3.23-3.37:1)
+- EAA docs updated: C.4 PARTIALLY MET with full audit scope documented
+
+### Decisions Made
+- Borderless filled-bg buttons excluded from 1.4.11: boundary conveyed by cyan fill, not border
+- view-toggle active excluded: state communicated by filled background, border is decorative
+- `--border` unchanged (decorative dividers don't require 3:1); `--border-ui` only for interactive controls
+- Checkbox outline approach (not appearance: none) — least invasive, preserves browser native UX
+
 ### TODOs
 
 **Remaining WebUI EAA**
 - [ ] Visual shape/pattern coding for throughput, airtime, QoE charts (color-primary indicator gap C.2/C.5)
-- [ ] Large-text and UI-component contrast (C.4 — medium priority)
+- [ ] WCAG 1.4.10 reflow at 320px viewport (LOW — likely needs responsive CSS work)
 - [ ] Formal AT testing with NVDA/JAWS (C.1/C.14)
 
 **Non-WebUI (other teams)**

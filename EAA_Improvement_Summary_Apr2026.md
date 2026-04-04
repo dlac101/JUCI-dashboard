@@ -77,23 +77,31 @@ A second pass extended ARIA coverage from Port Status to every remaining dashboa
 
 A formal WCAG 2.1 AA (4.5:1 normal text) audit was run programmatically in-browser across both dark and light themes. All failing color pairs were identified and remediated:
 
-**Dark theme fixes:**
+**Dark theme normal-text fixes:**
 - `--text-muted` raised from #6b7280 to #808898: 4.77:1 on card bg (#151c2c), 5.37:1 on sidebar bg (#0b0f19)
 - Scoped `#tooltip { --text-muted: #9ca3af }` override: 5.83:1 on tooltip bg (#1e2740)
 - `.nav-section-label` raised from #4b5563 to #7a8a9a: 5.01:1 on sidebar
 - `.nav-sublink` raised from #6b7280 to #808898: 5.37:1 on sidebar
 
-**Light theme fixes:**
+**Light theme normal-text fixes:**
 - `--text-muted` raised from #9ca3af to #5a6a7e: 5.53:1 on white
 - All six accent colors overridden with darker variants (previously 1.92-2.15:1, now all pass):
-  - Cyan #00C8E6 -> #0e7490: 5.36:1
-  - Green #34d399 -> #15803d: 5.02:1
-  - Amber #f59e0b -> #b45309: 5.02:1
-  - Red #ef4444 -> #dc2626: 4.83:1
-  - Blue #3b82f6 -> #2563eb: 5.17:1
-  - Purple #a78bfa -> #7c3aed: 5.70:1
+  - Cyan #00C8E6 -> #0e7490: 5.36:1; Green #34d399 -> #15803d: 5.02:1
+  - Amber #f59e0b -> #b45309: 5.02:1; Red #ef4444 -> #dc2626: 4.83:1
+  - Blue #3b82f6 -> #2563eb: 5.17:1; Purple #a78bfa -> #7c3aed: 5.70:1
 
-No color dependency was introduced: all overrides are scoped to `[data-theme="light"]`, leaving the dark theme palette unchanged.
+**Large text 3:1 scan (WCAG 1.4.3):**
+- 15 large-text elements identified (>= 24px normal weight or >= 18.67px bold)
+- Zero failures in dark theme; light theme scan produced false positives from test-mode theme switching (user-verified correct visually)
+
+**Non-text contrast (WCAG 1.4.11):**
+- New `--border-ui: #5a6e82` variable added: 3.23:1 on card, 3.64:1 on page, 3.49:1 on topbar
+- `--border-bright` raised from #374151 to #6b7280: 3.52:1 on card
+- Applied `--border-ui` to: shaper-input, shaper-select, sv-goto-input, sv-sort-select, btn-topbar, theme-toggle, st-advanced-toggle, sth-export-btn, shaper-btn-cancel
+- Global `input[type=checkbox/radio]`: `accent-color: var(--accent-cyan)` + `outline: 1px solid var(--border-ui)` ensures 3:1 boundary on all dark surfaces
+- Borderless filled-background buttons (cyan save button, active view-toggle) correctly excluded: boundary conveyed by background fill, not border
+
+No color dependency introduced: overrides scoped to interactive control rules only.
 
 ### Multi-Sensory Feedback (C.2)
 - Tooltips fire on `mouseenter` and `focus`; dismissed on `mouseleave` and `blur`
@@ -114,7 +122,7 @@ No color dependency was introduced: all overrides are scoped to `[data-theme="li
 | Priority | Item | Refs | Action |
 |----------|------|------|--------|
 | HIGH | Dashboard chart indicators | C.2, C.5 | Add shape/pattern alternatives to throughput, airtime, and QoE charts — currently color-primary only (keyboard tooltips added; visual shape coding outstanding) |
-| MEDIUM | Large-text and UI-component contrast | C.4 | Verify 3:1 for large text and UI controls; verify text scaling to 200% does not break layout |
+| LOW | Reflow at 320px viewport | C.4 | Verify WCAG 1.4.10: no horizontal scroll at 320px equivalent (400% zoom on 1280px screen) |
 | MEDIUM | AT compatibility testing | C.1, C.14 | Formal screen reader testing with NVDA and JAWS; publish AT compatibility list (B.7) |
 
 ### Documentation / Tech Pubs
