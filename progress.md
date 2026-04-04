@@ -109,17 +109,17 @@
 - Global checkbox/radio: `accent-color: var(--accent-cyan)` + `outline: 1px solid var(--border-ui)` (3.23-3.37:1)
 - EAA docs updated: C.4 PARTIALLY MET with full audit scope documented
 
-### Decisions Made
-- Borderless filled-bg buttons excluded from 1.4.11: boundary conveyed by cyan fill, not border
-- view-toggle active excluded: state communicated by filled background, border is decorative
-- `--border` unchanged (decorative dividers don't require 3:1); `--border-ui` only for interactive controls
-- Checkbox outline approach (not appearance: none) — least invasive, preserves browser native UX
-
 **Word Document**
 - Generated `EAA_Improvement_Summary_Apr2026.docx` (84 KB) using Adtran_Template.dotx
 - All 4 sections: Status Changes, What Was Implemented, Remaining Work, Overall Status
 - Validation passed: 205 paragraphs, exactly 2 sectPr, correct rIds for header/footer
 - No em-dashes, correct cover title/subtitle, version 1.0 April 2026
+
+### Decisions Made
+- Borderless filled-bg buttons excluded from 1.4.11: boundary conveyed by cyan fill, not border
+- view-toggle active excluded: state communicated by filled background, border is decorative
+- `--border` unchanged (decorative dividers don't require 3:1); `--border-ui` only for interactive controls
+- Checkbox outline approach (not appearance: none) — least invasive, preserves browser native UX
 
 ### TODOs
 
@@ -133,6 +133,3 @@
 - [ ] Tech pubs: Tagged PDF-UA docs with alt-text
 - [ ] Hardware: EN 301 489-17 hearing-aid interference testing (CRITICAL)
 - [ ] Support/Marketing: Accessibility statement on support pages
-
-**Word doc**
-- [ ] Generate Adtran Word version of `EAA_Improvement_Summary_Apr2026.md` (LED section now included, ready to generate)
