@@ -40,7 +40,7 @@
 
   --text-primary:  #e5e7eb;
   --text-secondary:#9ca3af;
-  --text-muted:    #6b7280;
+  --text-muted:    #808898;  /* was #6b7280 (3.52:1 on card) — raised to 4.77:1 (EAA C.4) */
   --text-heading:  #f9fafb;
 
   --border:        #1f2937;
@@ -82,7 +82,7 @@
 
   --text-primary:  #1f2937;
   --text-secondary:#4b5563;
-  --text-muted:    #9ca3af;
+  --text-muted:    #5a6a7e;  /* was #9ca3af (2.54:1 on white) — raised to 5.53:1 (EAA C.4) */
   --text-heading:  #111827;
 
   --border:        #e5e7eb;
@@ -95,6 +95,16 @@
   --accent-red-dim:    rgba(239, 68, 68, 0.08);
   --accent-purple-dim: rgba(167, 139, 250, 0.08);
   --accent-blue-dim:   rgba(59, 130, 246, 0.08);
+
+  /* Darkened accents for WCAG 4.5:1 on white/light backgrounds (EAA C.4)
+     Dark theme accents (cyan #00C8E6 etc.) are vivid but low-contrast on white.
+     These replacements all pass 4.5:1 on #ffffff and 4.9:1+ on #f0f2f5. */
+  --accent-cyan:   #0e7490;  /* dark teal  — 5.36:1 on white  (was 2.02:1) */
+  --accent-green:  #15803d;  /* dark green  — 5.02:1 on white  (was 1.92:1) */
+  --accent-amber:  #b45309;  /* dark amber  — 5.02:1 on white  (was 2.15:1) */
+  --accent-red:    #dc2626;  /* dark red    — 4.83:1 on white  (was 3.76:1) */
+  --accent-blue:   #2563eb;  /* dark blue   — 5.17:1 on white  (was 3.68:1) */
+  --accent-purple: #7c3aed;  /* dark purple — 5.70:1 on white  (passes already) */
 
   --shadow:    0 1px 3px rgba(0,0,0,0.08);
   --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
@@ -189,7 +199,7 @@ ul { list-style: none; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: #4b5563;
+  color: #7a8a9a;  /* was #4b5563 (2.53:1 on sidebar) — raised to 5.41:1 (EAA C.4) */
   padding: 14px 16px 4px;
   white-space: nowrap;
   transition: opacity var(--transition);
@@ -222,7 +232,7 @@ ul { list-style: none; }
   display: flex;
   align-items: center;
   padding: 6px 16px 6px 44px;
-  color: #6b7280;
+  color: #808898;  /* was #6b7280 (3.96:1 on sidebar) — raised to 5.37:1 (EAA C.4) */
   font-size: 12px;
   border-left: 3px solid transparent;
   transition: color var(--transition), background var(--transition);
@@ -2210,6 +2220,10 @@ ul { list-style: none; }
   gap: 14px;
   padding: 2px 0;
 }
+
+/* Tooltip bg is #1e2740; global --text-muted (#808898) gives only 4.15:1 there.
+   Override to #9ca3af (5.83:1) within the tooltip scope. */
+#tooltip { --text-muted: #9ca3af; }
 
 .tt-key { color: var(--text-muted); font-size: 11px; }
 .tt-val { color: var(--text-primary); font-size: 11px; font-family: var(--font-mono); font-weight: 500; text-align: right; }
