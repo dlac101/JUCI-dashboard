@@ -115,11 +115,17 @@
 - `--border` unchanged (decorative dividers don't require 3:1); `--border-ui` only for interactive controls
 - Checkbox outline approach (not appearance: none) — least invasive, preserves browser native UX
 
+**Word Document**
+- Generated `EAA_Improvement_Summary_Apr2026.docx` (84 KB) using Adtran_Template.dotx
+- All 4 sections: Status Changes, What Was Implemented, Remaining Work, Overall Status
+- Validation passed: 205 paragraphs, exactly 2 sectPr, correct rIds for header/footer
+- No em-dashes, correct cover title/subtitle, version 1.0 April 2026
+
 ### TODOs
 
 **Remaining WebUI EAA**
 - [ ] Visual shape/pattern coding for throughput, airtime, QoE charts (color-primary indicator gap C.2/C.5)
-- [ ] WCAG 1.4.10 reflow at 320px viewport (LOW — likely needs responsive CSS work)
+- [ ] WCAG 1.4.10 reflow at 320px viewport (LOW)
 - [ ] Formal AT testing with NVDA/JAWS (C.1/C.14)
 
 **Non-WebUI (other teams)**
