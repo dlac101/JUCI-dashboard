@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>VPN Card Layout Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0b0f19;
+  --bg-card: #151c2c;
+  --bg-card-hover: #1a2236;
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #808898;
+  --border: #1f2937;
+  --accent-cyan: #00d2be;
+  --accent-green: #00d264;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #a855f7;
+  --font-sans: 'Poppins', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.4);
+  --card-width: 260px;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f1f3f6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f7f8fa;
+  --text-primary: #1a2332;
+  --text-secondary: #475569;
+  --text-muted: #8494a7;
+  --border: #d8dce3;
+  --accent-cyan: #0ea5c9;
+  --accent-green: #10b981;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-purple: #7c3aed;
+}
+
+body {
+  background: var(--bg-primary);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  padding: 32px 24px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.ctrl-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.ctrl-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+.options-row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.option-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--accent-cyan);
+}
+
+.option-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  max-width: var(--card-width);
+  line-height: 1.5;
+}
+
+/* ---- CARD BASE ---- */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  width: var(--card-width);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.vpn-state-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+.vpn-state-up   { color: var(--accent-green); background: rgba(0,210,100,0.12); }
+
+.vpn-proto-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(0,210,190,0.12);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  margin-left: auto;
+}
+
+.vpn-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.state-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.state-dot.up   { background: var(--accent-green); }
+.state-dot.down { background: transparent; border: 1.5px solid var(--text-muted); }
+
+.vpn-role-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+.role-self   { color: var(--accent-cyan);   background: rgba(0,210,190,0.10); }
+.role-exit   { color: var(--accent-green);  background: rgba(0,210,100,0.10); }
+.role-subnet { color: var(--accent-purple); background: rgba(168,85,247,0.10); }
+
+.vpn-ssid-section {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 6px;
+}
+.vpn-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.vpn-ssid-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 2px 0;
+}
+.vpn-ssid-name   { font-family: var(--font-mono); color: var(--text-primary); font-size: 10px; }
+.vpn-ssid-arrow  { color: var(--text-muted); }
+.vpn-ssid-target { font-family: var(--font-mono); color: var(--text-secondary); font-size: 10px; }
+
+
+/* ======================================================
+   OPTION A: Two-line peer rows
+   ====================================================== */
+.opt-a .peer-row {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  gap: 1px;
+}
+.opt-a .peer-row:hover { background: var(--bg-card-hover); }
+
+.opt-a .peer-row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.opt-a .peer-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.opt-a .peer-row.offline .peer-name { color: var(--text-muted); }
+
+.opt-a .peer-row-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding-left: 13px; /* indent past dot width + gap */
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+
+/* ======================================================
+   OPTION B: Tooltip on hover/focus
+   ====================================================== */
+.opt-b .peer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.opt-b .peer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  cursor: default;
+  position: relative;
+}
+.opt-b .peer-row:hover { background: var(--bg-card-hover); }
+.opt-b .peer-row:hover .peer-tooltip { display: block; }
+
+.opt-b .peer-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.opt-b .peer-row.offline .peer-name { color: var(--text-muted); }
+
+.opt-b .peer-tooltip {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 8px;
+  background: #1e2740;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  width: 200px;
+  z-index: 10;
+  box-shadow: var(--shadow-lg);
+}
+.opt-b .tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+  padding: 2px 0;
+}
+.opt-b .tt-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+.opt-b .tt-val {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-primary);
+  text-align: right;
+}
+.opt-b .hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 6px;
+}
+
+
+/* ======================================================
+   OPTION C: Two-column internal grid
+   ====================================================== */
+.opt-c .peer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.opt-c .peer-row {
+  display: grid;
+  grid-template-columns: 13px 1fr 1fr;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+}
+.opt-c .peer-row:hover { background: var(--bg-card-hover); }
+
+.opt-c .peer-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.opt-c .peer-name {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.opt-c .peer-row.offline .peer-name { color: var(--text-muted); }
+
+.opt-c .peer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.opt-c .peer-ip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: right;
+}
+
+.opt-c .peer-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: right;
+}
+</style>
+</head>
+<body>
+
+<h1>VPN Card &mdash; Layout Options (span:1 / ~260px)</h1>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="document.documentElement.setAttribute('data-theme','dark')">Dark</button>
+  <button class="ctrl-btn" onclick="document.documentElement.setAttribute('data-theme','light')">Light</button>
+</div>
+
+<div class="options-row">
+
+  <!-- OPTION A: Two-line peer rows -->
+  <div class="option-wrap">
+    <div class="option-label">Option A &mdash; Two-line rows</div>
+    <div class="card opt-a">
+      <div class="card-label">
+        VPN Status
+        <span class="vpn-state-badge vpn-state-up">UP</span>
+        <span class="vpn-proto-badge">TAILSCALE</span>
+      </div>
+      <div class="vpn-summary-row">
+        <span style="font-family:var(--font-mono);font-size:10px">TUNNEL IP: 100.82.14.67</span>
+        <span>2 / 3 online</span>
+      </div>
+
+      <!-- Peers -->
+      <div class="peer-row online">
+        <div class="peer-row-top">
+          <span class="state-dot up"></span>
+          <span class="peer-name">home-sdg-8733</span>
+          <span class="vpn-role-badge role-self">SELF</span>
+        </div>
+        <div class="peer-row-sub">
+          <span>100.82.14.67</span>
+          <span>192.168.1.0/24</span>
+          <span>&#8593;4.2M &#8595;1.8M</span>
+        </div>
+      </div>
+
+      <div class="peer-row online">
+        <div class="peer-row-top">
+          <span class="state-dot up"></span>
+          <span class="peer-name">office-sdg-8612</span>
+          <span class="vpn-role-badge role-exit">EXIT &#9654;</span>
+        </div>
+        <div class="peer-row-sub">
+          <span>100.82.14.1</span>
+          <span>10.0.0.0/24</span>
+          <span>&#8593;12.5M &#8595;45M</span>
+        </div>
+      </div>
+
+      <div class="peer-row offline">
+        <div class="peer-row-top">
+          <span class="state-dot down"></span>
+          <span class="peer-name">mobile-phone</span>
+        </div>
+        <div class="peer-row-sub">
+          <span>100.82.14.89</span>
+          <span>last 1h ago</span>
+        </div>
+      </div>
+
+      <div class="vpn-ssid-section">
+        <div class="vpn-section-label">SSID Routing</div>
+        <div class="vpn-ssid-row">
+          <span class="vpn-ssid-name">HomeNet_5G</span>
+          <span class="vpn-ssid-arrow">&#8594;</span>
+          <span class="vpn-ssid-target">office-sdg-8612</span>
+        </div>
+      </div>
+    </div>
+    <div class="option-desc">All info always visible. Two lines per peer: name + badge on top, IP + routes + traffic indented below.</div>
+  </div>
+
+  <!-- OPTION B: Tooltip on hover/focus -->
+  <div class="option-wrap">
+    <div class="option-label">Option B &mdash; Detail on hover</div>
+    <div class="card opt-b">
+      <div class="card-label">
+        VPN Status
+        <span class="vpn-state-badge vpn-state-up">UP</span>
+        <span class="vpn-proto-badge">TAILSCALE</span>
+      </div>
+      <div class="vpn-summary-row">
+        <span style="font-family:var(--font-mono);font-size:10px">TUNNEL IP: 100.82.14.67</span>
+        <span>2 / 3 online</span>
+      </div>
+
+      <div class="peer-list">
+        <div class="peer-row online">
+          <span class="state-dot up"></span>
+          <span class="peer-name">home-sdg-8733</span>
+          <span class="vpn-role-badge role-self">SELF</span>
+          <div class="peer-tooltip">
+            <div class="tt-row"><span class="tt-label">IP</span><span class="tt-val">100.82.14.67</span></div>
+            <div class="tt-row"><span class="tt-label">Routes</span><span class="tt-val">192.168.1.0/24</span></div>
+            <div class="tt-row"><span class="tt-label">Sent</span><span class="tt-val">&#8593; 4.2 MB</span></div>
+            <div class="tt-row"><span class="tt-label">Recv</span><span class="tt-val">&#8595; 1.8 MB</span></div>
+          </div>
+        </div>
+
+        <div class="peer-row online">
+          <span class="state-dot up"></span>
+          <span class="peer-name">office-sdg-8612</span>
+          <span class="vpn-role-badge role-exit">EXIT &#9654;</span>
+          <div class="peer-tooltip">
+            <div class="tt-row"><span class="tt-label">IP</span><span class="tt-val">100.82.14.1</span></div>
+            <div class="tt-row"><span class="tt-label">Routes</span><span class="tt-val">10.0.0.0/24</span></div>
+            <div class="tt-row"><span class="tt-label">Sent</span><span class="tt-val">&#8593; 12.5 MB</span></div>
+            <div class="tt-row"><span class="tt-label">Recv</span><span class="tt-val">&#8595; 45.0 MB</span></div>
+          </div>
+        </div>
+
+        <div class="peer-row offline">
+          <span class="state-dot down"></span>
+          <span class="peer-name">mobile-phone</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-left:auto">1h ago</span>
+          <div class="peer-tooltip">
+            <div class="tt-row"><span class="tt-label">IP</span><span class="tt-val">100.82.14.89</span></div>
+            <div class="tt-row"><span class="tt-label">Last seen</span><span class="tt-val">1h ago</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vpn-ssid-section">
+        <div class="vpn-section-label">SSID Routing</div>
+        <div class="vpn-ssid-row">
+          <span class="vpn-ssid-name">HomeNet_5G</span>
+          <span class="vpn-ssid-arrow">&#8594;</span>
+          <span class="vpn-ssid-target">office-sdg-8612</span>
+        </div>
+      </div>
+
+      <div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-top:8px">&#8505; Hover a peer to see IP, routes &amp; traffic</div>
+    </div>
+    <div class="option-desc">Compact single-line rows. IP, routes, and traffic appear in a tooltip on hover or keyboard focus.</div>
+  </div>
+
+  <!-- OPTION C: Two-column internal grid -->
+  <div class="option-wrap">
+    <div class="option-label">Option C &mdash; Two-column grid</div>
+    <div class="card opt-c">
+      <div class="card-label">
+        VPN Status
+        <span class="vpn-state-badge vpn-state-up">UP</span>
+        <span class="vpn-proto-badge">TAILSCALE</span>
+      </div>
+      <div class="vpn-summary-row">
+        <span style="font-family:var(--font-mono);font-size:10px">TUNNEL IP: 100.82.14.67</span>
+        <span>2 / 3 online</span>
+      </div>
+
+      <div class="peer-list">
+        <div class="peer-row online">
+          <span class="state-dot up"></span>
+          <div class="peer-left">
+            <span class="peer-name">home-sdg-8733</span>
+            <span class="vpn-role-badge role-self">SELF</span>
+          </div>
+          <div class="peer-right">
+            <span class="peer-ip">100.82.14.67</span>
+            <span class="peer-meta">&#8593;4.2M &#8595;1.8M</span>
+          </div>
+        </div>
+
+        <div class="peer-row online">
+          <span class="state-dot up"></span>
+          <div class="peer-left">
+            <span class="peer-name">office-sdg-8612</span>
+            <span class="vpn-role-badge role-exit">EXIT &#9654;</span>
+          </div>
+          <div class="peer-right">
+            <span class="peer-ip">100.82.14.1</span>
+            <span class="peer-meta">10.0.0.0/24</span>
+          </div>
+        </div>
+
+        <div class="peer-row offline">
+          <span class="state-dot down"></span>
+          <div class="peer-left">
+            <span class="peer-name">mobile-phone</span>
+          </div>
+          <div class="peer-right">
+            <span class="peer-ip" style="color:var(--text-muted)">100.82.14.89</span>
+            <span class="peer-meta">last 1h ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vpn-ssid-section">
+        <div class="vpn-section-label">SSID Routing</div>
+        <div class="vpn-ssid-row">
+          <span class="vpn-ssid-name">HomeNet_5G</span>
+          <span class="vpn-ssid-arrow">&#8594;</span>
+          <span class="vpn-ssid-target">office-sdg-8612</span>
+        </div>
+      </div>
+    </div>
+    <div class="option-desc">Single-line rows with a left/right split: name + badge left, IP + meta right. Note: long hostnames truncate.</div>
+  </div>
+
+</div>
+</body>
+</html>

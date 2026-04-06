@@ -528,6 +528,32 @@
           <div class="sr-only" role="status" aria-live="polite" id="port-status-announce"></div>
         </div>
 
+        <!-- VPN Status -->
+        <div class="card tech-only" id="card-vpn" role="region" aria-label="VPN Status">
+          <div class="card-label">
+            VPN Status
+            <span class="vpn-state-badge" id="vpn-state-badge"></span>
+            <span class="vpn-proto-badge">TAILSCALE</span>
+          </div>
+          <div class="vpn-summary-row">
+            <span class="vpn-tunnel-ip mono" id="vpn-tunnel-ip"></span>
+            <span class="vpn-peer-count" id="vpn-peer-count"></span>
+          </div>
+          <div class="vpn-auth-box" id="vpn-auth-box" style="display:none" role="alert">
+            <span class="vpn-auth-icon" aria-hidden="true">&#9888;</span>
+            Authentication required.
+            <a class="vpn-auth-link" id="vpn-auth-link" target="_blank" rel="noopener">Open login page</a>
+          </div>
+          <div class="vpn-peer-list" id="vpn-peer-list"
+               role="list" aria-label="VPN peers" aria-live="polite" aria-relevant="additions removals">
+          </div>
+          <div class="vpn-ssid-section" id="vpn-ssid-section" style="display:none">
+            <div class="vpn-section-label">SSID ROUTING</div>
+            <div class="vpn-ssid-list" id="vpn-ssid-list" role="list" aria-label="SSID to exit node mappings"></div>
+          </div>
+          <div class="sr-only" role="status" aria-live="polite" id="vpn-status-announce"></div>
+        </div>
+
         <!-- Placeholder Tile -->
         <div class="card tech-only" id="card-placeholder" role="region" aria-label="Custom Tile">
           <div class="card-label">

@@ -497,6 +497,60 @@ MOCK.portEvents = [
   { epoch: Date.now()/1000 - 86500, port: 'LAN 4', state: 'up',   detail: 'Link up at 1 Gbps' },
 ];
 
+/* ===== VPN Status (Tailscale) ===== */
+MOCK.vpn = {
+  state: 'UP',             // UP | DOWN | WAIT | AUTH | DEAD
+  backend_state: 'Running',
+  my_ip: '100.82.14.67',
+  exit_node_online: true,
+  exit_node_ip: '100.82.14.1',
+  auth_url: null,          // populated when state=AUTH
+  peers: [
+    {
+      hostname: 'home-sdg-8733',
+      online: true,
+      ip: '100.82.14.67',
+      is_local: true,
+      exit_node: false,
+      exit_node_option: false,
+      subnet_router: true,
+      routes: '192.168.1.0/24',
+      tx_bytes: 4200000,
+      rx_bytes: 1800000,
+      last_seen: Date.now() / 1000
+    },
+    {
+      hostname: 'office-sdg-8612',
+      online: true,
+      ip: '100.82.14.1',
+      is_local: false,
+      exit_node: true,
+      exit_node_option: true,
+      subnet_router: true,
+      routes: '10.0.0.0/24',
+      tx_bytes: 12500000,
+      rx_bytes: 45000000,
+      last_seen: Date.now() / 1000
+    },
+    {
+      hostname: 'mobile-phone',
+      online: false,
+      ip: '100.82.14.89',
+      is_local: false,
+      exit_node: false,
+      exit_node_option: false,
+      subnet_router: false,
+      routes: '',
+      tx_bytes: 0,
+      rx_bytes: 0,
+      last_seen: Date.now() / 1000 - 3600
+    }
+  ],
+  ssid_exit_map: [
+    { ssid: 'HomeNet_5G', exit_node: 'office-sdg-8612' }
+  ]
+};
+
 /* ===== State ===== */
 let currentHistorySpan = 365; // days
 const dismissedAlarms = new Set();
@@ -528,6 +582,7 @@ const LAYOUT_4COL = {
   'card-ports':      { col: 1, row: 5, span: 2 },
   'card-multiwan':   { col: 3, row: 5, span: 1 },
   'card-placeholder':{ col: 4, row: 5, span: 1 },
+  'card-vpn':        { col: 1, row: 6, span: 1 },
 };
 
 /* 2-column layout (md/lg: 768-1279px) */
@@ -546,6 +601,7 @@ const LAYOUT_2COL = {
   'card-multiwan':   { col: 1, row: 9, span: 1 },
   'card-placeholder':{ col: 2, row: 9, span: 1 },
   'card-ports':      { col: 1, row: 10, span: 2 },
+  'card-vpn':        { col: 1, row: 11, span: 1 },
 };
 
 /* Basic view layout (2-col, 5 cards, fixed) */
@@ -2912,12 +2968,150 @@ function prependPortEvent(ev) {
 }
 
 /* Format epoch to relative time string */
+function fmtBytes(bytes) {
+  if (bytes >= 1e9) return (bytes / 1e9).toFixed(1) + 'G';
+  if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + 'M';
+  if (bytes >= 1e3) return (bytes / 1e3).toFixed(0) + 'K';
+  return bytes + 'B';
+}
+
 function formatTimeAgo(epoch) {
   const secs = Math.floor(Date.now() / 1000 - epoch);
   if (secs < 60)   return secs + 's ago';
   if (secs < 3600) return Math.floor(secs / 60) + 'm ago';
   if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
   return Math.floor(secs / 86400) + 'd ago';
+}
+
+/* ===== VPN Status Widget ===== */
+function vpnPeerTooltipHtml(peer) {
+  const rows = [];
+  rows.push('<div class="tt-row"><span class="tt-key">IP</span><span class="tt-val">' + peer.ip + '</span></div>');
+  if (peer.routes) {
+    rows.push('<div class="tt-row"><span class="tt-key">Routes</span><span class="tt-val">' + peer.routes + '</span></div>');
+  }
+  if (peer.online && (peer.tx_bytes || peer.rx_bytes)) {
+    rows.push('<div class="tt-row"><span class="tt-key">Sent</span><span class="tt-val">&#8593; ' + fmtBytes(peer.tx_bytes) + '</span></div>');
+    rows.push('<div class="tt-row"><span class="tt-key">Recv</span><span class="tt-val">&#8595; ' + fmtBytes(peer.rx_bytes) + '</span></div>');
+  }
+  if (!peer.online) {
+    rows.push('<div class="tt-row"><span class="tt-key">Last seen</span><span class="tt-val">' + formatTimeAgo(peer.last_seen) + '</span></div>');
+  }
+  return rows.join('');
+}
+
+function renderVPN() {
+  const v = MOCK.vpn;
+  if (!v) return;
+
+  // 1. State badge
+  const stateBadge = el('vpn-state-badge');
+  if (stateBadge) {
+    stateBadge.textContent = v.state;
+    stateBadge.className = 'vpn-state-badge vpn-state-' + v.state.toLowerCase();
+  }
+
+  // 2. Tunnel IP + online peer count
+  const isUp = v.state === 'UP';
+  const onlineCount = v.peers.filter(p => p.online).length;
+  const totalCount  = v.peers.length;
+  const tunnelIpEl  = el('vpn-tunnel-ip');
+  const peerCountEl = el('vpn-peer-count');
+  if (tunnelIpEl)  tunnelIpEl.textContent  = isUp ? 'TUNNEL IP: ' + v.my_ip : '';
+  if (peerCountEl) peerCountEl.textContent = isUp ? onlineCount + ' / ' + totalCount + ' online' : '';
+
+  // 3. Auth box (only when state=AUTH)
+  const authBox  = el('vpn-auth-box');
+  const authLink = el('vpn-auth-link');
+  if (authBox) {
+    authBox.style.display = v.state === 'AUTH' ? '' : 'none';
+    if (authLink && v.auth_url) authLink.href = v.auth_url;
+  }
+
+  // 4. Peer list — compact single-line rows, detail in tooltip on hover/focus
+  const peerList = el('vpn-peer-list');
+  if (peerList) {
+    if (!isUp && v.state !== 'AUTH') {
+      const stateMsg = { DOWN: 'VPN is disabled.', DEAD: 'VPN daemon not running.', WAIT: 'Connecting to Tailscale...' };
+      peerList.innerHTML = '<div class="vpn-empty-msg">' + (stateMsg[v.state] || 'VPN unavailable.') + '</div>';
+    } else {
+      peerList.innerHTML = v.peers.map(function(peer) {
+        const roles = [];
+        if (peer.is_local) {
+          roles.push('<span class="vpn-role-badge role-self">SELF</span>');
+        }
+        if (peer.exit_node) {
+          roles.push('<span class="vpn-role-badge role-exit" aria-label="Active exit node">EXIT &#9654;</span>');
+        } else if (peer.subnet_router && !peer.is_local) {
+          roles.push('<span class="vpn-role-badge role-subnet">SUBNET</span>');
+        }
+
+        const offlineMeta = !peer.online
+          ? '<span class="vpn-peer-lastseen">' + formatTimeAgo(peer.last_seen) + '</span>'
+          : '';
+
+        const ariaLabel = [
+          peer.hostname,
+          peer.online ? 'online' : 'offline',
+          peer.is_local ? 'this device' : '',
+          peer.exit_node ? 'active exit node' : '',
+          peer.routes ? 'routes ' + peer.routes : '',
+          peer.ip,
+          peer.tx_bytes ? 'sent ' + fmtBytes(peer.tx_bytes) + ' received ' + fmtBytes(peer.rx_bytes) : ''
+        ].filter(Boolean).join(', ');
+
+        return '<div class="vpn-peer-row ' + (peer.online ? 'peer-online' : 'peer-offline') + '"' +
+               ' role="listitem" aria-label="' + ariaLabel + '" tabindex="0"' +
+               ' data-peer="' + peer.hostname + '">' +
+          '<span class="vpn-peer-dot state-dot ' + (peer.online ? 'up' : 'down') + '" aria-hidden="true"></span>' +
+          '<span class="sr-only">' + (peer.online ? 'Online' : 'Offline') + '</span>' +
+          '<span class="vpn-peer-name">' + peer.hostname + '</span>' +
+          '<span class="vpn-peer-roles">' + roles.join('') + '</span>' +
+          offlineMeta +
+          '</div>';
+      }).join('');
+
+      // Bind hover + focus tooltip to each peer row
+      peerList.querySelectorAll('.vpn-peer-row').forEach(function(row) {
+        const hostname = row.getAttribute('data-peer');
+        const peer = v.peers.find(p => p.hostname === hostname);
+        if (!peer) return;
+        row.addEventListener('mouseenter', function() {
+          showTooltip(vpnPeerTooltipHtml(peer));
+        });
+        row.addEventListener('mouseleave', hideTooltip);
+        row.addEventListener('focus', function() {
+          showTooltipNearEl(vpnPeerTooltipHtml(peer), row);
+        });
+        row.addEventListener('blur', hideTooltip);
+      });
+    }
+  }
+
+  // 5. SSID exit map section
+  const ssidSection = el('vpn-ssid-section');
+  const ssidList    = el('vpn-ssid-list');
+  if (ssidSection && ssidList) {
+    if (v.ssid_exit_map && v.ssid_exit_map.length) {
+      ssidSection.style.display = '';
+      ssidList.innerHTML = v.ssid_exit_map.map(function(m) {
+        return '<div class="vpn-ssid-row" role="listitem" aria-label="SSID ' + m.ssid + ' routed via ' + m.exit_node + '">' +
+          '<span class="vpn-ssid-name">' + m.ssid + '</span>' +
+          '<span class="vpn-ssid-arrow" aria-hidden="true">&#8594;</span>' +
+          '<span class="vpn-ssid-target">' + m.exit_node + '</span>' +
+          '</div>';
+      }).join('');
+    } else {
+      ssidSection.style.display = 'none';
+    }
+  }
+
+  // 6. Screen reader live region (fires only when state changes)
+  const announce = el('vpn-status-announce');
+  if (announce && announce.dataset.lastState !== v.state) {
+    announce.textContent = 'VPN state: ' + v.state;
+    announce.dataset.lastState = v.state;
+  }
 }
 
 /* Port state drift animation (mock data) */
@@ -3487,6 +3681,7 @@ function init() {
   renderTopHosts();
   renderMWAN();
   renderPortStatus();
+  renderVPN();
   // Canvas needs layout to be done first
   requestAnimationFrame(() => initThroughputCanvas());
   // Deep link: check URL hash for page routing (handled in each page's script)
@@ -3502,7 +3697,6 @@ const AVAILABLE_TILES = [
   { id: 'tile-voip',      title: 'VoIP Line Status',           icon: 'fa-solid fa-phone',             desc: 'SIP registration + hook state per FXS port',            strip: '.strip-3', accentColor: 'var(--accent-green)' },
   { id: 'tile-clients',   title: 'Connected Clients by Band',  icon: 'fa-solid fa-laptop',            desc: 'Client count and RSSI per radio band',                  strip: '.strip-3', accentColor: 'var(--accent-cyan)' },
   { id: 'tile-sysres',    title: 'System Resources',           icon: 'fa-solid fa-microchip',         desc: 'CPU %, memory used/free, system uptime',                strip: '.strip-3', accentColor: 'var(--accent-purple)' },
-  { id: 'tile-vpn',       title: 'VPN Status',                 icon: 'fa-solid fa-lock',              desc: 'WireGuard + Tailscale tunnel state and peer count',     strip: '.strip-3', accentColor: 'var(--accent-blue)' },
   { id: 'tile-poe',       title: 'PoE / PSE Port Status',      icon: 'fa-solid fa-plug',              desc: 'Per-port power delivery, wattage, and fault state',     strip: '.strip-3', accentColor: 'var(--accent-amber)' },
 ];
 

@@ -7925,3 +7925,250 @@ body:not([data-view="basic"]) .pp-pipeline {
     border-color: ButtonText;
   }
 }
+
+/* ============================================================
+   VPN STATUS CARD (card-vpn)
+   ============================================================ */
+
+/* Card label row: state badge + protocol badge right-aligned */
+#card-vpn .card-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vpn-state-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+
+.vpn-state-up   { color: var(--accent-green); background: rgba(0, 210, 100, 0.12); }
+.vpn-state-down,
+.vpn-state-dead { color: var(--accent-red);   background: rgba(239, 68, 68, 0.12); }
+.vpn-state-wait,
+.vpn-state-auth { color: var(--accent-amber); background: rgba(245, 158, 11, 0.12); }
+
+.vpn-proto-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(0, 210, 190, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  margin-left: auto;
+}
+
+/* Summary row: tunnel IP + peer count */
+.vpn-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin: 4px 0 6px;
+  min-height: 14px;
+}
+
+/* Auth required box */
+.vpn-auth-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid var(--accent-amber);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--accent-amber);
+  margin-bottom: 8px;
+}
+
+.vpn-auth-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.vpn-auth-link {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+.vpn-auth-link:hover,
+.vpn-auth-link:focus-visible {
+  color: var(--text-primary);
+  outline: 2px solid var(--accent-cyan);
+  border-radius: 2px;
+}
+
+/* Peer list */
+.vpn-peer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.vpn-empty-msg {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 8px 4px;
+}
+
+/* Individual peer row */
+.vpn-peer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  cursor: default;
+  transition: background var(--transition);
+}
+
+.vpn-peer-row:hover {
+  background: var(--bg-card-hover);
+}
+
+.vpn-peer-row:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(0, 210, 190, 0.15);
+}
+
+.peer-offline .vpn-peer-name,
+.peer-offline .vpn-peer-ip {
+  color: var(--text-muted);
+}
+
+/* Peer fields */
+.vpn-peer-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.vpn-peer-roles {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.vpn-role-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+
+.role-self   { color: var(--accent-cyan);   background: rgba(0, 210, 190, 0.10); }
+.role-exit   { color: var(--accent-green);  background: rgba(0, 210, 100, 0.10); }
+.role-subnet { color: var(--accent-purple); background: rgba(168, 85, 247, 0.10); }
+
+.vpn-peer-lastseen {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* SSID routing section */
+.vpn-ssid-section {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+.vpn-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.vpn-ssid-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vpn-ssid-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.vpn-ssid-name {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.vpn-ssid-arrow {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.vpn-ssid-target {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .vpn-state-up   { background: rgba(16, 185, 129, 0.10); }
+[data-theme="light"] .vpn-state-down,
+[data-theme="light"] .vpn-state-dead { background: rgba(220, 38, 38, 0.10); }
+[data-theme="light"] .vpn-state-wait,
+[data-theme="light"] .vpn-state-auth { background: rgba(217, 119, 6, 0.10); }
+[data-theme="light"] .vpn-proto-badge { background: rgba(14, 165, 201, 0.10); }
+[data-theme="light"] .role-self      { background: rgba(14, 165, 201, 0.10); }
+[data-theme="light"] .role-exit      { background: rgba(16, 185, 129, 0.10); }
+[data-theme="light"] .role-subnet    { background: rgba(124, 58, 237, 0.10); }
+[data-theme="light"] .vpn-auth-box   { background: rgba(217, 119, 6, 0.07); }
+
+/* Forced colors: VPN-specific overrides */
+@media (forced-colors: active) {
+  .vpn-state-badge,
+  .vpn-proto-badge,
+  .vpn-role-badge {
+    border: 1px solid ButtonText;
+    forced-color-adjust: none;
+  }
+
+  .vpn-auth-box {
+    border: 2px solid ButtonText;
+    forced-color-adjust: none;
+  }
+
+  .vpn-peer-row:focus-visible {
+    outline: 3px solid Highlight;
+    box-shadow: none;
+  }
+}
