@@ -29,13 +29,13 @@
   --transition: 150ms ease;
 
   /* Dark theme (default) */
-  --bg-primary:    #0b0f19;
-  --bg-secondary:  #111827;
+  --bg-primary:    #0a0a0a;
+  --bg-secondary:  #111116;
   --bg-card:       #151c2c;
   --bg-card-hover: #1a2236;
   --bg-input:      #1a2236;
-  --bg-sidebar:    #0b0f19;
-  --bg-topbar:     #0f1420;
+  --bg-sidebar:    #0a0a0a;
+  --bg-topbar:     #0f0f14;
   --bg-tooltip:    #1e2740;
 
   --text-primary:  #e5e7eb;
